@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- The main content view -->
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <fragment
+            android:name="com.wearablesensor.aura.DevicePairingFragment"
+            android:id="@+id/device_pairing_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <fragment
+            android:name="com.wearablesensor.aura.DataSyncFragment"
+            android:id="@+id/data_sync_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <fragment
+            android:name="com.wearablesensor.aura.HRVRealTimeDisplayFragment"
+            android:id="@+id/hrv_realtime_display_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+        <com.github.clans.fab.FloatingActionMenu
+            android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp">
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/action_menu_report_seizure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/action_menu_report_seizure"
+                app:fab_label="@string/action_menu_report_seizure" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/action_menu_false_alert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/action_menu_false_alert"
+                app:fab_label="@string/action_menu_false_alert" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/action_menu_push_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/action_menu_push_data"
+                app:fab_label="@string/action_menu_push_data" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/action_menu_manual_pairing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/action_menu_manually_pair"
+                app:fab_label="@string/action_menu_manually_pairing" />
+
+        </com.github.clans.fab.FloatingActionMenu>
+
+    </FrameLayout>
+    <!-- The navigation drawer -->
+    <ListView android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"/>
+</android.support.v4.widget.DrawerLayout>

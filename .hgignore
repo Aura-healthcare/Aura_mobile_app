@@ -1,0 +1,11 @@
+syntax: regexp
+^\.git/
+^\.gradle/
+^\.idea/workspace.xml
+^\.idea/libraries/
+^\.DS_Store
+^build/
+^captures
+^app/build/
+^\.externalNativeBuild
+

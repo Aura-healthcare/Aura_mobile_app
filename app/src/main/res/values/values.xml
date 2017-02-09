@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_material_light">#030cae</color>
+    <color name="primary_dark_material_light">#2730dd</color>
+    <color name="primary_material_light">#5c82ff</color>
+    <string name="facebook_app_id">163310770815754</string>
+
+    <string-array name="drawer_array">
+        <item>Pairing Device</item>
+        <item>Seizure Notfication</item>
+        <item>RR History</item>
+        <item>Help</item>
+    </string-array>
+
+</resources>

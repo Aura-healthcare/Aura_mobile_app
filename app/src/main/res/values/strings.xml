@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="label_data">Data:</string>
+    <string name="label_device_address">Device address:</string>
+    <string name="label_state">State:</string>
+    <string name="no_data">No data</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="title_devices">BLE Device Scan</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+
+    <!-- Menu items -->
+    <string name="menu_connect">Connect</string>
+    <string name="menu_disconnect">Disconnect</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_stop">Stop</string>
+    <string name="menu_synchronize">Synchro</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
+
+    <string name="navigation_drawer_open">Epi Project</string>
+    <string name="navigation_drawer_close">Epi Project</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="automatic_pairing_fail">Automatic Device Pairing Fail</string>
+    <string name="title_device_pairing">Device Pairing:</string>
+    <string name="default_device_name">No Device Paired</string>
+
+    <string name="push_data_fail">Push data on Cloud failed</string>
+
+    <string name="title_data_sync">Data:</string>
+    <string name="last_sync">Last Synchro:</string>
+
+    <string name="action_menu_manually_pairing">Manually pair device</string>
+    <string name="action_menu_push_data">Push data on Cloud</string>
+    <string name="action_menu_false_alert">Report a false alert</string>
+    <string name="action_menu_report_seizure">Report a seizure</string>
+
+    <string name="default_hrv">--- ms</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
