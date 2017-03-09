@@ -16,8 +16,11 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+
+import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +59,9 @@ public class SignInActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mFbCallbackManager = CallbackManager.Factory.create();
+        _fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
         _fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
+
             @Override
             public void onSuccess(LoginResult loginResult) {
                 android.util.Log.d(TAG, "FB Login Success");
@@ -131,6 +136,7 @@ public class SignInActivity extends AppCompatActivity {
 
     public void onLoginSuccess(Context context) {
         _loginButton.setEnabled(true);
+
         Intent intent = new Intent(context, SeizureMonitoringActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);

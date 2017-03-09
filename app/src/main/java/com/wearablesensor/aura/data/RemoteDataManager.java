@@ -8,10 +8,13 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.facebook.AccessToken;
 import com.wearablesensor.aura.UserPrefs;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lecoucl on 14/12/16.
@@ -30,13 +33,19 @@ public class RemoteDataManager {
 
     protected void init(Context iApplicationContext, String iUser) {
         try {
-            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+            CognitoCachingCredentialsProvider lCredentialsProvider = new CognitoCachingCredentialsProvider(
                     iApplicationContext,    /* get the context for the application */
                     "eu-west-1:8dbf4eef-78e6-4ac9-9ace-fa164cd83538",    /* Identity Pool ID */
                     Regions.EU_WEST_1           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
             );
 
-            mAmazonDynamoDBClient = new AmazonDynamoDBClient(credentialsProvider);
+            Map<String, String> lLogins = new HashMap<String, String>();
+            Log.d(TAG, "Facebook token "+ AccessToken.getCurrentAccessToken().getToken());
+
+            lLogins.put("graph.facebook.com", AccessToken.getCurrentAccessToken().getToken());
+            lCredentialsProvider.setLogins(lLogins);
+
+            mAmazonDynamoDBClient = new AmazonDynamoDBClient(lCredentialsProvider);
             mAmazonDynamoDBClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
             mDynamoDBMapper = new DynamoDBMapper(mAmazonDynamoDBClient);
         } catch (Exception e) {

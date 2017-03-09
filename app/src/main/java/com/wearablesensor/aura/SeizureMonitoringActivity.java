@@ -31,6 +31,10 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.github.clans.fab.FloatingActionButton;
 import com.wearablesensor.aura.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.data.DataManager;
@@ -121,11 +125,54 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         setupDrawer();
         startAutomaticPairing();
 
-        // initialize DataManager
-        DataManager.getInstance().init(getApplicationContext(), this, "me");
+        initializeUserProfile();
 
         initializeUserPrefs();
 
+    }
+
+    private ProfileTracker mProfileTracker;
+    private AccessTokenTracker mAccesTokenTracker;
+    private void initializeUserProfileFromFacebook(){
+
+
+        if(Profile.getCurrentProfile() == null) {
+            mProfileTracker = new ProfileTracker() {
+                @Override
+                protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
+                    //TODO update profile display
+                    mProfileTracker.stopTracking();
+                }
+            };
+        }
+        else {
+            Profile lProfile = Profile.getCurrentProfile();
+            //TODO update profile display
+        }
+
+        if(AccessToken.getCurrentAccessToken() == null){
+            mAccesTokenTracker = new AccessTokenTracker() {
+                @Override
+                protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                    // initialize DataManager only after we receive credentials from Identity provider
+                    initializeDataManager();
+                    mAccesTokenTracker.stopTracking();
+                }
+            };
+
+        }
+        else{
+            initializeDataManager();
+        }
+
+    }
+
+    private void initializeUserProfile() {
+        initializeUserProfileFromFacebook();
+    }
+
+    private void initializeDataManager(){
+        DataManager.getInstance().init(getApplicationContext(), this, "me");
     }
 
     private void initializeUserPrefs() {
