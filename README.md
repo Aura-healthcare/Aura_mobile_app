@@ -16,7 +16,8 @@ Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
 
 
 # App Architecture #
-Draft of the architecture
+Redesign in progress - MVP architecture + Dagger 2 Dependency injection
+
 ![Scheme](documentation/auraapparchitecture.jpg)
 
 # Details #

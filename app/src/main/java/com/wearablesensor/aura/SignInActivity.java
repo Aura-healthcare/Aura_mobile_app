@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +20,8 @@ import com.facebook.FacebookSdk;
 
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.wearablesensor.aura.data.DataRepository;
+import com.wearablesensor.aura.data.DataRepositoryComponent;
 
 import java.util.Arrays;
 
@@ -53,14 +56,20 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        //TODO: to remove,only here for testing DaraRepository component loading
+        AuraApplication app = (AuraApplication) getApplication();
+        DataRepositoryComponent dataComponent = app.getDataRepositoryComponent();
+        DataRepository dataRep = dataComponent.getDataRepository();
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_sign_in);
 
         ButterKnife.bind(this);
 
         mFbCallbackManager = CallbackManager.Factory.create();
-        _fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
-        _fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
+        //_fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
+        /*_fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -79,7 +88,7 @@ public class SignInActivity extends AppCompatActivity {
                 android.util.Log.d(TAG, "FB Login Error");
                 onLoginFailed();
             }
-        });
+        });*/
     }
 
 
