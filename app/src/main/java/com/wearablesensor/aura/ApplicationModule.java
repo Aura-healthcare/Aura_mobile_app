@@ -1,6 +1,8 @@
 package com.wearablesensor.aura;
 
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import javax.inject.Singleton;
 

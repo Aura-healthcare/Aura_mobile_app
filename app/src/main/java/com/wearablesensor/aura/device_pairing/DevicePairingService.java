@@ -1,50 +1,47 @@
 package com.wearablesensor.aura.device_pairing;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.ServiceConnection;
-
-import com.wearablesensor.aura.bluetooth.BluetoothLeService;
-
-import java.util.ArrayList;
+import android.content.Context;
+import android.util.Log;
 
 import javax.inject.Inject;
 
 /**
- * Created by lecoucl on 30/03/17.
+ * Created by lecoucl on 31/03/17.
  */
 public class DevicePairingService {
-    private String mPairedDeviceName;
-    private String mPairedDeviceAddress;
+    private final String TAG = this.getClass().getSimpleName();
+    protected Context mContext;
 
-    private ServiceConnection mDevicePairingService;
-    private BroadcastReceiver mDataReceiver;
+    protected String mPairedDeviceName;
+    protected String mPairedDeviceAddress;
 
-    private Boolean mConnected;
-    private Boolean mScanning;
-
-    // Bluetooth pairing members
-    private BluetoothLeService mBluetoothLeService;
-    private BluetoothAdapter mBluetoothAdapter;
-    private ArrayList<BluetoothDevice> mBluetoothDeviceList;
+    protected Boolean mPaired;
 
     @Inject
-    public DevicePairingService(/*ServiceConnection iServiceConnection, BroadcastReceiver iDataReceiver, BluetoothAdapter iBluetoothAdapter, BluetoothLeService iBluetoothLeService*/){
+    public DevicePairingService(Context iContext){
+        mContext = iContext;
+
         mPairedDeviceName = null;
         mPairedDeviceAddress = null;
 
-        mConnected = false;
-        mScanning = false;
-
-        mBluetoothDeviceList = new ArrayList<BluetoothDevice>();
+        mPaired = false;
     }
 
-    public void scanDevices(){
-
+    public void automaticPairing(){
+        Log.d(TAG, "Start automatic Pairing");
     }
 
-    public void connectDevice(){
+    public void startPairing(){
+        Log.d(TAG, "start Pairing with Device: " + mPairedDeviceName + " - "+ mPairedDeviceAddress);
+    }
 
+    public void endPairing(){
+        Log.d(TAG, "end Pairing");
+        mPairedDeviceName = null;
+        mPairedDeviceAddress = null;
+    }
+
+    public Boolean isPaired(){
+        return mPaired;
     }
 }

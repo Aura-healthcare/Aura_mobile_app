@@ -1,6 +1,11 @@
 package com.wearablesensor.aura.device_pairing;
 
+import android.bluetooth.BluetoothManager;
+
+import javax.inject.Singleton;
+
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Created by lecoucl on 30/03/17.
@@ -8,5 +13,23 @@ import dagger.Module;
 
 @Module
 public class DevicePairingModule {
-    //TODO: implement providers
+
+    private final boolean mIsBluetoothLeFeatureSupported;
+    private final BluetoothManager mBluetoothManager;
+
+    public DevicePairingModule(boolean iIsBluetoothFeatureLeSupported, BluetoothManager iBluetoothManager){
+        mIsBluetoothLeFeatureSupported = iIsBluetoothFeatureLeSupported;
+        mBluetoothManager = iBluetoothManager;
+    }
+
+    @Provides
+    boolean providesIsBluetoothLeFeatureSupported() {
+        return mIsBluetoothLeFeatureSupported;
+    }
+
+    @Provides
+    @Singleton
+    BluetoothManager providesBluetoothManager(){
+        return mBluetoothManager;
+    }
 }
