@@ -39,7 +39,7 @@ The remaining functionalities need to be implemented:
 
 * fine tune Bluetooth pairing
 * report an epilepsy seizure
-* report an aura
+* report an aura WIP
 * report a false seizure alert
 * visualize streamed HRV data
 * secure user authentification
