@@ -17,12 +17,12 @@ public class DataRepositoryModule{
     @Singleton
     @Provides
     RemoteDataRepository providesRemoteDataRepository(Context context) {
-        return new RemoteDataRepository(context);
+        return new RemoteDataDynamoDBRepository(context);
     }
 
     @Singleton
     @Provides
     LocalDataRepository providesLocalDataRepository(Context context) {
-        return new LocalDataRepository(context);
+        return new LocalDataCouchbaseRepository(context);
     }
 }

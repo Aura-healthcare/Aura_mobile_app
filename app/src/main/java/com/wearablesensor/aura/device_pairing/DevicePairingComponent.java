@@ -13,5 +13,5 @@ import dagger.Component;
 @Singleton
 @Component(modules = {DevicePairingModule.class, ApplicationModule.class})
 public interface DevicePairingComponent {
-    BluetoothDevicePairingService getDevicePairingService();
+    BluetoothDevicePairingService devicePairingService();
 }

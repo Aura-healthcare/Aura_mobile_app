@@ -96,16 +96,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     }
 
-    public void automaticPairing(){
-        super.automaticPairing();
-
-        mScanningHandler = new Handler();
-
+    public Boolean checkBluetoothIsEnabled(){
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!mIsBluetoothLeFeatureSupported) {
-            endPairing();
-            return;
+            return false;
         }
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
@@ -114,15 +109,28 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         // Checks if Bluetooth is supported on the device.
         if (mBluetoothAdapter == null) {
-            endPairing();
-            return;
+            return false;
         }
 
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
         if (!mBluetoothAdapter.isEnabled()) {
-            /*Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);*/
+            return false;
+        }
+
+        return true;
+    }
+
+    public void automaticPairing(){
+        super.automaticPairing();
+
+        mScanningHandler = new Handler();
+
+        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
+        // fire an intent to display a dialog asking the user to grant permission to enable it.
+        if (!checkBluetoothIsEnabled()) {
+            endPairing();
+            return;
         }
         else{
             scanLeDevices();

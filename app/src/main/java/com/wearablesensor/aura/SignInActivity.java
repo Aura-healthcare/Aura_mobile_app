@@ -22,6 +22,9 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.wearablesensor.aura.data.DataRepository;
 import com.wearablesensor.aura.data.DataRepositoryComponent;
+import com.wearablesensor.aura.data.LocalDataRepository;
+import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
+import com.wearablesensor.aura.device_pairing.DevicePairingComponent;
 
 import java.util.Arrays;
 
@@ -60,7 +63,12 @@ public class SignInActivity extends AppCompatActivity {
         //TODO: to remove,only here for testing DaraRepository component loading
         AuraApplication app = (AuraApplication) getApplication();
         DataRepositoryComponent dataComponent = app.getDataRepositoryComponent();
-        DataRepository dataRep = dataComponent.getDataRepository();
+        LocalDataRepository dataRep = dataComponent.localDataRepository();
+
+        DevicePairingComponent devicePairingComponent = app.getDevicePairingComponent();
+        BluetoothDevicePairingService lBluetoothDevicePairingService = devicePairingComponent.devicePairingService();
+        Boolean lIsBluetoothEnabled = lBluetoothDevicePairingService.checkBluetoothIsEnabled();
+        lBluetoothDevicePairingService.automaticPairing();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_sign_in);

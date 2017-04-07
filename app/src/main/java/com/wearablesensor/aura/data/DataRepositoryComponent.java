@@ -13,5 +13,6 @@ import dagger.Component;
 @Component(modules = {DataRepositoryModule.class, ApplicationModule.class})
 public interface DataRepositoryComponent{
 
-    DataRepository getDataRepository();
+    LocalDataRepository localDataRepository();
+    RemoteDataRepository remoteDataRepository();
 }
