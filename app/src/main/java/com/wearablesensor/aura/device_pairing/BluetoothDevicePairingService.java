@@ -10,17 +10,23 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
-import com.wearablesensor.aura.bluetooth.BluetoothLeService;
-import com.wearablesensor.aura.bluetooth.BluetoothServiceConnection;
+import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
+import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
+import com.wearablesensor.aura.data.SampleRRInterval;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 30/03/17.
  */
+@Singleton
 public class BluetoothDevicePairingService extends DevicePairingService{
     private final String TAG = this.getClass().getSimpleName();
 
@@ -78,7 +84,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     String timestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
                     Integer rr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
 
-                    //SampleRRInterval lSampleRRInterval = new SampleRRInterval(user, mDeviceAddress, timestamp, rr);
+                    SampleRRInterval lSampleRRInterval = new SampleRRInterval(user, mPairedDeviceAddress, timestamp, rr);
+                    receiveData(lSampleRRInterval);
                     // DataManager.getInstance().saveRRSample(lSampleRRInterval);
                     // mHrvRealTimeDisplayFragment.addNewHRVData(lSampleRRInterval);
                 }
@@ -143,6 +150,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     public void endPairing(){
         super.endPairing();
+
     }
 
     private void scanLeDevices() {
@@ -171,6 +179,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         mScanning = true;
         mBluetoothAdapter.startLeScan(mLeScanCallback);
+    }
+
+    private void receiveData(SampleRRInterval iSampleRrInterval){
+        this.setChanged();
+        this.notifyObservers(new DevicePairingReceivedDataNotification(iSampleRrInterval));
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

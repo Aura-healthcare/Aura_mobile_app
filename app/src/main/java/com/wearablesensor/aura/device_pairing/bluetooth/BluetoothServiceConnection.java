@@ -1,11 +1,10 @@
-package com.wearablesensor.aura.bluetooth;
+package com.wearablesensor.aura.device_pairing.bluetooth;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import com.wearablesensor.aura.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 
 /**

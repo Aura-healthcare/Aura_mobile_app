@@ -4,11 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,11 +19,6 @@ import com.facebook.FacebookSdk;
 
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.wearablesensor.aura.data.DataRepository;
-import com.wearablesensor.aura.data.DataRepositoryComponent;
-import com.wearablesensor.aura.data.LocalDataRepository;
-import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
-import com.wearablesensor.aura.device_pairing.DevicePairingComponent;
 
 import java.util.Arrays;
 
@@ -37,13 +31,14 @@ public class SignInActivity extends AppCompatActivity {
     private static final int REQUEST_SIGNUP = 0;
 
     private CallbackManager mFbCallbackManager;
+
     @BindView(R.id.input_email) EditText _emailText;
     @BindView(R.id.input_password) EditText _passwordText;
-    @BindView(R.id.btn_login) Button _loginButton;
+    @BindView(R.id.btn_login) AppCompatButton _loginButton;
     @BindView(R.id.btn_login_fb) LoginButton _fbLoginButton;
     @BindView(R.id.link_signup) TextView _signupLink;
 
-    @OnClick (R.id.btn_login)
+    @OnClick(R.id.btn_login)
     public void loginCallback(View v) {
         login();
     }
@@ -60,24 +55,14 @@ public class SignInActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        //TODO: to remove,only here for testing DaraRepository component loading
-        AuraApplication app = (AuraApplication) getApplication();
-        DataRepositoryComponent dataComponent = app.getDataRepositoryComponent();
-        LocalDataRepository dataRep = dataComponent.localDataRepository();
-
-        DevicePairingComponent devicePairingComponent = app.getDevicePairingComponent();
-        BluetoothDevicePairingService lBluetoothDevicePairingService = devicePairingComponent.devicePairingService();
-        Boolean lIsBluetoothEnabled = lBluetoothDevicePairingService.checkBluetoothIsEnabled();
-        lBluetoothDevicePairingService.automaticPairing();
-
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_sign_in);
 
         ButterKnife.bind(this);
 
         mFbCallbackManager = CallbackManager.Factory.create();
-        //_fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
-        /*_fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
+        _fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
+        _fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -96,9 +81,8 @@ public class SignInActivity extends AppCompatActivity {
                 android.util.Log.d(TAG, "FB Login Error");
                 onLoginFailed();
             }
-        });*/
+        });
     }
-
 
     public void login() {
         Log.d(TAG, "Login");
@@ -143,6 +127,8 @@ public class SignInActivity extends AppCompatActivity {
                 this.finish();
             }
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

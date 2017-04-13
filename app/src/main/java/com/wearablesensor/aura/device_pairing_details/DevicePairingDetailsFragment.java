@@ -1,9 +1,10 @@
-package com.wearablesensor.aura;
+package com.wearablesensor.aura.device_pairing_details;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -18,25 +19,29 @@ import com.wearablesensor.aura.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static dagger.internal.Preconditions.checkNotNull;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link DevicePairingFragment.OnFragmentInteractionListener} interface
+ * {@link DevicePairingDetailsFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link DevicePairingFragment#newInstance} factory method to
+ * Use the {@link DevicePairingDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DevicePairingFragment extends Fragment {
+public class DevicePairingDetailsFragment extends Fragment implements DevicePairingDetailsContract.View {
 
-    private static final String TAG = "DevicePairingFragment";
+    private final String TAG = this.getClass().getSimpleName();
+
+    private DevicePairingDetailsContract.Presenter mPresenter;
 
     @BindView(R.id.device_pairing_image) ImageView mImageView;
     @BindView(R.id.device_pairing_progress_bar) ProgressBar mPropressBar;
     @BindView(R.id.device_pairing_name) TextView mDeviceNameView;
     private OnFragmentInteractionListener mListener;
 
-    public DevicePairingFragment() {
+    public DevicePairingDetailsFragment() {
         // Required empty public constructor
     }
 
@@ -47,8 +52,8 @@ public class DevicePairingFragment extends Fragment {
      * @return A new instance of fragment DevicePairingFragment.
      */
 
-    public static DevicePairingFragment newInstance() {
-        DevicePairingFragment fragment = new DevicePairingFragment();
+    public static DevicePairingDetailsFragment newInstance() {
+        DevicePairingDetailsFragment fragment = new DevicePairingDetailsFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -94,8 +99,25 @@ public class DevicePairingFragment extends Fragment {
         mListener = null;
     }
 
-    public void displayFailPairing()
-    {
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.start();
+    }
+
+    @Override
+    public void successPairing(String iDeviceName, String iDeviceAdress) {
+        mPropressBar.setVisibility(View.GONE);
+
+        mDeviceNameView.setText(iDeviceName + " - " + iDeviceAdress );
+
+        Drawable successPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.link_symbol);
+        mImageView.setImageDrawable(successPairingDrawable);
+        mImageView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void failParing() {
         mPropressBar.setVisibility(View.GONE);
 
         String lNoDevicePairedText = getString(R.string.default_device_name);
@@ -106,15 +128,9 @@ public class DevicePairingFragment extends Fragment {
         mImageView.setVisibility(View.VISIBLE);
     }
 
-    public void displaySuccessPairing(String iDeviceName, String iDeviceAdress)
-    {
-        mPropressBar.setVisibility(View.GONE);
-
-        mDeviceNameView.setText(iDeviceName + " - " + iDeviceAdress );
-
-        Drawable successPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.link_symbol);
-        mImageView.setImageDrawable(successPairingDrawable);
-        mImageView.setVisibility(View.VISIBLE);
+    @Override
+    public void setPresenter(@NonNull DevicePairingDetailsContract.Presenter iPresenter) {
+        mPresenter = checkNotNull(iPresenter);
     }
 
     /**

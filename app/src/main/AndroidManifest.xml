@@ -36,7 +36,7 @@
         </activity>
 
         <service
-            android:name="com.wearablesensor.aura.bluetooth.BluetoothLeService"
+            android:name=".device_pairing.bluetooth.BluetoothLeService"
             android:enabled="true" />
 
         <activity

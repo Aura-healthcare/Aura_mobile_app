@@ -16,8 +16,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <fragment
-            android:name="com.wearablesensor.aura.DevicePairingFragment"
-            android:id="@+id/device_pairing_fragment"
+            android:name="com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment"
+            android:id="@+id/device_pairing_details_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <fragment

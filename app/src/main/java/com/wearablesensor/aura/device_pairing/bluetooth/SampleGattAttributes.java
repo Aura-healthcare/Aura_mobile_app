@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.wearablesensor.aura.bluetooth;
+package com.wearablesensor.aura.device_pairing.bluetooth;
 
 import java.util.HashMap;
 
