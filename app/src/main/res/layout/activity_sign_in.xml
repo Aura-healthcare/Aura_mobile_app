@@ -12,7 +12,7 @@
         android:paddingLeft="24dp"
         android:paddingRight="24dp">
 
-        <ImageView android:src="@drawable/splash"
+        <ImageView android:src="@drawable/aura_logo_title_nobg_xxhd"
             android:layout_width="wrap_content"
             android:layout_height="144dp"
             android:layout_marginBottom="24dp"

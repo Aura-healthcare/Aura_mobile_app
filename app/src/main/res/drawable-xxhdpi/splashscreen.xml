@@ -8,7 +8,7 @@
         <bitmap
             android:gravity="center|clip_horizontal"
             android:scaleGravity="fill_horizontal"
-            android:src="@drawable/splash"/>
+            android:src="@drawable/aura_logo_xxhd"/>
     </item>
 
 </layer-list>
