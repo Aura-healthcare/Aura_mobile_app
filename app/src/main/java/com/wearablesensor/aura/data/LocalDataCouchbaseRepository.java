@@ -17,6 +17,7 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
+import com.wearablesensor.aura.utils.ApplicationScoped;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,8 +33,7 @@ import javax.inject.Singleton;
 /**
  * Created by lecoucl on 01/04/17.
  */
-
-@Singleton
+@ApplicationScoped
 public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final String TAG = this.getClass().getSimpleName();
 

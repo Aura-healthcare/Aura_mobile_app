@@ -13,9 +13,7 @@ import android.util.Log;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
 import com.wearablesensor.aura.data.SampleRRInterval;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 
 import java.util.ArrayList;
@@ -86,7 +84,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
                     SampleRRInterval lSampleRRInterval = new SampleRRInterval(user, mPairedDeviceAddress, timestamp, rr);
                     receiveData(lSampleRRInterval);
-                    // DataManager.getInstance().saveRRSample(lSampleRRInterval);
                     // mHrvRealTimeDisplayFragment.addNewHRVData(lSampleRRInterval);
                 }
             }

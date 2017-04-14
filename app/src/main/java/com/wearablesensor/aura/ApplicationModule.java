@@ -1,10 +1,6 @@
 package com.wearablesensor.aura;
 
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -22,8 +18,7 @@ public class ApplicationModule {
     }
 
     @Provides
-    @Singleton
-    Context providesContext() {
+    Context providesContext(){
         return mContext;
     }
 }

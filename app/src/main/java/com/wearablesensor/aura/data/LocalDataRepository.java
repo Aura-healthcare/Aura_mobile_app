@@ -1,10 +1,5 @@
 package com.wearablesensor.aura.data;
 
-import android.content.Context;
-import android.util.Log;
-
-import com.couchbase.lite.CouchbaseLiteException;
-
 import java.util.ArrayList;
 import java.util.Date;
 

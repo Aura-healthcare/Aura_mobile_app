@@ -10,10 +10,12 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotific
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 31/03/17.
  */
+@Singleton
 public class DevicePairingService extends Observable{
     private final String TAG = this.getClass().getSimpleName();
     protected Context mContext;

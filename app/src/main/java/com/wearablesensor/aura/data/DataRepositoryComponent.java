@@ -1,15 +1,15 @@
 package com.wearablesensor.aura.data;
 
 import com.wearablesensor.aura.ApplicationModule;
-
-import javax.inject.Singleton;
+import com.wearablesensor.aura.utils.ApplicationScoped;
 
 import dagger.Component;
 
 /**
  * Created by lecoucl on 29/03/17.
  */
-@Singleton
+
+@ApplicationScoped
 @Component(modules = {DataRepositoryModule.class, ApplicationModule.class})
 public interface DataRepositoryComponent{
 

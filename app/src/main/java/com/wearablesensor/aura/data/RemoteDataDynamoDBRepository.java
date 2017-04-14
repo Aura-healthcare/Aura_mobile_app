@@ -10,6 +10,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.facebook.AccessToken;
 import com.wearablesensor.aura.UserPrefs;
+import com.wearablesensor.aura.utils.ApplicationScoped;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +24,7 @@ import javax.inject.Singleton;
 /**
  * Created by lecoucl on 07/04/17.
  */
-@Singleton
+@ApplicationScoped
 public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     private final String TAG = this.getClass().getSimpleName();
 

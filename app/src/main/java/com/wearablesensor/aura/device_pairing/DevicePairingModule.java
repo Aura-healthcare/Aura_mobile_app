@@ -2,6 +2,8 @@ package com.wearablesensor.aura.device_pairing;
 
 import android.bluetooth.BluetoothManager;
 
+import com.wearablesensor.aura.utils.ApplicationScoped;
+
 import javax.inject.Singleton;
 
 import dagger.Module;

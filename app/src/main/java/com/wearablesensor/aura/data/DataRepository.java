@@ -1,14 +1,12 @@
 package com.wearablesensor.aura.data;
 
-import android.provider.ContactsContract;
-
+import com.wearablesensor.aura.utils.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 29/03/17.
  */
-@Singleton
+@ApplicationScoped
 public class DataRepository {
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository mRemoteDataRepository;

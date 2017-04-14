@@ -9,7 +9,6 @@ import dagger.Component;
 /**
  * Created by lecoucl on 30/03/17.
  */
-
 @Singleton
 @Component(modules = {DevicePairingModule.class, ApplicationModule.class})
 public interface DevicePairingComponent {

@@ -85,13 +85,11 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         setContentView(R.layout.activity_seizure_monitoring);
         mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
 
-        // Create the presenter
         DaggerDevicePairingDetailsComponent.builder()
                 .devicePairingComponent( ((AuraApplication) getApplication()).getDevicePairingComponent() )
                 .devicePairingDetailsPresenterModule(new DevicePairingDetailsPresenterModule(mDevicePairingFragment))
                 .build()
                 .inject(this);
-
 
         mDataSyncFragment = (DataSyncFragment) getSupportFragmentManager().findFragmentById(R.id.data_sync_fragment);
         mHrvRealTimeDisplayFragment = (HRVRealTimeDisplayFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
