@@ -9,6 +9,8 @@ The "Aura Project" app will alert an user from an epilepsy seizure within few mi
 Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
 [link](https://developer.android.com/reference/android/bluetooth/BluetoothGatt.html)
 
+Android Architecture Blueprints
+[link](https://github.com/googlesamples/android-architecture)
 # User Experience #
 ![Scheme](documentation/epi_ux_flowchart_loading.jpg)
 
@@ -16,9 +18,8 @@ Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
 
 
 # App Architecture #
-Redesign in progress - MVP architecture + Dagger 2 Dependency injection
 
-![Scheme](documentation/auraapparchitecture.jpg)
+![Scheme](documentation/auramobileapparchitecture.png)
 
 # Details #
 The "Aura project" app fetch HRV data from a armband device via Bluetooth Low Energy and process the data in order to anticipate an epilepsy seizure.
