@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import android.app.Activity;
 import android.content.Context;
@@ -35,9 +35,9 @@ public class DataManager {
         new InitHRVRealTimeDataAsync().execute();
     }
 
-    public void pushDataOnRemote(){
+   /* public void pushDataOnRemote(){
         new PushDataOnRemoteAsync().execute();
-    }
+    }*/
 
     public void saveRRSample(SampleRRInterval iSampleRR){
         // filter empty values
@@ -81,7 +81,7 @@ public class DataManager {
     }
 
 
-    class PushDataOnRemoteAsync extends AsyncTask<Void, Integer, Boolean>
+    /*class PushDataOnRemoteAsync extends AsyncTask<Void, Integer, Boolean>
     {
         final private String TAG = PushDataOnRemoteAsync.class.getSimpleName();
         private Date mCurrentSync;
@@ -91,7 +91,7 @@ public class DataManager {
             Log.d(TAG,"OnPreExecute");
             mCurrentSync = null;
             mFailMessage = "";
-            mActivity.startPushDataOnRemote();
+            mView.startPushDataOnRemote();
         }
 
         protected Boolean doInBackground(Void...arg0) {
@@ -134,7 +134,7 @@ public class DataManager {
                 mActivity.failPushDataOnRemote(mFailMessage);
             }
         }
-    }
+    }*/
 
     class InitUserPrefsAsync extends AsyncTask<Void, Integer, Date>
     {

@@ -8,8 +8,6 @@ import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
-import javax.inject.Inject;
-
 /**
  * Created by lecoucl on 07/04/17.
  */
@@ -21,14 +19,10 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
 
     private final DevicePairingDetailsContract.View mView;
 
-    @Inject
     public DevicePairingDetailsPresenter(BluetoothDevicePairingService iBluetoothDevicePairingService, DevicePairingDetailsContract.View iView){
         mBluetoothDevicePairingService = iBluetoothDevicePairingService;
         mView = iView;
-    }
 
-    @Inject
-    void setupListeners(){
         mView.setPresenter(this);
     }
 

@@ -6,58 +6,50 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.wearablesensor.aura.data.DataRepositoryComponent;
-import com.wearablesensor.aura.data.DaggerDataRepositoryComponent;
-import com.wearablesensor.aura.data.DataRepositoryModule;
-import com.wearablesensor.aura.device_pairing.DaggerDevicePairingComponent;
-import com.wearablesensor.aura.device_pairing.DevicePairingComponent;
-import com.wearablesensor.aura.device_pairing.DevicePairingModule;
-import com.wearablesensor.aura.real_time_data_caching.DaggerRealTimeDataCachingComponent;
-import com.wearablesensor.aura.real_time_data_caching.RealTimeDataCachingComponent;
+import com.wearablesensor.aura.data_repository.LocalDataCouchbaseRepository;
+import com.wearablesensor.aura.data_repository.LocalDataRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataRepository;
+import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
+import com.wearablesensor.aura.device_pairing.DevicePairingService;
+import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
 
 /**
  * Created by lecoucl on 29/03/17.
  */
 public class AuraApplication extends Application{
-    private DataRepositoryComponent mDataRepositoryComponent;
-    private DevicePairingComponent mDevicePairingComponent;
-    private RealTimeDataCachingComponent mRealTimeCachingComponent;
+    private DevicePairingService mDevicePairingService;
+    private LocalDataRepository mLocalDataRepository;
+    private RemoteDataRepository mRemoteDataRepository;
+    private RealTimeDataProcessorService mRealTimeDataProcessorService;
 
     @Override
     public void onCreate() {
         Log.d("AuraApplication", "Init");
         super.onCreate();
 
+        Context lApplicationContext = getApplicationContext();
         boolean lIsBluetoothLeFeatureSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         BluetoothManager lBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
-        mDataRepositoryComponent = DaggerDataRepositoryComponent.builder()
-                .applicationModule(new ApplicationModule((getApplicationContext())))
-                .build();
+        mDevicePairingService = new BluetoothDevicePairingService(lIsBluetoothLeFeatureSupported, lBluetoothManager, lApplicationContext);
+        mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
+        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
 
-        mDevicePairingComponent = DaggerDevicePairingComponent.builder()
-                .applicationModule(new ApplicationModule(getApplicationContext()))
-                .devicePairingModule(new DevicePairingModule(lIsBluetoothLeFeatureSupported, lBluetoothManager))
-                .build();
+        mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository);
 
-        mRealTimeCachingComponent = DaggerRealTimeDataCachingComponent.builder()
-                                    .devicePairingComponent(mDevicePairingComponent)
-                                    .dataRepositoryModule(new DataRepositoryModule())
-                                    .applicationModule(new ApplicationModule(getApplicationContext()))
-                                    .build();
-
-        mRealTimeCachingComponent.realTimeDataCachingService().init();
+        mRealTimeDataProcessorService.init();
     }
 
-    public DataRepositoryComponent getDataRepositoryComponent() {
-        return mDataRepositoryComponent;
+    public DevicePairingService getDevicePairingService() {
+        return mDevicePairingService;
     }
 
-    public DevicePairingComponent getDevicePairingComponent(){
-        return mDevicePairingComponent;
+    public LocalDataRepository getLocalDataRepository() {
+        return mLocalDataRepository;
     }
 
-    public RealTimeDataCachingComponent getRealTimeCachingComponent(){
-        return mRealTimeCachingComponent;
+    public RemoteDataRepository getRemoteDataRepository() {
+        return mRemoteDataRepository;
     }
 }

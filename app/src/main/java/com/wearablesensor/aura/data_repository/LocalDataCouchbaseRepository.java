@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import android.content.Context;
 import android.util.Log;
@@ -17,7 +17,6 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
-import com.wearablesensor.aura.utils.ApplicationScoped;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,14 +25,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 
 /**
  * Created by lecoucl on 01/04/17.
  */
-@ApplicationScoped
 public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final String TAG = this.getClass().getSimpleName();
 
@@ -57,7 +53,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView";
 
-    @Inject
+
     public LocalDataCouchbaseRepository(Context iApplicationContext){
         Log.d(TAG, "Local data CouchBase repository init");
         mDBOptions = new DatabaseOptions();

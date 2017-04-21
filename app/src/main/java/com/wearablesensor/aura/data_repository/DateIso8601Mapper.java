@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

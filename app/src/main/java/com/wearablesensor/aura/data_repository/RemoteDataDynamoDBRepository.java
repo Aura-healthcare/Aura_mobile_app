@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,23 +8,17 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.facebook.AccessToken;
 import com.wearablesensor.aura.UserPrefs;
-import com.wearablesensor.aura.utils.ApplicationScoped;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 07/04/17.
  */
-@ApplicationScoped
 public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     private final String TAG = this.getClass().getSimpleName();
 
@@ -34,7 +28,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
 
     private String mUser;
 
-    @Inject
+
     public RemoteDataDynamoDBRepository(Context iApplicationContext){
         Log.d(TAG, "RemoteData DynamoDB repository init");
         mApplicationContext = iApplicationContext;

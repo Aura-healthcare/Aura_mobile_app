@@ -1,6 +1,6 @@
 package com.wearablesensor.aura.device_pairing.notifications;
 
-import com.wearablesensor.aura.data.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
 
 /**
  * Created by lecoucl on 13/04/17.

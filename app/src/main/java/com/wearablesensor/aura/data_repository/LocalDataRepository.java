@@ -1,9 +1,7 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 29/03/17.

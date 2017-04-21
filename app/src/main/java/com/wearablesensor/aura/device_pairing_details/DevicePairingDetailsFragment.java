@@ -19,8 +19,6 @@ import com.wearablesensor.aura.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static dagger.internal.Preconditions.checkNotNull;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -129,8 +127,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     }
 
     @Override
-    public void setPresenter(@NonNull DevicePairingDetailsContract.Presenter iPresenter) {
-        mPresenter = checkNotNull(iPresenter);
+    public void setPresenter(DevicePairingDetailsContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
     }
 
     /**

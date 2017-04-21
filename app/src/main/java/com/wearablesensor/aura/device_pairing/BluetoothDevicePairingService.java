@@ -12,19 +12,16 @@ import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
-import com.wearablesensor.aura.data.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Created by lecoucl on 30/03/17.
  */
-@Singleton
+
 public class BluetoothDevicePairingService extends DevicePairingService{
     private final String TAG = this.getClass().getSimpleName();
 
@@ -48,7 +45,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private BluetoothServiceConnection mDeviceServiceConnection;
     private BroadcastReceiver mGattUpdateReceiver;
 
-    @Inject
     public BluetoothDevicePairingService(boolean iIsBluetoothFeatureLeSupported, BluetoothManager iBluetoothManager, Context iContext){
         super(iContext);
 

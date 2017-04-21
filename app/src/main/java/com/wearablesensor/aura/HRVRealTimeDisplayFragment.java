@@ -16,8 +16,8 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.PointsGraphSeries;
-import com.wearablesensor.aura.data.DateIso8601Mapper;
-import com.wearablesensor.aura.data.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

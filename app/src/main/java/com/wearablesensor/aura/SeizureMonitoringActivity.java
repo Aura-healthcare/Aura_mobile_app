@@ -16,23 +16,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
-import com.facebook.Profile;
-import com.facebook.ProfileTracker;
 import com.github.clans.fab.FloatingActionButton;
+import com.wearablesensor.aura.data_sync.DataSyncFragment;
+import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
-import com.wearablesensor.aura.data.DataManager;
-import com.wearablesensor.aura.data.SampleRRInterval;
-import com.wearablesensor.aura.device_pairing_details.DaggerDevicePairingDetailsComponent;
+import com.wearablesensor.aura.data_repository.DataManager;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
-import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenterModule;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,17 +45,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @OnClick (R.id.action_menu_manual_pairing)
     public void actionMenuManualPairingCallback(View v){ DataManager.getInstance().cleanLocalCache();}
     @BindView(R.id.action_menu_push_data) FloatingActionButton mPushDataButton;
-    @OnClick (R.id.action_menu_push_data)
-    public void actionMenuPushBackCallback(View v) {
-        DataManager.getInstance().pushDataOnRemote();
-    }
+
 
     private BluetoothDevicePairingService mDevicePairingService;
 
-    @Inject
-    DevicePairingDetailsPresenter mDevicePairingDetailsPresenter;
+
+    private DevicePairingDetailsPresenter mDevicePairingDetailsPresenter;
     private DevicePairingDetailsFragment mDevicePairingFragment;
+
+    private DataSyncPresenter mDataSyncPresenter;
     private DataSyncFragment mDataSyncFragment;
+
     private HRVRealTimeDisplayFragment mHrvRealTimeDisplayFragment;
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -83,19 +77,20 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_seizure_monitoring);
-        mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
+        mDevicePairingService =  (BluetoothDevicePairingService) ((AuraApplication) getApplication()).getDevicePairingService();
 
-        DaggerDevicePairingDetailsComponent.builder()
-                .devicePairingComponent( ((AuraApplication) getApplication()).getDevicePairingComponent() )
-                .devicePairingDetailsPresenterModule(new DevicePairingDetailsPresenterModule(mDevicePairingFragment))
-                .build()
-                .inject(this);
+        mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
+        mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
 
         mDataSyncFragment = (DataSyncFragment) getSupportFragmentManager().findFragmentById(R.id.data_sync_fragment);
+        mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getRemoteDataRepository(), mDataSyncFragment, this);
+
         mHrvRealTimeDisplayFragment = (HRVRealTimeDisplayFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
         ButterKnife.bind(this);
 
         setupDrawer();
+
+        setupActionMenu();
 
         startAutomaticPairing();
 
@@ -105,6 +100,15 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     }
 
+    private void setupActionMenu() {
+        mPushDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            mDataSyncPresenter.pushData();
+            }
+        });
+    }
+/*
     private ProfileTracker mProfileTracker;
     private AccessTokenTracker mAccesTokenTracker;
     private void initializeUserProfileFromFacebook(){
@@ -129,14 +133,14 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
                 @Override
                 protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                     // initialize DataManager only after we receive credentials from Identity provider
-                    initializeDataManager();
+                    //initializeDataManager();
                     mAccesTokenTracker.stopTracking();
                 }
             };
 
         }
         else{
-            initializeDataManager();
+            //initializeDataManager();
         }
 
     }
@@ -145,17 +149,13 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         initializeUserProfileFromFacebook();
     }
 
-    private void initializeDataManager(){
-        DataManager.getInstance().init(getApplicationContext(), this, "me");
-    }
-
     private void initializeUserPrefs() {
         DataManager.getInstance().initializeUserPrefs();
-    }
+    }*/
 
     //TODO extend to all user Prefs
     public void displayUserPrefs(Date iLastSync) {
-        mDataSyncFragment.updateLastSyncDisplay(iLastSync);
+        //mDataSyncFragment.updateLastSyncDisplay(iLastSync);
     }
 
     private void setupDrawer(){
@@ -191,7 +191,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
 
     private void startAutomaticPairing(){
-        mDevicePairingService =  ( (AuraApplication) getApplication()).getDevicePairingComponent().devicePairingService();
         if(mDevicePairingService.checkBluetoothIsEnabled()){
             mDevicePairingService.automaticPairing();
         }
@@ -199,25 +198,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-    }
-
-    public void startPushDataOnRemote(){
-        mDataSyncFragment.displayStartPushData();
-    }
-
-    public void progressPushDataOnRemote(Integer iProgress){
-        mDataSyncFragment.displayProgressPushData(iProgress);
-    }
-
-    public void successPushDataOnRemote(Date iCurrentSync){
-        mDataSyncFragment.displaySuccessPushData(iCurrentSync);
-    }
-
-    public void failPushDataOnRemote(String iFailMessage){
-        String lFailMessage = getString(R.string.push_data_fail) + " : " + iFailMessage;
-        Toast.makeText(getApplicationContext(), lFailMessage, Toast.LENGTH_LONG).show();
-
-        mDataSyncFragment.displayFailPushData();
     }
 
     public void enableHRVRealTimeDisplay(ArrayList<SampleRRInterval> mRrSamples, Date iWindowStart, Date iWindowEnd){

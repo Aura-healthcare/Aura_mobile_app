@@ -32,8 +32,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.wearablesensor.aura.data.SampleRRInterval;
-import com.wearablesensor.aura.data.DateIso8601Mapper;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 
 import java.util.Calendar;
 import java.util.List;

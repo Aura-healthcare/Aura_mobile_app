@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data;
+package com.wearablesensor.aura.data_repository;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;

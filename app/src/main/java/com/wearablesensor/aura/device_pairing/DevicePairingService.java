@@ -6,16 +6,11 @@ import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Created by lecoucl on 31/03/17.
  */
-@Singleton
+
 public class DevicePairingService extends Observable{
     private final String TAG = this.getClass().getSimpleName();
     protected Context mContext;
@@ -25,7 +20,7 @@ public class DevicePairingService extends Observable{
 
     protected Boolean mPaired;
 
-    @Inject
+
     public DevicePairingService(Context iContext){
         mContext = iContext;
 

@@ -1,23 +1,26 @@
-package com.wearablesensor.aura;
+package com.wearablesensor.aura.data_sync;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.wearablesensor.aura.data.DateIso8601Mapper;
+import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,8 +30,10 @@ import butterknife.ButterKnife;
  * Use the {@link DataSyncFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DataSyncFragment extends Fragment {
+public class DataSyncFragment extends Fragment implements DataSyncContract.View {
     private final String TAG = this.getClass().getSimpleName();
+
+    private DataSyncContract.Presenter mPresenter;
 
     @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar;
     @BindView(R.id.data_sync_image_view) ImageView mImageView;
@@ -37,6 +42,7 @@ public class DataSyncFragment extends Fragment {
 
     public DataSyncFragment() {
         // Required empty public constructor
+        Log.d(TAG, "constructor");
     }
 
     /**
@@ -47,6 +53,7 @@ public class DataSyncFragment extends Fragment {
      */
 
     public static DataSyncFragment newInstance() {
+        Log.d("DataSyncFragment", "newInstance");
         DataSyncFragment fragment = new DataSyncFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -93,36 +100,47 @@ public class DataSyncFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
+        mPresenter.start();
+    }
 
-    public void displayStartPushData() {
+    @Override
+    public void startPushDataOnCloud() {
         mProgressBar.setVisibility(View.VISIBLE);
         mImageView.setVisibility(View.GONE);
     }
 
-    public void displayProgressPushData(Integer iProgress) {
+    @Override
+    public void endPushDataOnCloud() {
+        mProgressBar.setVisibility(View.GONE);
+        mProgressBar.setProgress(0);
+
+        mImageView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void refreshProgressPushDataOnCloud(Integer iProgress) {
         mProgressBar.setProgress(iProgress);
     }
 
-    public void displaySuccessPushData(Date iCurrentSync) {
-        mProgressBar.setVisibility(View.GONE);
-        mProgressBar.setProgress(0);
-
-        mImageView.setVisibility(View.VISIBLE);
-
-        updateLastSyncDisplay(iCurrentSync);
-    }
-
-    public void displayFailPushData(){
-        mProgressBar.setVisibility(View.GONE);
-        mProgressBar.setProgress(0);
-
-        mImageView.setVisibility(View.VISIBLE);
-    }
-
-    public void updateLastSyncDisplay(Date iLastSync){
+    @Override
+    public void refreshLastSync(Date iLastSync) {
         mLastSyncView.setText(getString(R.string.last_sync) +  DateIso8601Mapper.getString(iLastSync));
     }
 
+    @Override
+    public void displayFailMessageOnPushData(Context iContext, String iFailMessage) {
+        String lFailMessage = getString(R.string.push_data_fail) + " : " + iFailMessage;
+        Toast.makeText(iContext, lFailMessage, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void setPresenter(DataSyncContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
+    }
 
 
     /**

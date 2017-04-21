@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <fragment
-            android:name="com.wearablesensor.aura.DataSyncFragment"
+            android:name="com.wearablesensor.aura.data_sync.DataSyncFragment"
             android:id="@+id/data_sync_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

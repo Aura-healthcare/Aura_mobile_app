@@ -1,38 +1,31 @@
-package com.wearablesensor.aura.real_time_data_caching;
+package com.wearablesensor.aura.real_time_data_processor;
 
-import android.util.Log;
-
-import com.wearablesensor.aura.data.LocalDataRepository;
-import com.wearablesensor.aura.data.SampleRRInterval;
-import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
+import com.wearablesensor.aura.data_repository.LocalDataRepository;
+import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
-import com.wearablesensor.aura.utils.ApplicationScoped;
-
-import javax.inject.Inject;
 
 /**
  * Created by lecoucl on 13/04/17.
  */
-@ApplicationScoped
-public class RealTimeDataCachingService extends DevicePairingServiceObserver{
+public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private BluetoothDevicePairingService mBluetoothDevicePairingService;
+    private DevicePairingService mDevicePairingService;
     private LocalDataRepository mLocalDataRepository;
 
-    @Inject
-    public RealTimeDataCachingService(BluetoothDevicePairingService iBluetoothDevicePairingService,
-                                      LocalDataRepository iLocalDataRepository){
-        mBluetoothDevicePairingService = iBluetoothDevicePairingService;
+    public RealTimeDataProcessorService(DevicePairingService iBluetoothDevicePairingService,
+                                        LocalDataRepository iLocalDataRepository){
+        mDevicePairingService = iBluetoothDevicePairingService;
         mLocalDataRepository = iLocalDataRepository;
     }
 
     public void init(){
-        mBluetoothDevicePairingService.addObserver(this);
+        mDevicePairingService.addObserver(this);
     }
 
 
@@ -47,6 +40,11 @@ public class RealTimeDataCachingService extends DevicePairingServiceObserver{
     }
 
     private void putSampleInCache(SampleRRInterval iSampleRrInterval){
+        // filter empty values
+        if (iSampleRrInterval.getTimestamp() == "" && iSampleRrInterval.getRR() == 0) {
+            return;
+        }
+
         try {
             mLocalDataRepository.saveRRSample(iSampleRrInterval);
         } catch (Exception e) {
