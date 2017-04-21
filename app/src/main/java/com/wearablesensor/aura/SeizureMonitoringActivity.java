@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.github.clans.fab.FloatingActionButton;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
+import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
+import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.data_repository.DataManager;
 import com.wearablesensor.aura.data_repository.SampleRRInterval;
@@ -33,7 +35,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, HRVRealTimeDisplayFragment.OnFragmentInteractionListener{
+public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
@@ -56,7 +58,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private DataSyncPresenter mDataSyncPresenter;
     private DataSyncFragment mDataSyncFragment;
 
-    private HRVRealTimeDisplayFragment mHrvRealTimeDisplayFragment;
+    private DataVisualisationPresenter mDataVisualisationPresenter;
+    private RRSamplesVisualisationFragment mRRSamplesVisualisationFragment;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -85,7 +88,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDataSyncFragment = (DataSyncFragment) getSupportFragmentManager().findFragmentById(R.id.data_sync_fragment);
         mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getRemoteDataRepository(), mDataSyncFragment, this);
 
-        mHrvRealTimeDisplayFragment = (HRVRealTimeDisplayFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
+        mRRSamplesVisualisationFragment = (RRSamplesVisualisationFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
+        mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
         ButterKnife.bind(this);
 
         setupDrawer();
@@ -198,11 +202,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-    }
-
-    public void enableHRVRealTimeDisplay(ArrayList<SampleRRInterval> mRrSamples, Date iWindowStart, Date iWindowEnd){
-        mHrvRealTimeDisplayFragment.initHRVRealTimeData(mRrSamples);
-        mHrvRealTimeDisplayFragment.displayHRVRealTimeData(iWindowStart, iWindowEnd);
     }
 
     @Override

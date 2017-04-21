@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <fragment
-            android:name="com.wearablesensor.aura.HRVRealTimeDisplayFragment"
+            android:name="com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment"
             android:id="@+id/hrv_realtime_display_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

@@ -206,7 +206,7 @@ public class DataManager {
         protected void onPostExecute(Boolean iSuccess) {
             Log.d(TAG , "onPostExecute");
             if(iSuccess){
-              mActivity.enableHRVRealTimeDisplay(mRrSamples, mWindowStart, mWindowEnd);
+              //mActivity.enableHRVRealTimeDisplay(mRrSamples, mWindowStart, mWindowEnd);
               mRrSamples.clear();
             }
         }

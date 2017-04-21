@@ -1,4 +1,4 @@
-package com.wearablesensor.aura;
+package com.wearablesensor.aura.data_visualisation;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -16,6 +16,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.PointsGraphSeries;
+import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.SampleRRInterval;
 
@@ -26,7 +27,7 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class HRVRealTimeDisplayFragment extends Fragment {
+public class RRSamplesVisualisationFragment extends Fragment implements DataVisualisationContract.View {
     private final String TAG = this.getClass().getSimpleName();
 
     @BindView(R.id.hrv_realtime_graph) GraphView mGraphView;
@@ -35,13 +36,16 @@ public class HRVRealTimeDisplayFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private DataVisualisationContract.Presenter mPresenter;
+
     private final int GRAPH_POINT_NB = 3600;
     private final int GRAPH_POINT_SIZE = 5;
     private final int GRAPH_HORIZONTAL_LABEL_NB = 3;
     private final int MAX_HRV_VALUE = 2000;
     private final int MIN_HRV_VALUE = 0;
+    // TODO: points graph series should be handled by DataSyncPresenter
     private PointsGraphSeries<DataPoint> mSeries;
-    public HRVRealTimeDisplayFragment() {
+    public RRSamplesVisualisationFragment() {
         // Required empty public constructor
     }
 
@@ -49,10 +53,10 @@ public class HRVRealTimeDisplayFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment HRVRealTimeDisplayFragment.
+     * @return A new instance of fragment RRSamplesVisualisationFragment.
      */
-    public static HRVRealTimeDisplayFragment newInstance() {
-        HRVRealTimeDisplayFragment fragment = new HRVRealTimeDisplayFragment();
+    public static RRSamplesVisualisationFragment newInstance() {
+        RRSamplesVisualisationFragment fragment = new RRSamplesVisualisationFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -70,15 +74,6 @@ public class HRVRealTimeDisplayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_hrv_realtime_display, container, false);
         ButterKnife.bind(this, view);
-
-        mSeries = new PointsGraphSeries<>();
-
-        mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity(), new SimpleDateFormat("HH:mm")));
-        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(GRAPH_HORIZONTAL_LABEL_NB);
-
-        mGraphView.getViewport().setYAxisBoundsManual(true);
-        mGraphView.getViewport().setMinY(MIN_HRV_VALUE);
-        mGraphView.getViewport().setMaxY(MAX_HRV_VALUE);
 
         return view;
     }
@@ -107,36 +102,38 @@ public class HRVRealTimeDisplayFragment extends Fragment {
         mListener = null;
     }
 
-    public void initHRVRealTimeData(ArrayList<SampleRRInterval> mRrSamples) {
-        DataPoint[] lData;
-        if(mRrSamples.size() == 0){
-            lData = new DataPoint[]{};
-        }
-        else {
-            int lNbRrSamples = mRrSamples.size();
-            lData = new DataPoint[lNbRrSamples];
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.start();
+    }
 
-            for (int i = 0; i < (mRrSamples.size()); i++) {
-                lData[i] = new DataPoint(DateIso8601Mapper.getDate(mRrSamples.get(i).getTimestamp()), mRrSamples.get(i).getRR());
-            }
-        }
+    @Override
+    public void initRRSamplesVisualisation(Date iWindowStart, Date iWindowEnd) {
+        mSeries = new PointsGraphSeries<>();
 
+        mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity(), new SimpleDateFormat("HH:mm:ss")));
+        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(GRAPH_HORIZONTAL_LABEL_NB);
+
+        mGraphView.getViewport().setYAxisBoundsManual(true);
+        mGraphView.getViewport().setMinY(MIN_HRV_VALUE);
+        mGraphView.getViewport().setMaxY(MAX_HRV_VALUE);
+
+        DataPoint[] lData = new DataPoint[]{};
         mSeries.resetData(lData);
 
         int lHrvGrey = getContext().getResources().getColor(R.color.hrv_grey);
         mSeries.setColor(lHrvGrey);
         mSeries.setSize(GRAPH_POINT_SIZE);
-    }
-
-    public void displayHRVRealTimeData(Date iWindowStart, Date iWindowEnd){
-        mGraphView.addSeries(mSeries);
 
         mGraphView.getViewport().setXAxisBoundsManual(true);
         mGraphView.getViewport().setMinX(iWindowStart.getTime());
         mGraphView.getViewport().setMaxX(iWindowEnd.getTime());
+        mGraphView.addSeries(mSeries);
     }
 
-    public void enableHRVRealTime() {
+    @Override
+    public void enableRRSamplesVisualisation() {
         Drawable lEnableHrvPulse = ContextCompat.getDrawable(getContext(), R.drawable.hrv_pulse_enable);
         mImageView.setImageDrawable(lEnableHrvPulse);
 
@@ -145,7 +142,8 @@ public class HRVRealTimeDisplayFragment extends Fragment {
         mGraphView.invalidate();
     }
 
-    public void disableHRVRealTime(){
+    @Override
+    public void disableRRSamplesVisualisation() {
         mHrvTextView.setText(getString(R.string.default_hrv));
 
         Drawable lDisableHrvPulse = ContextCompat.getDrawable(getContext(), R.drawable.hrv_pulse_disable);
@@ -153,16 +151,22 @@ public class HRVRealTimeDisplayFragment extends Fragment {
 
         int lHrvGrey = getContext().getResources().getColor(R.color.hrv_grey);
         mSeries.setColor(lHrvGrey);
+        mGraphView.invalidate();
     }
 
-    public void addNewHRVData(SampleRRInterval iSampleRrInterval)
-    {
-        int lCurrentRr = iSampleRrInterval.getRR();
-        Date lCurrentDate = DateIso8601Mapper.getDate(iSampleRrInterval.getTimestamp());
+    @Override
+    public void refreshRRSamplesVisualisation(SampleRRInterval iSampleRR) {
+        int lCurrentRr = iSampleRR.getRR();
+        Date lCurrentDate = DateIso8601Mapper.getDate(iSampleRR.getTimestamp());
 
         mHrvTextView.setText(lCurrentRr + " ms");
 
         mSeries.appendData( new DataPoint(lCurrentDate, lCurrentRr), true, GRAPH_POINT_NB);
+    }
+
+    @Override
+    public void setPresenter(DataVisualisationContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
     }
 
     /**

@@ -13,7 +13,6 @@ import java.util.Observer;
 public class DevicePairingServiceObserver implements Observer {
     @Override
     public void update(Observable o, Object arg) {
-        Log.d("DevicePairingServiceObs", "update");
         if(arg instanceof DevicePairingNotification){
             this.onDevicePairingServiceNotification((DevicePairingNotification) arg);
         }
