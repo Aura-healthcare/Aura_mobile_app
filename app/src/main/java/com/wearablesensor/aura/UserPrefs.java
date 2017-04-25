@@ -4,10 +4,6 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribut
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
-/**
- * Created by lecoucl on 08/01/17.
- */
-
 @DynamoDBTable(tableName = "UserPrefs")
 public class UserPrefs {
     private String user;
