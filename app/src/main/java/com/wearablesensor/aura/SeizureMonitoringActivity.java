@@ -96,12 +96,23 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         setupActionMenu();
 
+        connectToRemoteDatabase();
+
         startAutomaticPairing();
 
         //initializeUserProfile();
 
         //initializeUserPrefs();
 
+    }
+
+    private void connectToRemoteDatabase() {
+        try{
+            ((AuraApplication) getApplication()).getRemoteDataRepository().connect();
+        }
+        catch (Exception e){
+
+        }
     }
 
     private void setupActionMenu() {

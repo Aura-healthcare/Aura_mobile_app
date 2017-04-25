@@ -8,6 +8,7 @@ import java.util.Date;
  */
 
 public interface RemoteDataRepository {
+    void connect() throws Exception;
 
     void saveRRSample(final ArrayList<SampleRRInterval> iRrSamples) throws Exception;
 

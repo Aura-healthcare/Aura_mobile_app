@@ -35,16 +35,17 @@ public class AuraApplication extends Application{
         boolean lIsBluetoothLeFeatureSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         BluetoothManager lBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
+
+        mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
+        mAuthentificationHelper.init(lApplicationContext);
+
         mDevicePairingService = new BluetoothDevicePairingService(lIsBluetoothLeFeatureSupported, lBluetoothManager, lApplicationContext);
         mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
-        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
+        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext, mAuthentificationHelper);
 
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository);
 
         mRealTimeDataProcessorService.init();
-
-        mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
-        mAuthentificationHelper.init(lApplicationContext);
 
     }
 

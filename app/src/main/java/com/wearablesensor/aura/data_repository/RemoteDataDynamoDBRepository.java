@@ -9,6 +9,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.wearablesensor.aura.UserPrefs;
+import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,16 +26,21 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     private Context mApplicationContext;
     private AmazonDynamoDBClient mAmazonDynamoDBClient;
     private DynamoDBMapper mDynamoDBMapper;
+    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
 
-    private String mUser;
-
-
-    public RemoteDataDynamoDBRepository(Context iApplicationContext){
+    public RemoteDataDynamoDBRepository(Context iApplicationContext, AmazonCognitoAuthentificationHelper iAuthentificationHelper){
         Log.d(TAG, "RemoteData DynamoDB repository init");
         mApplicationContext = iApplicationContext;
+        mAuthentificationHelper = iAuthentificationHelper;
+
     }
 
-    public void connect(String iUser, String iAccesToken) throws Exception{
+    public void connect() throws Exception{
+        // TODO need to sanitize credentials
+        String lIdTokens = mAuthentificationHelper.getCurrSession().getIdToken().getJWTToken();
+
+        Log.d(TAG, "MyToken - " + lIdTokens);
+
         try {
             CognitoCachingCredentialsProvider lCredentialsProvider = new CognitoCachingCredentialsProvider(
                     mApplicationContext,    /* get the context for the application */
@@ -43,9 +49,8 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
             );
 
             Map<String, String> lLogins = new HashMap<String, String>();
-            Log.d(TAG, "Facebook token "+ iAccesToken);
 
-            lLogins.put("graph.facebook.com", iAccesToken);
+            lLogins.put("cognito-idp.us-east-1.amazonaws.com/us-east-1_G8nkqNjZM", lIdTokens);
             lCredentialsProvider.setLogins(lLogins);
 
             mAmazonDynamoDBClient = new AmazonDynamoDBClient(lCredentialsProvider);
@@ -76,7 +81,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     public Date queryLastSync() throws Exception {
         UserPrefs lUserPrefs = null;
         try{
-            lUserPrefs = mDynamoDBMapper.load(UserPrefs.class, mUser);
+            lUserPrefs = mDynamoDBMapper.load(UserPrefs.class, "newMe");
             return DateIso8601Mapper.getDate(lUserPrefs.getLastSync());
         }
         catch(Exception e){
@@ -90,7 +95,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     @Override
     public void saveLastSync(Date iLastSync) throws Exception {
         String iLastSyncStr = DateIso8601Mapper.getString(iLastSync);
-        final UserPrefs lUserPrefs = new UserPrefs(mUser, iLastSyncStr);
+        final UserPrefs lUserPrefs = new UserPrefs("newMe", iLastSyncStr);
 
         try{
             mDynamoDBMapper.save(lUserPrefs);
