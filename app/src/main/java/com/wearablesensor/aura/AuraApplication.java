@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 import com.wearablesensor.aura.data_repository.LocalDataCouchbaseRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
@@ -23,6 +24,8 @@ public class AuraApplication extends Application{
     private RemoteDataRepository mRemoteDataRepository;
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
 
+    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
+
     @Override
     public void onCreate() {
         Log.d("AuraApplication", "Init");
@@ -39,6 +42,10 @@ public class AuraApplication extends Application{
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository);
 
         mRealTimeDataProcessorService.init();
+
+        mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
+        mAuthentificationHelper.init(lApplicationContext);
+
     }
 
     public DevicePairingService getDevicePairingService() {
@@ -52,4 +59,6 @@ public class AuraApplication extends Application{
     public RemoteDataRepository getRemoteDataRepository() {
         return mRemoteDataRepository;
     }
+
+    public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
 }

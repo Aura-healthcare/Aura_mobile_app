@@ -2,8 +2,10 @@ package com.wearablesensor.aura;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
@@ -19,6 +21,8 @@ import com.facebook.FacebookSdk;
 
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.wearablesensor.aura.authentification.SignInContract;
+import com.wearablesensor.aura.authentification.SignInPresenter;
 
 import java.util.Arrays;
 
@@ -26,21 +30,30 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SignInActivity extends AppCompatActivity {
-    private final static String TAG = SignInActivity.class.getSimpleName();
+public class SignInActivity extends AppCompatActivity implements SignInContract.View{
+    private final String TAG = this.getClass().getSimpleName();
     private static final int REQUEST_SIGNUP = 0;
+    private static final int FIRST_TIME_SIGN_IN = 1;
 
     private CallbackManager mFbCallbackManager;
 
-    @BindView(R.id.input_email) EditText _emailText;
-    @BindView(R.id.input_password) EditText _passwordText;
-    @BindView(R.id.btn_login) AppCompatButton _loginButton;
-    @BindView(R.id.btn_login_fb) LoginButton _fbLoginButton;
-    @BindView(R.id.link_signup) TextView _signupLink;
+    private SignInContract.Presenter mPresenter;
+
+    private ProgressDialog mProgressDialog;
+    protected AlertDialog mAlertDialog;
+
+
+    @BindView(R.id.input_username) EditText mUsernameText;
+    @BindView(R.id.input_password) EditText mPasswordText;
+    @BindView(R.id.btn_login) AppCompatButton mLoginButton;
+    @BindView(R.id.btn_login_fb) LoginButton mFbLoginButton;
+    @BindView(R.id.link_signup) TextView mSignupLink;
 
     @OnClick(R.id.btn_login)
     public void loginCallback(View v) {
-        login();
+        String lUsername = mUsernameText.getText().toString();
+        String lPassword = mPasswordText.getText().toString();
+        mPresenter.signIn(lUsername, lPassword);
     }
 
     @OnClick(R.id.link_signup)
@@ -60,60 +73,30 @@ public class SignInActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        mPresenter = new SignInPresenter(this, getApplicationContext(), this, ((AuraApplication) getApplication()).getAuthentificationHelper());
+
         mFbCallbackManager = CallbackManager.Factory.create();
-        _fbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
-        _fbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
+        mFbLoginButton.setReadPermissions(Arrays.asList("public_profile"));
+        mFbLoginButton.registerCallback(mFbCallbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
                 android.util.Log.d(TAG, "FB Login Success");
-                onLoginSuccess(getApplicationContext());
+                mPresenter.signInSucceed();
             }
 
             @Override
             public void onCancel() {
                 android.util.Log.d(TAG, "FB Login Cancel");
-                onLoginFailed();
+                mPresenter.signInFails();
             }
 
             @Override
             public void onError(FacebookException error) {
                 android.util.Log.d(TAG, "FB Login Error");
-                onLoginFailed();
+                mPresenter.signInFails();
             }
         });
-    }
-
-    public void login() {
-        Log.d(TAG, "Login");
-
-        if (!validate()) {
-            onLoginFailed();
-            return;
-        }
-
-        _loginButton.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(SignInActivity.this);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-
-        // TODO: Implement your own authentication logic here.
-
-        final Context context = getApplicationContext();
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess(context);
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
 
     @Override
@@ -127,6 +110,11 @@ public class SignInActivity extends AppCompatActivity {
                 this.finish();
             }
         }
+        else if(requestCode == FIRST_TIME_SIGN_IN){
+             if(resultCode == RESULT_OK) {
+                 mPresenter.continueWithFirstSignIn();
+             }
+         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -137,41 +125,49 @@ public class SignInActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess(Context context) {
-        _loginButton.setEnabled(true);
-
-        Intent intent = new Intent(context, SeizureMonitoringActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-        this.finish();
+    @Override
+    public void displayValidationError(String iErrorMessage) {
+        mUsernameText.setError(iErrorMessage);
     }
 
-    public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
-        _loginButton.setEnabled(true);
+    @Override
+    public void displayAuthentificationProgressDialog() {
+        mProgressDialog = new ProgressDialog(SignInActivity.this);
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setMessage("Authenticating...");
+        mProgressDialog.show();
     }
 
-    public boolean validate() {
-        boolean valid = true;
+    @Override
+    public void closeAuthentificationProgressDialog() {
+        mProgressDialog.dismiss();
+    }
 
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+    @Override
+    public void enableLoginButton() {
+        mLoginButton.setEnabled(true);
+    }
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("enter a valid email address");
-            valid = false;
-        } else {
-            _emailText.setError(null);
-        }
+    @Override
+    public void disableLoginButton() {
+        mLoginButton.setEnabled(false);
+    }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
-            valid = false;
-        } else {
-            _passwordText.setError(null);
-        }
+    @Override
+    public void displayFailLoginMessage() {
+        mAlertDialog = new AlertDialog.Builder(SignInActivity.this)
+                .setMessage("Login failed")
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-        return valid;
+                    }
+                }).create();
+        mAlertDialog.show();
+    }
+
+    @Override
+    public void setPresenter(SignInContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
     }
 }

@@ -48,6 +48,7 @@
         completions."
     </string>
     <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_first_sign_in">FirstSignInActivity</string>
     <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
 
     <string name="navigation_drawer_open">Epi Project</string>

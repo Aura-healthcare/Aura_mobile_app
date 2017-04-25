@@ -28,6 +28,7 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.2.+'
+    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.3.2'
     compile 'com.couchbase.lite:couchbase-lite-android:+'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.jakewharton:butterknife:8.4.0'
