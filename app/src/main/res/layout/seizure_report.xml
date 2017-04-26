@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:text="@string/title_seizure_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/Title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp"
+        android:weightSum="1"
+        android:layout_margin="10dp">
+
+        <DatePicker
+            android:layout_width="184dp"
+            android:layout_height="176dp"
+            android:id="@+id/SeizureDatePicker"
+            android:headerBackground="@color/app_primary"
+            style="@android:style/Widget.DatePicker"
+            android:animationCache="false"
+            android:elevation="0dp"
+            android:paddingTop="@dimen/activity_horizontal_margin" />
+
+        <TimePicker
+            android:layout_width="wrap_content"
+            android:layout_height="176dp"
+            android:id="@+id/SeizureTimePicker"
+            android:headerBackground="@color/app_primary"
+            android:numbersSelectorColor="@color/app_primary_dark"
+            style="@android:style/Widget.Holo.Light.TimePicker"
+            android:elevation="0dp"
+            android:paddingTop="@dimen/activity_horizontal_margin" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1"
+        android:layout_margin="10dp">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="@string/seizure_reports_comments"
+            android:ems="10"
+            android:id="@+id/CommentTitle" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/CommentBlock"
+            android:layout_weight="2" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:elevation="0dp"
+        android:gravity="bottom">
+
+        <Button
+            android:text="@string/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/CancelButton"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="@string/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ConfirmButton"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+</LinearLayout>
