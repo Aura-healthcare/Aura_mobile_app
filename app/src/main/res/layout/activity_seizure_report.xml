@@ -36,7 +36,6 @@
             android:id="@+id/SeizureTimePicker"
             android:headerBackground="@color/app_primary"
             android:numbersSelectorColor="@color/app_primary_dark"
-            style="@android:style/Widget.Holo.Light.TimePicker"
             android:elevation="0dp"
             android:paddingTop="@dimen/activity_horizontal_margin" />
 

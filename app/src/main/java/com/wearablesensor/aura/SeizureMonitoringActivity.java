@@ -41,7 +41,6 @@ import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.data_repository.DataManager;
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
 
@@ -66,6 +65,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     public void actionMenuManualPairingCallback(View v){ DataManager.getInstance().cleanLocalCache();}
     @BindView(R.id.action_menu_push_data) FloatingActionButton mPushDataButton;
 
+    @BindView(R.id.action_menu_report_seizure) FloatingActionButton mReportSeizureButton;
 
     private BluetoothDevicePairingService mDevicePairingService;
 
@@ -138,6 +138,14 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             @Override
             public void onClick(View v) {
             mDataSyncPresenter.pushData();
+            }
+        });
+        mReportSeizureButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent lIntent = new Intent(getApplicationContext(), SeizureReportActivity.class);
+                SeizureMonitoringActivity.this.startActivity(lIntent);
+                SeizureMonitoringActivity.this.finish();
             }
         });
     }
