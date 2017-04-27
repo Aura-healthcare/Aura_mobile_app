@@ -41,6 +41,8 @@ import java.util.Map;
 public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     private final String TAG = this.getClass().getSimpleName();
 
+    private static final String DYNAMO_DB_IDENTITY_POOL_ID = "eu-west-1:8dbf4eef-78e6-4ac9-9ace-fa164cd83538";
+
     private Context mApplicationContext;
     private AmazonDynamoDBClient mAmazonDynamoDBClient;
     private DynamoDBMapper mDynamoDBMapper;
@@ -62,13 +64,13 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
         try {
             CognitoCachingCredentialsProvider lCredentialsProvider = new CognitoCachingCredentialsProvider(
                     mApplicationContext,    /* get the context for the application */
-                    "eu-west-1:8dbf4eef-78e6-4ac9-9ace-fa164cd83538",    /* Identity Pool ID */
+                    DYNAMO_DB_IDENTITY_POOL_ID,    /* Identity Pool ID */
                     Regions.EU_WEST_1           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
             );
 
             Map<String, String> lLogins = new HashMap<String, String>();
 
-            lLogins.put("cognito-idp.us-east-1.amazonaws.com/us-east-1_G8nkqNjZM", lIdTokens);
+            lLogins.put("cognito-idp.eu-west-1.amazonaws.com/" + AmazonCognitoAuthentificationHelper.userPoolId, lIdTokens);
             lCredentialsProvider.setLogins(lLogins);
 
             mAmazonDynamoDBClient = new AmazonDynamoDBClient(lCredentialsProvider);

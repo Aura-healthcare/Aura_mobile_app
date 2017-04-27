@@ -72,25 +72,25 @@ public class AmazonCognitoAuthentificationHelper {
     /**
      * Add your pool id here
      */
-    private static final String userPoolId = "us-east-1_G8nkqNjZM";
+    public static final String userPoolId = "eu-west-1_DuDxK0mMq";
 
     /**
      * Add you app id
      */
-    private static final String clientId = "7k5fn1jp88pe6ks1coi8kcmuis";
+    private static final String clientId = "6muri7ajudhsm0jt6odtbdj0v";
 
     /**
      * App secret associated with your app id - if the App id does not have an associated App secret,
      * set the App secret to null.
      * e.g. clientSecret = null;
      */
-    private static final String clientSecret = "clsl9jmbl0l2jalpk4jjc4gl632625u1uhhedenfijl0bt1cvdq";
+    private static final String clientSecret = "1dqjeieljepf8g93400apa1fnjqmqa9rc99l2ttk2er3q1fa5f3t";
 
     /**
      * Set Your User Pools region.
      * e.g. if your user pools are in US East (N Virginia) then set cognitoRegion = Regions.US_EAST_1.
      */
-    private static final Regions cognitoRegion = Regions.US_EAST_1;
+    private static final Regions cognitoRegion = Regions.EU_WEST_1;
 
     // User details from the service
     private static CognitoUserSession currSession;

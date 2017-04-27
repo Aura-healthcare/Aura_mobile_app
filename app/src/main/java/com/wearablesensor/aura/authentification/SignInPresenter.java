@@ -162,7 +162,7 @@ public class SignInPresenter implements SignInContract.Presenter{
 
         @Override
         public void onFailure(Exception e) {
-            Log.d(TAG, "Auth Fail");
+            Log.d(TAG, "Auth Fail " + e.toString());
             signInFails();
         }
 
