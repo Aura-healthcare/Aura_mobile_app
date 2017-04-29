@@ -91,7 +91,11 @@ public class SignInActivity extends AppCompatActivity implements SignInContract.
 
         ButterKnife.bind(this);
 
-        mPresenter = new SignInPresenter(this, getApplicationContext(), this, ((AuraApplication) getApplication()).getAuthentificationHelper());
+        mPresenter = new SignInPresenter(this,
+                                        getApplicationContext(),
+                                        this,
+                                        ((AuraApplication) getApplication()).getAuthentificationHelper(),
+                                        ((AuraApplication) getApplication()).getUserSessionService());
 
         mFbCallbackManager = CallbackManager.Factory.create();
         mFbLoginButton.setReadPermissions(Arrays.asList("public_profile"));

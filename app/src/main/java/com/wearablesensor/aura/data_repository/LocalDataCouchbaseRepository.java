@@ -35,6 +35,9 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
+import com.couchbase.lite.util.StreamUtils;
+import com.wearablesensor.aura.user_session.UserModel;
+import com.wearablesensor.aura.user_session.UserPreferencesModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +45,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.util.Observer;
 
 
 /**
@@ -66,11 +69,8 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final static String RR_PARAM = "rr";
     private final static String DEVICE_ADRESS_PARAM = "deviceAdress";
 
-    private final static String USER_PREFS_DOCUMENT = "userPrefsDocument";
-    private final static String LAST_SYNC_PARAM = "lastSync";
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView";
-
 
     public LocalDataCouchbaseRepository(Context iApplicationContext){
         Log.d(TAG, "Local data CouchBase repository init");
@@ -195,48 +195,22 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     }
 
     @Override
-    public Date queryLastSync() throws Exception{
-        Document userPrefsDocument = null;
+    public void clear() {
+        Document lPhysioSignalDocument = null;
 
         try {
-            userPrefsDocument = mDB.getDocument(USER_PREFS_DOCUMENT);
-            Log.d(TAG, "Get Document - id:" + userPrefsDocument.getId());
-            return  DateIso8601Mapper.getDate((String)userPrefsDocument.getProperty(LAST_SYNC_PARAM));
+            lPhysioSignalDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
 
         }catch(Exception e){
             e.printStackTrace();
-            throw e;
-        }
-    }
-
-    @Override
-    public void saveLastSync(final Date iLastSync) throws Exception {
-        Document userPrefsDocument = null;
-
-        final String iLastSyncStr = DateIso8601Mapper.getString(iLastSync);
-        try {
-            userPrefsDocument = mDB.getDocument(USER_PREFS_DOCUMENT);
-            Log.d(TAG, "Get Document - id:" + userPrefsDocument.getId());
-        }catch(Exception e){
-            e.printStackTrace();
-            throw e;
         }
 
         try {
-            userPrefsDocument.update(new Document.DocumentUpdater() {
-                @Override
-                public boolean update(UnsavedRevision newRevision) {
-                    Map<String, Object> properties = newRevision.getUserProperties();
-                    properties.put(LAST_SYNC_PARAM, iLastSyncStr);
+            lPhysioSignalDocument.delete();
+            android.util.Log.d(TAG, "Documents deleted" );
 
-                    newRevision.setUserProperties(properties);
-                    Log.d(TAG, "RecordSuccess");
-                    return true;
-                }
-            });
         } catch (CouchbaseLiteException e) {
-            Log.d(TAG, "RecordFail " + e.getMessage());
-            throw e;
+            e.printStackTrace();
         }
     }
 }

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
@@ -31,8 +32,11 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Chal
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.NewPasswordContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.wearablesensor.aura.FirstSignInActivity;
 import com.wearablesensor.aura.SeizureMonitoringActivity;
+import com.wearablesensor.aura.SessionSignInActivity;
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 import java.util.Map;
 
@@ -43,23 +47,32 @@ public class SignInPresenter implements SignInContract.Presenter{
     private SignInContract.View mView;
     private Context mApplicationContext;
     private Activity mActivity;
-    private static final int FIRST_TIME_SIGN_IN = 1;
+    private UserSessionService mUserSessionService;
 
+    private static final int FIRST_TIME_SIGN_IN = 1;
+    private Boolean mIsFirstSignIn;
     // Amazon Cognito Authentification attribute
     private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
     private NewPasswordContinuation mNewPasswordContinuation;
 
     private String mCurrentPassword; // argument exist because AmazonCognito does not take it as input
+    private String mCurrentUsername;
 
-
-    public SignInPresenter(SignInContract.View iView, Context iApplicationContext, Activity iActivity, AmazonCognitoAuthentificationHelper iAuthentificationHelper){
+    public SignInPresenter(SignInContract.View iView,
+                           Context iApplicationContext,
+                           Activity iActivity,
+                           AmazonCognitoAuthentificationHelper iAuthentificationHelper,
+                           UserSessionService iUserSessionService){
         mView = iView;
         mView.setPresenter(this);
 
         mApplicationContext = iApplicationContext;
         mActivity = iActivity;
+        mUserSessionService = iUserSessionService;
 
         mAuthentificationHelper = iAuthentificationHelper;
+
+        mIsFirstSignIn = false;
     }
 
     @Override
@@ -79,19 +92,22 @@ public class SignInPresenter implements SignInContract.Presenter{
         mView.displayAuthentificationProgressDialog();
 
         setCurrentPassword(iPassword);
+        mAuthentificationHelper.setUser(iUsername);
+
         mAuthentificationHelper.getPool().getUser(iUsername).getSessionInBackground(mAuthenticationHandler);
-
-        // TODO: Implement your own authentication logic here.
-        Log.d(TAG, "try to log on Amazon pool");
-
     }
 
     public void signInSucceed(){
         mView.enableLoginButton();
         mView.closeAuthentificationProgressDialog();
 
-        Intent intent = new Intent(mApplicationContext, SeizureMonitoringActivity.class);
+        Intent intent = new Intent(mApplicationContext, SessionSignInActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("firstSignIn", mIsFirstSignIn);
+        String lAuthToken = mAuthentificationHelper.getCurrSession().getIdToken().getJWTToken();
+        intent.putExtra("AuthToken", lAuthToken);
+        mIsFirstSignIn = false;
+
         mApplicationContext.startActivity(intent);
         mActivity.finish();
     }
@@ -132,6 +148,7 @@ public class SignInPresenter implements SignInContract.Presenter{
             }
         }
         try {
+            mIsFirstSignIn = true;
             mNewPasswordContinuation.continueTask();
         } catch (Exception e) {
             signInFails();
@@ -189,4 +206,5 @@ public class SignInPresenter implements SignInContract.Presenter{
     private String getCurrentPassword(){
         return mCurrentPassword;
     }
+
 }

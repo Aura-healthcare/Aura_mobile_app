@@ -32,12 +32,14 @@ import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 public class AuraApplication extends Application{
     private DevicePairingService mDevicePairingService;
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository mRemoteDataRepository;
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
+    private UserSessionService mUserSessionService;
 
     private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
 
@@ -50,7 +52,6 @@ public class AuraApplication extends Application{
         boolean lIsBluetoothLeFeatureSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         BluetoothManager lBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
-
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
         mAuthentificationHelper.init(lApplicationContext);
 
@@ -59,9 +60,9 @@ public class AuraApplication extends Application{
         mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext, mAuthentificationHelper);
 
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository);
-
         mRealTimeDataProcessorService.init();
 
+        mUserSessionService = new UserSessionService(mRemoteDataRepository, lApplicationContext);
     }
 
     public DevicePairingService getDevicePairingService() {
@@ -77,4 +78,6 @@ public class AuraApplication extends Application{
     }
 
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
+
+    public UserSessionService getUserSessionService(){return mUserSessionService;}
 }

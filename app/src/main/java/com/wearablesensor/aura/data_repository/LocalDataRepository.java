@@ -18,6 +18,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.data_repository;
 
+import com.wearablesensor.aura.user_session.UserModel;
+import com.wearablesensor.aura.user_session.UserPreferencesModel;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -30,7 +33,5 @@ public interface LocalDataRepository {
     ArrayList<SampleRRInterval> queryRRSample(Date iStartDate, Date iEndDate) throws Exception;
     void saveRRSample(final SampleRRInterval iSampleRR) throws Exception;
 
-    Date queryLastSync() throws Exception;
-    void saveLastSync(final Date iLastSync) throws Exception;
-
+    void clear();
 }

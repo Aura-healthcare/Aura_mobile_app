@@ -48,6 +48,10 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:label="@string/title_activity_first_sign_in" />
         <activity
+            android:name="com.wearablesensor.aura.SessionSignInActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:label="@string/title_activity_first_sign_in" />
+        <activity
             android:name="com.wearablesensor.aura.SeizureMonitoringActivity"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name="com.wearablesensor.aura.ManualPairingActivity"></activity>

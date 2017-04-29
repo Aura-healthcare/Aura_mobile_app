@@ -40,11 +40,9 @@ import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
-import com.wearablesensor.aura.data_repository.DataManager;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -62,7 +60,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @BindView(R.id.action_menu_manual_pairing) FloatingActionButton mManualPairingButton;
     @OnClick (R.id.action_menu_manual_pairing)
-    public void actionMenuManualPairingCallback(View v){ DataManager.getInstance().cleanLocalCache();}
+    public void actionMenuManualPairingCallback(View v){ /*DataManager.getInstance().cleanLocalCache();*/}
     @BindView(R.id.action_menu_push_data) FloatingActionButton mPushDataButton;
 
     @BindView(R.id.action_menu_report_seizure) FloatingActionButton mReportSeizureButton;
@@ -104,7 +102,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
 
         mDataSyncFragment = (DataSyncFragment) getSupportFragmentManager().findFragmentById(R.id.data_sync_fragment);
-        mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getRemoteDataRepository(), mDataSyncFragment, this);
+        mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getRemoteDataRepository(), mDataSyncFragment, this, ((AuraApplication) getApplication()).getUserSessionService());
 
         mRRSamplesVisualisationFragment = (RRSamplesVisualisationFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
         mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
@@ -114,23 +112,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         setupActionMenu();
 
-        connectToRemoteDatabase();
-
         startAutomaticPairing();
-
-        //initializeUserProfile();
-
-        //initializeUserPrefs();
-
-    }
-
-    private void connectToRemoteDatabase() {
-        try{
-            ((AuraApplication) getApplication()).getRemoteDataRepository().connect();
-        }
-        catch (Exception e){
-
-        }
     }
 
     private void setupActionMenu() {
@@ -148,55 +130,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
                 SeizureMonitoringActivity.this.finish();
             }
         });
-    }
-/*
-    private ProfileTracker mProfileTracker;
-    private AccessTokenTracker mAccesTokenTracker;
-    private void initializeUserProfileFromFacebook(){
-
-
-        if(Profile.getCurrentProfile() == null) {
-            mProfileTracker = new ProfileTracker() {
-                @Override
-                protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
-                    //TODO update profile display
-                    mProfileTracker.stopTracking();
-                }
-            };
-        }
-        else {
-            Profile lProfile = Profile.getCurrentProfile();
-            //TODO update profile display
-        }
-
-        if(AccessToken.getCurrentAccessToken() == null){
-            mAccesTokenTracker = new AccessTokenTracker() {
-                @Override
-                protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-                    // initialize DataManager only after we receive credentials from Identity provider
-                    //initializeDataManager();
-                    mAccesTokenTracker.stopTracking();
-                }
-            };
-
-        }
-        else{
-            //initializeDataManager();
-        }
-
-    }
-
-    private void initializeUserProfile() {
-        initializeUserProfileFromFacebook();
-    }
-
-    private void initializeUserPrefs() {
-        DataManager.getInstance().initializeUserPrefs();
-    }*/
-
-    //TODO extend to all user Prefs
-    public void displayUserPrefs(Date iLastSync) {
-        //mDataSyncFragment.updateLastSyncDisplay(iLastSync);
     }
 
     private void setupDrawer(){
@@ -267,7 +200,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         // User chose not to enable Bluetooth.
         if (requestCode == REQUEST_ENABLE_BT){
             if(resultCode == Activity.RESULT_OK){
-                //scanLeDevice(true);
                 mDevicePairingService.automaticPairing();
                 return;
             }

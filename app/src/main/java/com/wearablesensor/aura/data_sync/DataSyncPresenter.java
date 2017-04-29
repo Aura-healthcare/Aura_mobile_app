@@ -22,9 +22,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.user_session.UserPreferencesModel;
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +42,8 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
     private final LocalDataRepository mLocalDataRepository;
     private final RemoteDataRepository mRemoteDataRepository;
 
+    private final UserSessionService mUserSessionService;
+
     private final DataSyncContract.View mView;
 
     private final Context mApplicationContext;
@@ -46,11 +51,13 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
     public DataSyncPresenter(LocalDataRepository iLocalDataRepository,
                              RemoteDataRepository iRemoteDataRepository,
                              DataSyncContract.View iView,
-                             Context iApplicationContext) {
+                             Context iApplicationContext,
+                             UserSessionService iUserSessionService) {
         mLocalDataRepository = iLocalDataRepository;
         mRemoteDataRepository = iRemoteDataRepository;
         mView = iView;
         mApplicationContext = iApplicationContext;
+        mUserSessionService = iUserSessionService;
         Log.d("DataSyncPresenter","constructor" );
 
         mView.setPresenter(this);
@@ -69,32 +76,18 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
 
     private void saveLastSync(Date iLastSync) throws Exception {
         try {
-            mLocalDataRepository.saveLastSync(iLastSync);
-            mRemoteDataRepository.saveLastSync(iLastSync);
+            UserPreferencesModel lFormerUserPrefs = mUserSessionService.getUserPreferences();
+            UserPreferencesModel lNewUserPrefs= new UserPreferencesModel(lFormerUserPrefs.getUserId(), DateIso8601Mapper.getString(iLastSync) );
+            mUserSessionService.setUserPreferences(lNewUserPrefs);
+            mRemoteDataRepository.saveUserPreferences(lNewUserPrefs);
         }catch(Exception e){
             throw e;
         }
     }
 
     private Date getLastSync(){
-        Date lLastSync = null;
-        // query last sync value from cache
-        try {
-            lLastSync = mLocalDataRepository.queryLastSync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // query last sync value from remote repository
-        if(lLastSync == null){
-            try {
-                lLastSync = mRemoteDataRepository.queryLastSync();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return lLastSync;
+        String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
+        return DateIso8601Mapper.getDate(lLastSync);
     }
 
 

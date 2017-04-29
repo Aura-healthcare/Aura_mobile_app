@@ -23,10 +23,15 @@ import android.util.Log;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.wearablesensor.aura.UserPrefs;
+import com.couchbase.lite.CouchbaseLiteException;
+import com.wearablesensor.aura.user_session.UserModel;
+import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 
 import java.util.ArrayList;
@@ -46,20 +51,15 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     private Context mApplicationContext;
     private AmazonDynamoDBClient mAmazonDynamoDBClient;
     private DynamoDBMapper mDynamoDBMapper;
-    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
 
-    public RemoteDataDynamoDBRepository(Context iApplicationContext, AmazonCognitoAuthentificationHelper iAuthentificationHelper){
+    public RemoteDataDynamoDBRepository(Context iApplicationContext){
         Log.d(TAG, "RemoteData DynamoDB repository init");
         mApplicationContext = iApplicationContext;
-        mAuthentificationHelper = iAuthentificationHelper;
-
     }
 
-    public void connect() throws Exception{
-        // TODO need to sanitize credentials
-        String lIdTokens = mAuthentificationHelper.getCurrSession().getIdToken().getJWTToken();
+    public void connect(String lAuthToken) throws Exception{
 
-        Log.d(TAG, "MyToken - " + lIdTokens);
+        Log.d(TAG, "MyToken - " + lAuthToken);
 
         try {
             CognitoCachingCredentialsProvider lCredentialsProvider = new CognitoCachingCredentialsProvider(
@@ -70,7 +70,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
 
             Map<String, String> lLogins = new HashMap<String, String>();
 
-            lLogins.put("cognito-idp.eu-west-1.amazonaws.com/" + AmazonCognitoAuthentificationHelper.userPoolId, lIdTokens);
+            lLogins.put("cognito-idp.eu-west-1.amazonaws.com/" + AmazonCognitoAuthentificationHelper.userPoolId, lAuthToken);
             lCredentialsProvider.setLogins(lLogins);
 
             mAmazonDynamoDBClient = new AmazonDynamoDBClient(lCredentialsProvider);
@@ -98,31 +98,72 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     }
 
     @Override
-    public Date queryLastSync() throws Exception {
-        UserPrefs lUserPrefs = null;
+    public UserModel queryUser(String iAmazonId) throws Exception{
+
         try{
-            lUserPrefs = mDynamoDBMapper.load(UserPrefs.class, "newMe");
-            return DateIso8601Mapper.getDate(lUserPrefs.getLastSync());
+            UserModel lUserModel = new UserModel();
+            lUserModel.setAmazonId(iAmazonId);
+
+            DynamoDBQueryExpression lQueryExpression = new DynamoDBQueryExpression()
+                    .withHashKeyValues(lUserModel)
+                    .withConsistentRead(false);
+
+            PaginatedQueryList<UserModel> lUserModelList = mDynamoDBMapper.query(UserModel.class, lQueryExpression);
+            Log.d(TAG, "Query Fetched User Number: " + lUserModelList.size() + " " + iAmazonId );
+
+            if(lUserModelList.size() == 1) {
+                return lUserModelList.get(0);
+            }
+            else{
+                throw new Exception();
+            }
         }
         catch(Exception e){
             e.printStackTrace();
-            Log.d(TAG, "Error getLastSync" + e.getMessage());
+            Log.d(TAG, "Error Fail GetUser" + e.getMessage());
             throw e;
         }
-
     }
 
     @Override
-    public void saveLastSync(Date iLastSync) throws Exception {
-        String iLastSyncStr = DateIso8601Mapper.getString(iLastSync);
-        final UserPrefs lUserPrefs = new UserPrefs("newMe", iLastSyncStr);
-
+    public void saveUser(final UserModel iUserModel) throws Exception {
         try{
-            mDynamoDBMapper.save(lUserPrefs);
-            Log.d(TAG, "Success Save UserPrefs");
+            mDynamoDBMapper.save(iUserModel);
+            Log.d(TAG, "Success Save User");
+        }
+        catch(NotAuthorizedException e){
+            e.printStackTrace();
         }
         catch(Exception e){
-            Log.d(TAG, "Error Save UserPrefs" + e.getMessage());
+            e.printStackTrace();
+            Log.d(TAG, "Error Save User");
+            throw e;
+        }
+    }
+
+    @Override
+    public UserPreferencesModel queryUserPreferences(String iUserId) {
+        UserPreferencesModel lUserPrefsModel = null;
+        try{
+            lUserPrefsModel = mDynamoDBMapper.load(UserPreferencesModel.class, iUserId);
+            Log.d(TAG, "Success GetUserPrefs");
+            return lUserPrefsModel;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            Log.d(TAG, "Error GetUserPrefs" + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public void saveUserPreferences(final UserPreferencesModel iUserPreferencesModel) throws Exception {
+        try{
+            mDynamoDBMapper.save(iUserPreferencesModel);
+            Log.d(TAG, "Success Save UserPreferences");
+        }
+        catch(Exception e){
+            Log.d(TAG, "Error Save UserPreferences" + e.getMessage());
             throw e;
         }
     }
