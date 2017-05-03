@@ -32,7 +32,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 
 import java.util.Calendar;
@@ -131,7 +131,7 @@ public class BluetoothLeService extends Service {
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
 
-        SampleRRInterval rr = new SampleRRInterval();
+        RRIntervalModel rr = new RRIntervalModel();
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
@@ -170,7 +170,7 @@ public class BluetoothLeService extends Service {
 
                 Calendar c = Calendar.getInstance();
                 String timeStamp = DateIso8601Mapper.getString(c.getTime());
-                rr = new SampleRRInterval("me", mBluetoothDeviceAddress, timeStamp, mRr_values[0]);
+                rr = new RRIntervalModel("me", mBluetoothDeviceAddress, timeStamp, mRr_values[0]);
             }
         }
 
@@ -179,7 +179,7 @@ public class BluetoothLeService extends Service {
         intent.putExtra(BluetoothLeService.USER_EXTRA_DATA, rr.getUser());
         intent.putExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA, rr.getDeviceAdress());
         intent.putExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA, rr.getTimestamp());
-        intent.putExtra(BluetoothLeService.RR_EXTRA_DATA, rr.getRR());
+        intent.putExtra(BluetoothLeService.RR_EXTRA_DATA, rr.getRrInterval());
         sendBroadcast(intent);
     }
 

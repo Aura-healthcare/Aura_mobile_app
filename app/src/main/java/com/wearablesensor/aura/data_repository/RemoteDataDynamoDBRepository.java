@@ -29,13 +29,12 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.couchbase.lite.CouchbaseLiteException;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +82,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
     }
 
     @Override
-    public void saveRRSample(final ArrayList<SampleRRInterval> iRrSamples) throws Exception {
+    public void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception {
         Log.d(TAG, "save RR Samples: " + iRrSamples.size());
 
         try{

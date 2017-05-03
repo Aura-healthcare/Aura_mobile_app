@@ -104,6 +104,14 @@ public class UserSessionService {
         return mUserPrefs;
     }
 
+    public void setUser(UserModel iUserModel){
+        mUserModel = iUserModel;
+    }
+
+    public UserModel getUser(){
+        return mUserModel;
+    }
+
     class LoadUserAsync extends AsyncTask<String, Integer, Boolean>
     {
         @Override

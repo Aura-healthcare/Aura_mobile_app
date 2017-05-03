@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.data_visualisation;
 
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.utils.BasePresenter;
 import com.wearablesensor.aura.utils.BaseView;
 
@@ -33,10 +33,10 @@ public class DataVisualisationContract {
         void enableRRSamplesVisualisation();
         void disableRRSamplesVisualisation();
 
-        void refreshRRSamplesVisualisation(SampleRRInterval iSampleRR);
+        void refreshRRSamplesVisualisation(RRIntervalModel iSampleRR);
     }
 
     interface Presenter extends BasePresenter{
-        void receiveNewHRVSample(SampleRRInterval iSampleRR);
+        void receiveNewHRVSample(RRIntervalModel iSampleRR);
     }
 }

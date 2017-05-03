@@ -57,12 +57,12 @@ public class AuraApplication extends Application{
 
         mDevicePairingService = new BluetoothDevicePairingService(lIsBluetoothLeFeatureSupported, lBluetoothManager, lApplicationContext);
         mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
-        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext, mAuthentificationHelper);
-
-        mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository);
-        mRealTimeDataProcessorService.init();
+        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
 
         mUserSessionService = new UserSessionService(mRemoteDataRepository, lApplicationContext);
+
+        mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, mUserSessionService);
+        mRealTimeDataProcessorService.init();
     }
 
     public DevicePairingService getDevicePairingService() {

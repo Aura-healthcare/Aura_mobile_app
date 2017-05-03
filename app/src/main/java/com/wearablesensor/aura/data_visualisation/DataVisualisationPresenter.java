@@ -18,14 +18,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.data_visualisation;
 
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -64,7 +63,7 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
     }
 
     @Override
-    public void receiveNewHRVSample(SampleRRInterval iSampleRR) {
+    public void receiveNewHRVSample(RRIntervalModel iSampleRR) {
         mView.refreshRRSamplesVisualisation(iSampleRR);
     }
 

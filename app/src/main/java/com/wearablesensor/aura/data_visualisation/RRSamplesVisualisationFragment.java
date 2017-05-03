@@ -36,10 +36,9 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -173,8 +172,8 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
     }
 
     @Override
-    public void refreshRRSamplesVisualisation(SampleRRInterval iSampleRR) {
-        int lCurrentRr = iSampleRR.getRR();
+    public void refreshRRSamplesVisualisation(RRIntervalModel iSampleRR) {
+        int lCurrentRr = iSampleRR.getRrInterval();
         Date lCurrentDate = DateIso8601Mapper.getDate(iSampleRR.getTimestamp());
 
         mHrvTextView.setText(lCurrentRr + " ms");

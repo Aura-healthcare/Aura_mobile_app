@@ -35,9 +35,7 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
-import com.couchbase.lite.util.StreamUtils;
-import com.wearablesensor.aura.user_session.UserModel;
-import com.wearablesensor.aura.user_session.UserPreferencesModel;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Observer;
 
 
 /**
@@ -66,7 +63,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final static String UUID_PARAM= "uuid";
     private final static String TIMESTAMP_PARAM = "timestamp";
     private final static String USER_PARAM = "user";
-    private final static String RR_PARAM = "rr";
+    private final static String RR_INTERVAL_PARAM = "rrInterval";
     private final static String DEVICE_ADRESS_PARAM = "deviceAdress";
 
 
@@ -114,7 +111,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
 
     @Override
-    public ArrayList<SampleRRInterval> queryRRSample(Date iStartDate, Date iEndDate) throws Exception {
+    public ArrayList<RRIntervalModel> queryRRSample(Date iStartDate, Date iEndDate) throws Exception {
         Log.d(TAG, "start query RR Samples");
         Document lRrDocument = null;
         try {
@@ -125,7 +122,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             throw e;
         }
 
-        ArrayList<SampleRRInterval> lRrSamples = new ArrayList<SampleRRInterval>();
+        ArrayList<RRIntervalModel> lRrSamples = new ArrayList<RRIntervalModel>();
 
         try {
             Query query = mRRSamplesView.createQuery();
@@ -136,18 +133,18 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
             for (Iterator<QueryRow> it = queryEnum; it.hasNext(); ) {
                 QueryRow row=it.next();
-                //TODO: implement a mapper to SampleRRInterval - need to understand why Couchbase does not systematically return same object type
-                SampleRRInterval lRrSample;
+                //TODO: implement a mapper to RRIntervalModel - need to understand why Couchbase does not systematically return same object type
+                RRIntervalModel lRrSample;
                 if(row.getValue() instanceof  LinkedHashMap) {
                     LinkedHashMap<String, Object> jsonMap = (LinkedHashMap<String, Object>) row.getValue();
-                    lRrSample = new SampleRRInterval((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_PARAM));
+                    lRrSample = new RRIntervalModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_INTERVAL_PARAM));
                 }
                 else if(row.getValue() instanceof LazyJsonObject) {
                     LazyJsonObject jsonMap = (LazyJsonObject) row.getValue();
-                    lRrSample = new SampleRRInterval((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_PARAM));
+                    lRrSample = new RRIntervalModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_INTERVAL_PARAM));
                 }
                 else{
-                    lRrSample = (SampleRRInterval) row.getValue();
+                    lRrSample = (RRIntervalModel) row.getValue();
                 }
                 lRrSamples.add(lRrSample);
                 Log.d(TAG,"Document contents: " + row.getKey() + " "+ row.getValue());
@@ -162,7 +159,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     }
 
     @Override
-    public void saveRRSample(final SampleRRInterval iSampleRR) throws Exception{
+    public void saveRRSample(final RRIntervalModel iSampleRR) throws Exception{
         Document rrDocument = null;
         try {
             rrDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);

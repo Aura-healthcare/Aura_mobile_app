@@ -18,11 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.data_repository;
 
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by lecoucl on 29/03/17.
@@ -31,7 +31,7 @@ import java.util.Date;
 public interface RemoteDataRepository {
     void connect(String lAuthToken) throws Exception;
 
-    void saveRRSample(final ArrayList<SampleRRInterval> iRrSamples) throws Exception;
+    void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception;
 
     UserModel queryUser(String iAmazonId) throws Exception;
     void saveUser(final UserModel iUserMode) throws Exception;

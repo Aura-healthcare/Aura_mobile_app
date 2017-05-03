@@ -28,9 +28,9 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 
 
@@ -93,9 +93,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     String timestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
                     Integer rr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
 
-                    SampleRRInterval lSampleRRInterval = new SampleRRInterval(user, mPairedDeviceAddress, timestamp, rr);
-                    receiveData(lSampleRRInterval);
-                    // mHrvRealTimeDisplayFragment.addNewHRVData(lSampleRRInterval);
+                    RRIntervalModel lRRIntervalModel = new RRIntervalModel(user, mPairedDeviceAddress, timestamp, rr);
+                    receiveData(lRRIntervalModel);
                 }
             }
         };
@@ -189,9 +188,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
 
-    private void receiveData(SampleRRInterval iSampleRrInterval){
+    private void receiveData(RRIntervalModel iRrIntervalModel){
         this.setChanged();
-        this.notifyObservers(new DevicePairingReceivedDataNotification(iSampleRrInterval));
+        this.notifyObservers(new DevicePairingReceivedDataNotification(iRrIntervalModel));
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

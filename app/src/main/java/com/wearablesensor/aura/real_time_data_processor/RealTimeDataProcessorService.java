@@ -18,13 +18,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.real_time_data_processor;
 
+import android.util.Log;
+
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
-import com.wearablesensor.aura.data_repository.SampleRRInterval;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 
 public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
@@ -32,18 +35,22 @@ public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
     private final String TAG = this.getClass().getSimpleName();
 
     private DevicePairingService mDevicePairingService;
+    private UserSessionService mUserSessionService;
+
     private LocalDataRepository mLocalDataRepository;
 
     public RealTimeDataProcessorService(DevicePairingService iBluetoothDevicePairingService,
-                                        LocalDataRepository iLocalDataRepository){
+                                        LocalDataRepository iLocalDataRepository,
+                                        UserSessionService iUserSessionService){
         mDevicePairingService = iBluetoothDevicePairingService;
         mLocalDataRepository = iLocalDataRepository;
+
+        mUserSessionService = iUserSessionService;
     }
 
     public void init(){
         mDevicePairingService.addObserver(this);
     }
-
 
     @Override
     public void onDevicePairingServiceNotification(DevicePairingNotification iDevicePairingNotification) {
@@ -51,18 +58,27 @@ public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
 
         if(lStatus == DevicePairingStatus.RECEIVED_DATA){
             DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
+
+            Log.d(TAG, "User Session info "+ mUserSessionService + " " + mUserSessionService.getUser().getUuid());
+            // no user registered yet
+            if(mUserSessionService == null || mUserSessionService.getUser() == null){
+                return;
+            }
+
+            RRIntervalModel lRrIntervalModel = lDevicePairingNotification.getSampleRrInterval();
+            lRrIntervalModel.setUser(mUserSessionService.getUser().getUuid());
             putSampleInCache(lDevicePairingNotification.getSampleRrInterval());
         }
     }
 
-    private void putSampleInCache(SampleRRInterval iSampleRrInterval){
+    private void putSampleInCache(RRIntervalModel iRrIntervalModel){
         // filter empty values
-        if (iSampleRrInterval.getTimestamp() == "" && iSampleRrInterval.getRR() == 0) {
+        if (iRrIntervalModel.getTimestamp() == "" && iRrIntervalModel.getRrInterval() == 0) {
             return;
         }
 
         try {
-            mLocalDataRepository.saveRRSample(iSampleRrInterval);
+            mLocalDataRepository.saveRRSample(iRrIntervalModel);
         } catch (Exception e) {
             e.printStackTrace();
         }

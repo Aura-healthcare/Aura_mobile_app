@@ -1,4 +1,4 @@
-package com.wearablesensor.aura.data_repository;
+package com.wearablesensor.aura.data_repository.models;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
