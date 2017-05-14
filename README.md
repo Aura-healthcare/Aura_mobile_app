@@ -44,3 +44,9 @@ The remaining functionalities need to be implemented:
 * report a false seizure alert
 * visualize streamed HRV data
 * secure user authentification
+
+# Generate Documentation #
+```
+cd rootProjectDir/documentation 
+doxygen Doxyfile 
+```

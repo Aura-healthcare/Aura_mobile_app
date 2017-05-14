@@ -1,20 +1,36 @@
-/*
-Aura Mobile Application
-Copyright (C) 2017 Aura Healthcare
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/
-*/
+/**
+ * @file
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ *
+ * LocalDataCouchbaseRepository is a local data storage implementation relying on Couchbase mobile
+ * framework <https://developer.couchbase.com/documentation/mobile/current/installation/index.html>
+ * The framework saves data in a NoSql database with a multiple documents architecture.
+ * It provides good read/write performances, data encryption using sql_cipher library and automatic
+ * syncing with remote database using Couchbase server (not implemented here).
+ *
+ */
 
 package com.wearablesensor.aura.data_repository;
 
@@ -45,29 +61,32 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-/**
- * Created by lecoucl on 01/04/17.
- */
 public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final String TAG = this.getClass().getSimpleName();
 
-    private Manager mCouchBaseManager;
-    private Database mDB;
-    private DatabaseOptions mDBOptions;
+    private Manager mCouchBaseManager; /** couchbase manager */
+    private Database mDB; /** local couchbase database */
+    private DatabaseOptions mDBOptions; /** local couchbase database options */
 
-    private View mRRSamplesView;
+    private View mRRSamplesView; /** pre-formatted view to query R-R interval on a date interval */
 
-    private final static String DB_NAME = "dbaura";
+    private final static String DB_NAME = "dbaura"; /** couchbase database name */
 
-    private final static String PHYSIO_SIGNAL_DOCUMENT= "physioSignalDocument";
-    private final static String UUID_PARAM= "uuid";
-    private final static String TIMESTAMP_PARAM = "timestamp";
-    private final static String USER_PARAM = "user";
-    private final static String RR_INTERVAL_PARAM = "rrInterval";
-    private final static String DEVICE_ADRESS_PARAM = "deviceAdress";
+    private final static String PHYSIO_SIGNAL_DOCUMENT= "physioSignalDocument"; /** document storing every physiological data */
+    private final static String UUID_PARAM= "uuid"; /** UUID param used to map couchbase json to PhysioSignal model */
+    private final static String TIMESTAMP_PARAM = "timestamp"; /** timestamp param used to map couchbase json to PhysioSignal model */
+    private final static String USER_PARAM = "user"; /** user param used to map couchbase json to PhysioSignal model */
+    private final static String RR_INTERVAL_PARAM = "rrInterval"; /** rrInterval param used to map couchbase json to PhysioSignal model */
+    private final static String DEVICE_ADRESS_PARAM = "deviceAdress"; /** deviceAdress param used to map couchbase json to PhysioSignal model */
 
 
-    private final static String RR_SAMPLES_VIEW = "rrSamplesView";
+    private final static String RR_SAMPLES_VIEW = "rrSamplesView"; /** RR Sample view name */
+
+    /**
+     * @brief constructor
+     *
+     * @param iApplicationContext application context
+     */
 
     public LocalDataCouchbaseRepository(Context iApplicationContext){
         Log.d(TAG, "Local data CouchBase repository init");
@@ -109,6 +128,16 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         },"1.0");
     }
 
+    /**
+     * @brief query a list of R-R interval samples in a time range [iStartDate, iEndDate]
+     *
+     * @param iStartDate collected data sample timestamps are newer than iStartData
+     * @param iEndDate collected data samples timestamp is older than iEndData
+     *
+     * @return a list of R-R interval samples
+     *
+     * @throws Exception
+     */
 
     @Override
     public ArrayList<RRIntervalModel> queryRRSample(Date iStartDate, Date iEndDate) throws Exception {
@@ -158,6 +187,13 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         return lRrSamples;
     }
 
+    /**
+     * @brief save a single R-R interval in the local storage
+     *
+     * @param iSampleRR R-R interval to be stored
+     *
+     * @throws Exception
+     */
     @Override
     public void saveRRSample(final RRIntervalModel iSampleRR) throws Exception{
         Document rrDocument = null;
@@ -191,6 +227,9 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         Log.d(TAG, "RecordHistory nbItems:" + rrDocument.getProperties().size());
     }
 
+    /**
+     * @brief clear entirely the local data storage
+     */
     @Override
     public void clear() {
         Document lPhysioSignalDocument = null;

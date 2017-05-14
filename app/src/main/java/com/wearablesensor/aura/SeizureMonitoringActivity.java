@@ -60,7 +60,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @BindView(R.id.action_menu_manual_pairing) FloatingActionButton mManualPairingButton;
     @OnClick (R.id.action_menu_manual_pairing)
-    public void actionMenuManualPairingCallback(View v){ /*DataManager.getInstance().cleanLocalCache();*/}
+    public void actionMenuManualPairingCallback(View v){ ((AuraApplication) getApplication()).getLocalDataRepository().clear();}
     @BindView(R.id.action_menu_push_data) FloatingActionButton mPushDataButton;
 
     @BindView(R.id.action_menu_report_seizure) FloatingActionButton mReportSeizureButton;

@@ -8,3 +8,5 @@
 /captures
 .externalNativeBuild
 .hgignore
+/documentation/html
+/documentation/latex
