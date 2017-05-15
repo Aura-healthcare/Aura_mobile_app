@@ -1,27 +1,38 @@
-/*
-Aura Mobile Application
-Copyright (C) 2017 Aura Healthcare
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/
-*/
-
+/**
+ * @file
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ * DataSyncFragment is the UI component that informs user of the Could data sync state
+ * It implements the DataSyncContract.View interface
+ *
+ */
 package com.wearablesensor.aura.data_sync;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,22 +51,15 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link DataSyncFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link DataSyncFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class DataSyncFragment extends Fragment implements DataSyncContract.View {
     private final String TAG = this.getClass().getSimpleName();
 
     private DataSyncContract.Presenter mPresenter;
 
-    @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar;
-    @BindView(R.id.data_sync_image_view) ImageView mImageView;
-    @BindView(R.id.data_sync_last_sync) TextView mLastSyncView;
+    @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar; /** data push progress bar */
+    @BindView(R.id.data_sync_image_view) ImageView mImageView; /** data push image state */
+    @BindView(R.id.data_sync_last_sync) TextView mLastSyncView; /** text view displaying last sync date */
     private OnFragmentInteractionListener mListener;
 
     public DataSyncFragment() {
@@ -64,7 +68,7 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
     }
 
     /**
-     * Use this factory method to create a new instance of
+     * @brief Use this factory method to create a new instance of
      * this fragment using the provided parameters
      *
      * @return A new instance of fragment DevicePairingFragment.
@@ -125,12 +129,18 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
         mPresenter.start();
     }
 
+    /**
+     * @brief start data push display state
+     */
     @Override
     public void startPushDataOnCloud() {
         mProgressBar.setVisibility(View.VISIBLE);
         mImageView.setVisibility(View.GONE);
     }
 
+    /**
+     * @brief end data push display state
+     */
     @Override
     public void endPushDataOnCloud() {
         mProgressBar.setVisibility(View.GONE);
@@ -139,22 +149,43 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
         mImageView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * @brief refresh progress bar display during data push
+     *
+     * @param iProgress data push progress state in percent
+     */
     @Override
     public void refreshProgressPushDataOnCloud(Integer iProgress) {
         mProgressBar.setProgress(iProgress);
     }
 
+    /**
+     * @brief  refresh last syncing date display
+     *
+     * @param iLastSync last time data has been push on Cloud
+     */
     @Override
     public void refreshLastSync(Date iLastSync) {
         mLastSyncView.setText(getString(R.string.last_sync) +  DateIso8601Mapper.getString(iLastSync));
     }
 
+    /**
+     * @brief display an error popup with corresponding message to user
+     *
+     * @param iContext application context
+     * @param iFailMessage message to be displayed
+     */
     @Override
     public void displayFailMessageOnPushData(Context iContext, String iFailMessage) {
         String lFailMessage = getString(R.string.push_data_fail) + " : " + iFailMessage;
         Toast.makeText(iContext, lFailMessage, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * @brief attach presenter to view as it is done in MVP architecture
+     *
+     * @param iPresenter presenter to be attached
+     */
     @Override
     public void setPresenter(DataSyncContract.Presenter iPresenter) {
         mPresenter = iPresenter;

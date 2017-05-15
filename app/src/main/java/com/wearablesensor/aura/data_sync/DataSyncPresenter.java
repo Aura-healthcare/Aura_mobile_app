@@ -1,20 +1,33 @@
-/*
-Aura Mobile Application
-Copyright (C) 2017 Aura Healthcare
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/
-*/
+/**
+ * @file
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ * DataSyncPresenter is the presentation component that handles action related to data sync with Cloud
+ * It implements the DataSyncContract.Presenter interface
+ *
+ */
 
 package com.wearablesensor.aura.data_sync;
 
@@ -33,21 +46,25 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-
-/**
- * Created by lecoucl on 14/04/17.
- */
 public class DataSyncPresenter implements DataSyncContract.Presenter {
 
     private final LocalDataRepository mLocalDataRepository;
     private final RemoteDataRepository mRemoteDataRepository;
 
-    private final UserSessionService mUserSessionService;
+    private final UserSessionService mUserSessionService; /** user session service is required to keep user preferences updated on data push */
 
     private final DataSyncContract.View mView;
 
     private final Context mApplicationContext;
 
+    /**
+     *
+     * @param iLocalDataRepository local data repository that stored to-be-pushed data
+     * @param iRemoteDataRepository remote data repository that need to be synced
+     * @param iView UI component that displays data push state to user
+     * @param iApplicationContext application context
+     * @param iUserSessionService user session information
+     */
     public DataSyncPresenter(LocalDataRepository iLocalDataRepository,
                              RemoteDataRepository iRemoteDataRepository,
                              DataSyncContract.View iView,
@@ -63,17 +80,29 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
         mView.setPresenter(this);
     }
 
+    /**
+     * @brief presenter initialisation method executed at the creation of the view fragment
+     */
     @Override
     public void start() {
         Date lLastSync = getLastSync();
         mView.refreshLastSync(lLastSync);
     }
 
+    /**
+     * @brief callback triggered when user push data on Cloud
+     */
     @Override
     public void pushData() {
         new PushDataOnRemoteAsync().execute();
     }
 
+    /**
+     * @brief update last sync attribute from user preferences
+     *
+     * @param iLastSync last sync value to apply
+     * @throws Exception
+     */
     private void saveLastSync(Date iLastSync) throws Exception {
         try {
             UserPreferencesModel lFormerUserPrefs = mUserSessionService.getUserPreferences();
@@ -85,12 +114,20 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
         }
     }
 
+    /**
+     * @brief get last sync value from user preferences
+     *
+     * @return last sync date if exists, otherwise null
+     */
     private Date getLastSync(){
         String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
         return DateIso8601Mapper.getDate(lLastSync);
     }
 
 
+    /**
+     * @brief asynchronous task that handles the data push on a background thread
+     */
     // TODO: we should implement a Loader and cache/remote data sync logic
     class PushDataOnRemoteAsync extends AsyncTask<Void, Integer, Boolean> {
         final private String TAG = PushDataOnRemoteAsync.class.getSimpleName();
