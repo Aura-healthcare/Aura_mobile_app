@@ -1,4 +1,12 @@
-/*
+
+/**
+ * @file
+ * @author Amazon
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
  *  Copyright 2013-2016 Amazon.com,
  *  Inc. or its affiliates. All Rights Reserved.
  *
@@ -13,8 +21,13 @@
  *  CONDITIONS OF ANY KIND, express or implied. See the License
  *  for the specific language governing permissions and
  *  limitations under the License.
+ *
+ * @section DESCRIPTION
+ * AmazonCognitoAuthentificationHelper is a class that provides an API to authenticate with AmazonCognito  user pool
+ * and stores all related information
+ *
+ *
  */
-
 package com.wearablesensor.aura.authentification;
 
 import android.content.Context;

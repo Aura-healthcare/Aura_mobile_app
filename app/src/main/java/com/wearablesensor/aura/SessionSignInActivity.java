@@ -1,33 +1,49 @@
+/**
+ * @file
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ * SessionSignInActivity is an activity class that handles user session start
+ * It does binding between authentification component and user session service
+ */
+
 package com.wearablesensor.aura;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageInstaller;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
-/**
- * Created by lecoucl on 28/04/17.
- */
 public class SessionSignInActivity extends AppCompatActivity{
     private final String TAG = this.getClass().getSimpleName();
 
-    private final static String AMAZON_ID_ATTRIBUTE = "sub";
+    private AmazonCognitoAuthentificationHelper mAuthentificationHelper; /** Amazon authentification API */
+    private UserSessionService mUserSessionService; /** User session service */
 
-    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
-    private UserSessionService mUserSessionService;
-
-    private ProgressDialog mProgressDialog;
-    private AlertDialog mAlertDialog;
+    private ProgressDialog mProgressDialog; /** session initialisation progress bar */
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -54,39 +70,34 @@ public class SessionSignInActivity extends AppCompatActivity{
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         closeAuthentificationProgressDialog();
     }
 
+    /**
+     * @brief start session sign-in
+     *
+     * @param iAmazonId Amazon unique username
+     */
     private void sessionSignIn(String iAmazonId){
         displayAuthentificationProgressDialog();
-       mUserSessionService.initSession(iAmazonId, this);
+        mUserSessionService.initSession(iAmazonId, this);
     }
 
-    private void sessionSignInFail() {
-        closeAuthentificationProgressDialog();
-        displayFailLoginMessage();
-    }
-
+    /**
+     * @brief display session sign-in pending message
+     */
     public void displayAuthentificationProgressDialog() {
         mProgressDialog = new ProgressDialog(SessionSignInActivity.this);
         mProgressDialog.setIndeterminate(true);
-        mProgressDialog.setMessage("Enter Session...");
+        mProgressDialog.setMessage(getResources().getString(R.string.session_signin_pending_message));
         mProgressDialog.show();
     }
 
+    /**
+     * @brief end session sign-in message
+     */
     public void closeAuthentificationProgressDialog() {
         mProgressDialog.dismiss();
-    }
-
-    public void displayFailLoginMessage() {
-        mAlertDialog = new AlertDialog.Builder(SessionSignInActivity.this)
-                .setMessage("Login failed")
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mUserSessionService.closeSession(SessionSignInActivity.this);
-                    }
-                }).create();
-        mAlertDialog.show();
     }
 }

@@ -48,8 +48,20 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <!-- Strings related to sign-in -->
     <string name="title_activity_sign_in">SignInActivity</string>
     <string name="title_activity_first_sign_in">FirstSignInActivity</string>
+
+    <string name="signin_username_tooltip">Enter a valid user name</string>
+    <string name="signin_pending_message">Authenticating...</string>
+    <string name="signin_failed">Sign in failed</string>
+
+    <string name="fail_extra_message_no_internet">Please check your internet connection</string>
+    <string name="fail_extra_message_invalid_credentials">Credentials are incorrect</string>
+
+    <string name="session_signin_pending_message">"Enter Session..."</string>
+
     <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
 
     <string name="navigation_drawer_open">Epi Project</string>
