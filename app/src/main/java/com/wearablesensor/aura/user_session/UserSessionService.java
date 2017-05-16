@@ -45,6 +45,7 @@ import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.SeizureMonitoringActivity;
 import com.wearablesensor.aura.SessionSignInActivity;
 import com.wearablesensor.aura.SignInActivity;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
@@ -255,7 +256,9 @@ public class UserSessionService {
         protected Boolean doInBackground(UserModel... lUser) {
             try {
                 mRemoteDataRepository.saveUser(lUser[0]);
-                UserPreferencesModel lDefaultUserPreferencesModel = new UserPreferencesModel(lUser[0].getUuid(), "");
+
+
+                UserPreferencesModel lDefaultUserPreferencesModel = new UserPreferencesModel(lUser[0].getUuid(), DateIso8601Mapper.getString(new Date()));
                 mRemoteDataRepository.saveUserPreferences(lDefaultUserPreferencesModel);
 
                 mRegisteredAmazonId = lUser[0].getAmazonId();

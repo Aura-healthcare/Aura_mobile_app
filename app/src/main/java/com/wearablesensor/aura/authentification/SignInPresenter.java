@@ -43,6 +43,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Auth
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.NewPasswordContinuation;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.wearablesensor.aura.FirstSignInActivity;
 import com.wearablesensor.aura.R;
@@ -189,7 +190,6 @@ public class SignInPresenter implements SignInContract.Presenter{
         Map<String, String> newAttributes = mAuthentificationHelper.getUserAttributesForFirstTimeLogin();
         if (newAttributes != null) {
             for(Map.Entry<String, String> attr: newAttributes.entrySet()) {
-                Log.e(TAG, String.format("Adding attribute: %s, %s", attr.getKey(), attr.getValue()));
                 mNewPasswordContinuation.setUserAttribute(attr.getKey(), attr.getValue());
             }
         }
@@ -197,7 +197,7 @@ public class SignInPresenter implements SignInContract.Presenter{
             mIsFirstSignIn = true;
             mNewPasswordContinuation.continueTask();
         } catch (Exception e) {
-            signInFails("");
+            signInFails(getFailExtraMessage(e));
         }
     }
 
@@ -274,7 +274,7 @@ public class SignInPresenter implements SignInContract.Presenter{
      * @return information message to display to user
      */
     private String getFailExtraMessage(Exception iException){
-        if(iException.getClass() == AmazonClientException.class){
+        if(iException.getClass() == AmazonClientException.class || iException.getClass() == CognitoInternalErrorException.class){
             return mApplicationContext.getResources().getString(R.string.fail_extra_message_no_internet);
         }
         else{

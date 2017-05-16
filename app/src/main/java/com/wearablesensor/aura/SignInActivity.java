@@ -176,7 +176,7 @@ public class SignInActivity extends AppCompatActivity implements SignInContract.
     /**
      * @brief setter
      *
-     * @param iPresenter attached presenter 
+     * @param iPresenter attached presenter
      */
     @Override
     public void setPresenter(SignInContract.Presenter iPresenter) {
