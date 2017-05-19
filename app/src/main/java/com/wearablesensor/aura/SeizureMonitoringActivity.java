@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -113,6 +114,18 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         setupActionMenu();
 
         startAutomaticPairing();
+    }
+
+    @Override
+    public void onStop(){
+        try {
+            ((AuraApplication) getApplication()).getLocalDataRepository().clearCache();
+
+        }
+        catch(Exception e){
+            Log.d(TAG, "Fail to save cache data on exit");
+        }
+        super.onStop();
     }
 
     private void setupActionMenu() {

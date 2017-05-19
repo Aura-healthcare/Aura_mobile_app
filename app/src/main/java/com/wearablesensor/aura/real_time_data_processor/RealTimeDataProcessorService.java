@@ -72,15 +72,12 @@ public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
     }
 
     private void putSampleInCache(RRIntervalModel iRrIntervalModel){
-        // filter empty values
-        if (iRrIntervalModel.getTimestamp() == "" && iRrIntervalModel.getRrInterval() == 0) {
-            return;
+        try{
+            mLocalDataRepository.cacheRRSample(iRrIntervalModel);
         }
-
-        try {
-            mLocalDataRepository.saveRRSample(iRrIntervalModel);
-        } catch (Exception e) {
-            e.printStackTrace();
+        catch (Exception e){
+            Log.d(TAG, "Fail to cache RrSample");
         }
     }
+
 }

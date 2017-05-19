@@ -48,16 +48,30 @@ public interface LocalDataRepository {
      *
      * @throws Exception
      */
-    ArrayList<RRIntervalModel> queryRRSample(Date iStartDate, Date iEndDate) throws Exception;
+    ArrayList<RRIntervalModel> queryRRSamples(Date iStartDate, Date iEndDate) throws Exception;
 
     /**
-     * @brief save a single R-R interval in the local storage
+     * @brief save a batch of R-R interval in the local storage
      *
-     * @param iSampleRR R-R interval to be stored
+     * @param iSamplesRR R-R interval list to be stored
      *
      * @throws Exception
      */
-    void saveRRSample(final RRIntervalModel iSampleRR) throws Exception;
+    void saveRRSamples(final ArrayList<RRIntervalModel> iSamplesRR) throws Exception;
+
+    /**
+     * @brief cache an R-R interval in the heap and periodically clear cache and save data to local
+     * storage
+     *
+     * @param iSampleRR R-R interval sample to be cached
+     */
+    void cacheRRSample(RRIntervalModel iSampleRR) throws Exception;
+
+    /**
+     * @brief clear cache and store data from heap to local data storage
+     *
+     */
+    void clearCache() throws Exception;
 
     /**
      * @brief clear entirely the local data storage

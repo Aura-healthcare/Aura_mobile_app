@@ -146,12 +146,13 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
 
             try {
                 publishProgress(1);
+                mLocalDataRepository.clearCache();
                 Calendar c = Calendar.getInstance();
                 mCurrentSync = c.getTime();
 
                 Date lLastSync = getLastSync();
                 publishProgress(10);
-                final ArrayList<RRIntervalModel> rrSamples = mLocalDataRepository.queryRRSample(lLastSync, mCurrentSync);
+                final ArrayList<RRIntervalModel> rrSamples = mLocalDataRepository.queryRRSamples(lLastSync, mCurrentSync);
                 publishProgress(30);
                 mRemoteDataRepository.saveRRSample(rrSamples);
                 publishProgress(90);

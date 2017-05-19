@@ -94,6 +94,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     Integer rr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
 
                     RRIntervalModel lRRIntervalModel = new RRIntervalModel(user, mPairedDeviceAddress, timestamp, rr);
+                    Log.d(TAG, lRRIntervalModel.getTimestamp() + " " + lRRIntervalModel.getUuid() + " " + lRRIntervalModel.getRrInterval() + " " + lRRIntervalModel.getUser());
                     receiveData(lRRIntervalModel);
                 }
             }
@@ -168,8 +169,10 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 mScanning = false;
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
+
                 if(mBluetoothDeviceList.size() > 0) {
                     BluetoothDevice lDevice = mBluetoothDeviceList.get(0);
+
                     mPairedDeviceName = lDevice.getName();
                     mPairedDeviceAddress = lDevice.getAddress();
 
@@ -189,6 +192,12 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     }
 
     private void receiveData(RRIntervalModel iRrIntervalModel){
+        // filter corrupted cardiac R-R intervals
+        if(iRrIntervalModel.getRrInterval() == 0 || iRrIntervalModel.getTimestamp() == null
+                || iRrIntervalModel.getTimestamp() == ""){
+            return;
+        }
+
         this.setChanged();
         this.notifyObservers(new DevicePairingReceivedDataNotification(iRrIntervalModel));
     }

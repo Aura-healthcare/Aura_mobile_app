@@ -82,6 +82,8 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView"; /** RR Sample view name */
 
+    private ArrayList<RRIntervalModel> mRRSamplesCache; /* temporary storage in an array to avoid call overhead to local data repository */
+
     /**
      * @brief constructor
      *
@@ -126,6 +128,8 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
                 }
             }
         },"1.0");
+
+        mRRSamplesCache = new ArrayList<RRIntervalModel>();
     }
 
     /**
@@ -140,7 +144,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
      */
 
     @Override
-    public ArrayList<RRIntervalModel> queryRRSample(Date iStartDate, Date iEndDate) throws Exception {
+    public ArrayList<RRIntervalModel> queryRRSamples(Date iStartDate, Date iEndDate) throws Exception {
         Log.d(TAG, "start query RR Samples");
         Document lRrDocument = null;
         try {
@@ -188,14 +192,14 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     }
 
     /**
-     * @brief save a single R-R interval in the local storage
+     * @brief save a batch of R-R interval in the local storage
      *
-     * @param iSampleRR R-R interval to be stored
+     * @param iSamplesRR R-R interval list to be stored
      *
      * @throws Exception
      */
     @Override
-    public void saveRRSample(final RRIntervalModel iSampleRR) throws Exception{
+    public void saveRRSamples(final ArrayList<RRIntervalModel> iSamplesRR) throws Exception{
         Document rrDocument = null;
         try {
             rrDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
@@ -205,14 +209,16 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             throw e;
         }
 
-        Log.d(TAG, "Start Recording - iSample:" + iSampleRR.getUuid() + " " + iSampleRR.getTimestamp());
+        Log.d(TAG, "Start Recording - iSamples:" + iSamplesRR.size());
 
         try {
             rrDocument.update(new Document.DocumentUpdater() {
                 @Override
                 public boolean update(UnsavedRevision newRevision) {
                     Map<String, Object> properties = newRevision.getUserProperties();
-                    properties.put(iSampleRR.getUuid(), iSampleRR);
+                    for(int i = 0; i < iSamplesRR.size(); i++){
+                        properties.put(iSamplesRR.get(i).getUuid(), iSamplesRR.get(i));
+                    }
 
                     newRevision.setUserProperties(properties);
                     Log.d(TAG, "RecordSuccess");
@@ -225,6 +231,36 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         }
 
         Log.d(TAG, "RecordHistory nbItems:" + rrDocument.getProperties().size());
+    }
+
+    /**
+     * @brief cache an R-R interval in the heap and periodically clear cache and save data to local
+     * storage
+     *
+     * @param iSampleRR R-R interval sample to be cached
+     */
+    public void cacheRRSample(RRIntervalModel iSampleRR) throws Exception{
+        if(mRRSamplesCache.size() < 100) {
+            mRRSamplesCache.add(iSampleRR);
+        }
+        else {
+            try {
+                clearCache();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+
+        }
+    }
+
+    /**
+     * @brief clear cache and store data from heap to local data storage
+     *
+     */
+    public void clearCache() throws Exception{
+        saveRRSamples(mRRSamplesCache);
+        mRRSamplesCache.clear();
     }
 
     /**
