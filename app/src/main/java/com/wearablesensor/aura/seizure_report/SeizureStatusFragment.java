@@ -16,22 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/
 */
 
-package com.wearablesensor.aura.device_pairing_details;
+package com.wearablesensor.aura.seizure_report;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 
@@ -43,36 +37,26 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link DevicePairingDetailsFragment.OnFragmentInteractionListener} interface
+ * {@link SeizureStatusFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link DevicePairingDetailsFragment#newInstance} factory method to
+ * Use the {@link SeizureStatusFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DevicePairingDetailsFragment extends Fragment implements DevicePairingDetailsContract.View {
+public class SeizureStatusFragment extends Fragment implements SeizureReportContract.View{
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private DevicePairingDetailsContract.Presenter mPresenter;
-
-    @BindView(R.id.device_pairing_image) ImageView mImageView;
-    @BindView(R.id.device_pairing_progress_bar) ProgressBar mPropressBar;
-    @BindView(R.id.device_pairing_name) TextView mDeviceNameView;
-    @BindView(R.id.device_pairing_adress) TextView mDeviceParingAdressView;
-
-    @BindView(R.id.device_pairing_button) Button mDevicePairingButton;
-    @OnClick(R.id.device_pairing_button)
-    public void OnClickDevicePairingButton(View v){
-        if(mListener != null){
-            mListener.onDevicePairingAttempt();
-        }
-
+    @BindView(R.id.report_seizure_button) Button mReportSeizureButton;
+    @OnClick(R.id.report_seizure_button)
+    public void OnClickReportSeizure(View v){
+        mPresenter.startReportSeizureDetails();
     }
 
-    @BindView(R.id.device_pairing_layout) LinearLayout mDevicePairingLayout;
+    private SeizureReportContract.Presenter mPresenter;
 
     private OnFragmentInteractionListener mListener;
 
-    public DevicePairingDetailsFragment() {
+    public SeizureStatusFragment() {
         // Required empty public constructor
     }
 
@@ -83,8 +67,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
      * @return A new instance of fragment DevicePairingFragment.
      */
 
-    public static DevicePairingDetailsFragment newInstance() {
-        DevicePairingDetailsFragment fragment = new DevicePairingDetailsFragment();
+    public static SeizureStatusFragment newInstance() {
+        SeizureStatusFragment fragment = new SeizureStatusFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -100,7 +84,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_device_pairing, container, false);
+        View view = inflater.inflate(R.layout.fragment_seizure_status, container, false);
         ButterKnife.bind(this, view);
 
         return view;
@@ -109,7 +93,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onDevicePairingAttempt();
+            mListener.onSeizureStatusFragmentInteraction(uri);
         }
     }
 
@@ -137,40 +121,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     }
 
     @Override
-    public void successPairing(String iDeviceName, String iDeviceAdress) {
-        mPropressBar.setVisibility(View.GONE);
-
-        mDeviceNameView.setText(iDeviceName );
-        mDeviceParingAdressView.setVisibility(View.VISIBLE);
-        mDeviceParingAdressView.setText(iDeviceAdress);
-
-        Drawable successPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_success);
-        mImageView.setImageDrawable(successPairingDrawable);
-        mImageView.setVisibility(View.VISIBLE);
-
-        mDevicePairingLayout.setVisibility(View.VISIBLE);
-        mDevicePairingButton.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void failParing() {
-        mPropressBar.setVisibility(View.GONE);
-
-        String lNoDevicePairedText = getString(R.string.default_device_name);
-        mDeviceNameView.setText( lNoDevicePairedText );
-        mDeviceParingAdressView.setVisibility(View.GONE);
-        mDeviceParingAdressView.setText("");
-
-        Drawable failPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_fail);
-        mImageView.setImageDrawable(failPairingDrawable);
-        mImageView.setVisibility(View.VISIBLE);
-
-        mDevicePairingLayout.setVisibility(View.VISIBLE);
-        mDevicePairingButton.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void setPresenter(DevicePairingDetailsContract.Presenter iPresenter) {
+    public void setPresenter(SeizureReportContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }
 
@@ -185,6 +136,6 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void onDevicePairingAttempt();
+        void onSeizureStatusFragmentInteraction(Uri uri);
     }
 }

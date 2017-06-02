@@ -35,7 +35,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.github.clans.fab.FloatingActionButton;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
@@ -43,28 +42,20 @@ import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
-
-import java.util.Date;
+import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
+import com.wearablesensor.aura.seizure_report.SeizureStatusFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 
-public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener{
+public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
     private ActionBarDrawerToggle mDrawerToggle;
     @BindView(R.id.left_drawer) ListView mDrawerList;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
-
-    @BindView(R.id.action_menu_manual_pairing) FloatingActionButton mManualPairingButton;
-    @OnClick (R.id.action_menu_manual_pairing)
-    public void actionMenuManualPairingCallback(View v){ ((AuraApplication) getApplication()).getLocalDataRepository().clear();}
-    @BindView(R.id.action_menu_push_data) FloatingActionButton mPushDataButton;
-
-    @BindView(R.id.action_menu_report_seizure) FloatingActionButton mReportSeizureButton;
 
     private BluetoothDevicePairingService mDevicePairingService;
 
@@ -77,6 +68,9 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     private DataVisualisationPresenter mDataVisualisationPresenter;
     private RRSamplesVisualisationFragment mRRSamplesVisualisationFragment;
+
+    private SeizureStatusFragment mSeizureStatusFragment;
+    private SeizureReportPresenter mSeizureReportPresenter;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -107,11 +101,13 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         mRRSamplesVisualisationFragment = (RRSamplesVisualisationFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
         mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
+
+        mSeizureStatusFragment = (SeizureStatusFragment) getSupportFragmentManager().findFragmentById(R.id.seizure_status_fragment);
+        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureStatusFragment, this);
+
         ButterKnife.bind(this);
 
         setupDrawer();
-
-        setupActionMenu();
 
         startAutomaticPairing();
     }
@@ -126,23 +122,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             Log.d(TAG, "Fail to save cache data on exit");
         }
         super.onStop();
-    }
-
-    private void setupActionMenu() {
-        mPushDataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            mDataSyncPresenter.pushData();
-            }
-        });
-        mReportSeizureButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                Intent lIntent = new Intent(getApplicationContext(), SeizureReportActivity.class);
-                SeizureMonitoringActivity.this.startActivity(lIntent);
-                SeizureMonitoringActivity.this.finish();
-            }
-        });
     }
 
     private void setupDrawer(){
@@ -230,12 +209,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
 
     @Override
-    public void onDevicePairingFragmentInteraction(Uri uri) {
-
+    public void onDevicePairingAttempt() {
+        startAutomaticPairing();
     }
 
     @Override
     public void onHRVRealTimeDisplayFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onSeizureStatusFragmentInteraction(Uri uri) {
 
     }
 }

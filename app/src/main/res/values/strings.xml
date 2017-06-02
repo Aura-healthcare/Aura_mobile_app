@@ -69,19 +69,16 @@
 
     <string name="action_settings">Settings</string>
 
+    <!-- Strings related to device pairing -->
     <string name="automatic_pairing_fail">Automatic Device Pairing Fail</string>
-    <string name="title_device_pairing">Device Pairing:</string>
+    <string name="device_pairing_button">Connect</string>
     <string name="default_device_name">No Device Paired</string>
 
+    <!-- Strings related to data syncing -->
     <string name="push_data_fail">Push data on Cloud failed</string>
 
-    <string name="title_data_sync">Data:</string>
-    <string name="last_sync">Last Synchro:</string>
-
-    <string name="action_menu_manually_pairing">Manually pair device</string>
-    <string name="action_menu_push_data">Push data on Cloud</string>
-    <string name="action_menu_false_alert">Report a false alert</string>
-    <string name="action_menu_report_seizure">Report a seizure</string>
+    <string name="data_sync_button">Sync Data</string>
+    <string name="last_sync">Last Synchro: \n</string>
 
     <!-- Strings related to seizure report panel -->
     <string name="title_seizure_report">Seizure Report</string>

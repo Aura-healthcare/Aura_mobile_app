@@ -16,16 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/
 */
 
-package com.wearablesensor.aura;
+package com.wearablesensor.aura.seizure_report;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import com.wearablesensor.aura.utils.BasePresenter;
+import com.wearablesensor.aura.utils.BaseView;
 
-public class ManualPairingActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_manual_pairing);
+public class SeizureReportContract {
+
+    interface View extends BaseView<Presenter> {
+
+
+        void setPresenter(Presenter iPresenter);
+    }
+
+
+    interface Presenter extends BasePresenter {
+
+        void startReportSeizureDetails();
+        void reportSeizure();
     }
 }

@@ -38,6 +38,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 public class DataSyncFragment extends Fragment implements DataSyncContract.View {
@@ -60,6 +62,12 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
     @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar; /** data push progress bar */
     @BindView(R.id.data_sync_image_view) ImageView mImageView; /** data push image state */
     @BindView(R.id.data_sync_last_sync) TextView mLastSyncView; /** text view displaying last sync date */
+    @BindView(R.id.data_sync_button) Button mDataSyncButton;
+    @OnClick(R.id.data_sync_button)
+    public void onClickDataSyncButton(View v){
+        mPresenter.pushData();
+    }
+
     private OnFragmentInteractionListener mListener;
 
     public DataSyncFragment() {
@@ -135,7 +143,8 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
     @Override
     public void startPushDataOnCloud() {
         mProgressBar.setVisibility(View.VISIBLE);
-        mImageView.setVisibility(View.GONE);
+
+        mDataSyncButton.setVisibility(View.GONE);
     }
 
     /**
@@ -146,7 +155,7 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
         mProgressBar.setVisibility(View.GONE);
         mProgressBar.setProgress(0);
 
-        mImageView.setVisibility(View.VISIBLE);
+        mDataSyncButton.setVisibility(View.VISIBLE);
     }
 
     /**

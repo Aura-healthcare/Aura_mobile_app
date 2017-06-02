@@ -54,7 +54,6 @@
         <activity
             android:name="com.wearablesensor.aura.SeizureMonitoringActivity"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-        <activity android:name="com.wearablesensor.aura.ManualPairingActivity"></activity>
         <activity android:name="com.wearablesensor.aura.SeizureReportActivity"></activity>
     </application>
 

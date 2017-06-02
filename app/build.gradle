@@ -30,10 +30,8 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.3.2'
     compile 'com.couchbase.lite:couchbase-lite-android:+'
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    compile 'com.github.clans:fab:1.6.4'
     compile 'com.jjoe64:graphview:4.2.1'
     testCompile 'junit:junit:4.12'
 }
