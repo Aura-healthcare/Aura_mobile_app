@@ -47,7 +47,9 @@ import android.widget.Toast;
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -175,7 +177,20 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
      */
     @Override
     public void refreshLastSync(Date iLastSync) {
-        mLastSyncView.setText(getString(R.string.last_sync) +  DateIso8601Mapper.getString(iLastSync));
+        long iCurrentTimeInMs = Calendar.getInstance().getTimeInMillis();
+
+        Calendar lFormerDate = Calendar.getInstance();
+        lFormerDate.setTime(iLastSync);
+        long msDiff = iCurrentTimeInMs - lFormerDate.getTimeInMillis();
+        long daysDiff = TimeUnit.MILLISECONDS.toDays(msDiff);
+        long hoursDiff = TimeUnit.MILLISECONDS.toHours(msDiff);
+
+        if(daysDiff < 1){
+            mLastSyncView.setText(getString(R.string.last_sync) + hoursDiff + " hours ago");
+        }
+        else{
+            mLastSyncView.setText(getString(R.string.last_sync) + daysDiff + " days ago");
+        }
     }
 
     /**
