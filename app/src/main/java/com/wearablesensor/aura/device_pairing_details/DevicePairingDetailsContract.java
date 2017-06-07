@@ -28,6 +28,8 @@ public class DevicePairingDetailsContract {
 
     interface View extends BaseView<Presenter> {
 
+        void progressPairing();
+
         void successPairing(String iDeviceName, String iDeviceAdress);
 
         void failParing();

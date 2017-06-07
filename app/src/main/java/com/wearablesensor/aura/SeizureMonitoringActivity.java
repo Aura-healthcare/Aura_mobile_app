@@ -159,6 +159,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private void startAutomaticPairing(){
         if(mDevicePairingService.checkBluetoothIsEnabled()){
             mDevicePairingService.automaticPairing();
+            mDevicePairingFragment.progressPairing();
         }
         else{
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -192,7 +193,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         // User chose not to enable Bluetooth.
         if (requestCode == REQUEST_ENABLE_BT){
             if(resultCode == Activity.RESULT_OK){
-                mDevicePairingService.automaticPairing();
+                startAutomaticPairing();
                 return;
             }
             else if(resultCode == Activity.RESULT_CANCELED) {

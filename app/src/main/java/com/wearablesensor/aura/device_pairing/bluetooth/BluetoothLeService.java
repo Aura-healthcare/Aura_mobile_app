@@ -349,7 +349,13 @@ public class BluetoothLeService extends Service {
     }
 
     public BluetoothGattCharacteristic getBluetoothGattHeartRateCharacteristic() {
-        return mBluetoothGatt.getService(UUID_HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
+        if(mBluetoothGatt.getService(UUID_HEART_RATE_SERVICE) != null){
+            return mBluetoothGatt.getService(UUID_HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
+
+        }
+        else{
+            return null;
+        }
     }
 
 }

@@ -170,6 +170,14 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     }
 
     @Override
+    public void progressPairing(){
+        mPropressBar.setVisibility(View.VISIBLE);
+
+        mDevicePairingLayout.setVisibility(View.GONE);
+        mImageView.setVisibility(View.GONE);
+    }
+
+    @Override
     public void setPresenter(DevicePairingDetailsContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }

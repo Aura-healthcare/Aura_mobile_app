@@ -83,6 +83,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                     mPaired = false;
                     endPairing();
+                    mContext.unbindService(mDeviceServiceConnection);
                 } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                     mDeviceServiceConnection.startHeartProfileMonitoring();
                     // Show all the supported services and characteristics on the user interface.
@@ -162,6 +163,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     }
 
     private void scanLeDevices() {
+
+        mBluetoothDeviceList.clear();
+
         // Stops scanning after a pre-defined scan period.
         mScanningHandler.postDelayed(new Runnable() {
             @Override
@@ -170,20 +174,27 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
 
-                if(mBluetoothDeviceList.size() > 0) {
-                    BluetoothDevice lDevice = mBluetoothDeviceList.get(0);
+                BluetoothDevice lDevice =  null;
 
-                    mPairedDeviceName = lDevice.getName();
-                    mPairedDeviceAddress = lDevice.getAddress();
-
-                    mDeviceServiceConnection.setDeviceAdress(mPairedDeviceAddress);
-                    mContext.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-                    Intent gattServiceIntent = new Intent(mContext, BluetoothLeService.class);
-                    mContext.bindService(gattServiceIntent, mDeviceServiceConnection, Context.BIND_AUTO_CREATE);
+                for(int i = 0;i < mBluetoothDeviceList.size(); i++){
+                    if(mBluetoothDeviceList.get(i).getName().contains("Polar")){
+                        lDevice = mBluetoothDeviceList.get(i);
+                    }
                 }
-                else{
+
+                if(lDevice == null){
                     endPairing();
+                    return;
                 }
+
+                mPairedDeviceName = lDevice.getName();
+                mPairedDeviceAddress = lDevice.getAddress();
+
+                mDeviceServiceConnection.setDeviceAdress(mPairedDeviceAddress);
+                mContext.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+                Intent gattServiceIntent = new Intent(mContext, BluetoothLeService.class);
+                mContext.bindService(gattServiceIntent, mDeviceServiceConnection, Context.BIND_AUTO_CREATE);
+
             }
         }, SCAN_PERIOD);
 

@@ -22,13 +22,14 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 
 /**
  * Created by lecoucl on 31/03/17.
  */
 public class BluetoothServiceConnection implements ServiceConnection {
+    private final String TAG = this.getClass().getSimpleName();
+
     private BluetoothLeService mBluetoothLeService;
     private String mDeviceAdress;
 
@@ -59,7 +60,9 @@ public class BluetoothServiceConnection implements ServiceConnection {
 
     public void startHeartProfileMonitoring(){
         BluetoothGattCharacteristic lBleHeartRateCharacteristic = mBluetoothLeService.getBluetoothGattHeartRateCharacteristic();
-        mBluetoothLeService.setCharacteristicNotification(lBleHeartRateCharacteristic, true);
+        if(lBleHeartRateCharacteristic != null) {
+            mBluetoothLeService.setCharacteristicNotification(lBleHeartRateCharacteristic, true);
+        }
     }
 
     public void setDeviceAdress(String iDeviceAdress){
