@@ -52,6 +52,7 @@ import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,10 +70,12 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private DatabaseOptions mDBOptions; /** local couchbase database options */
 
     private View mRRSamplesView; /** pre-formatted view to query R-R interval on a date interval */
+    //private View mSensitiveEventsView; /** pre-formatted view to sensitive event on a date interval */
 
     private final static String DB_NAME = "dbaura"; /** couchbase database name */
 
     private final static String PHYSIO_SIGNAL_DOCUMENT= "physioSignalDocument"; /** document storing every physiological data */
+    private final static String SENSITIVE_EVENT_DOCUMENT="sensitiveEventDocument"; /** document storing reported sensitive events */
     private final static String UUID_PARAM= "uuid"; /** UUID param used to map couchbase json to PhysioSignal model */
     private final static String TIMESTAMP_PARAM = "timestamp"; /** timestamp param used to map couchbase json to PhysioSignal model */
     private final static String USER_PARAM = "user"; /** user param used to map couchbase json to PhysioSignal model */
@@ -81,7 +84,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView"; /** RR Sample view name */
-
+    //private final static String SENSITIVE_EVENTS_VIEW = "sensitiveEventView"; /** sensitive event view */
     private ArrayList<RRIntervalModel> mRRSamplesCache; /* temporary storage in an array to avoid call overhead to local data repository */
 
     /**
@@ -128,6 +131,23 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
                 }
             }
         },"1.0");
+
+        /*mSensitiveEventsView = mDB.getView(SENSITIVE_EVENTS_VIEW);
+        mSensitiveEventsView.setMap(new Mapper() {
+            @Override
+            public void map(Map<String, Object> document, Emitter emitter) {
+
+                for (Map.Entry<String, Object> entry : document.entrySet())
+                {
+                    if(entry.getValue() instanceof LinkedHashMap) {
+                        LinkedHashMap<String, Object> rr = (LinkedHashMap<String, Object>) entry.getValue();
+                        if (rr.get(TIMESTAMP_PARAM) instanceof String) {
+                            emitter.emit(DateIso8601Mapper.getDate((String) rr.get(TIMESTAMP_PARAM)), rr);
+                        }
+                    }
+                }
+            }
+        },"1.0");*/
 
         mRRSamplesCache = new ArrayList<RRIntervalModel>();
     }
@@ -252,6 +272,50 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             }
 
         }
+    }
+
+    @Override
+    public ArrayList<SeizureEventModel> querySeizures(Date iStartDate, Date iEndDate) throws Exception {
+        //TODO: to be implemented
+        return null;
+    }
+
+    /**
+     * @brief save a seizure event
+     *
+     * @param iSeizureEventModel seizure event
+     *
+     * @throws Exception
+     */
+    @Override
+    public void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception {
+        Document lSensitiveEventDocument = null;
+        try {
+            lSensitiveEventDocument = mDB.getDocument(SENSITIVE_EVENT_DOCUMENT);
+            Log.d(TAG, "Get Document - id:" + lSensitiveEventDocument.getId());
+        }catch(Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+
+        try {
+            lSensitiveEventDocument.update(new Document.DocumentUpdater() {
+                @Override
+                public boolean update(UnsavedRevision newRevision) {
+                    Map<String, Object> properties = newRevision.getUserProperties();
+                    properties.put(iSeizureEventModel.getUuid(), iSeizureEventModel);
+
+                    newRevision.setUserProperties(properties);
+                    Log.d(TAG, "RecordSuccess");
+                    return true;
+                }
+            });
+        } catch (CouchbaseLiteException e) {
+            Log.d(TAG, "RecordFail " + e.getMessage());
+            throw e;
+        }
+
+        Log.d(TAG, "RecordHistory nbItems:" + lSensitiveEventDocument.getProperties().size());
     }
 
     /**

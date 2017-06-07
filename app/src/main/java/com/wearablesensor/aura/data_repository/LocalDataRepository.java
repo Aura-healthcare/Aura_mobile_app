@@ -32,6 +32,7 @@
 package com.wearablesensor.aura.data_repository;
 
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,6 +67,27 @@ public interface LocalDataRepository {
      * @param iSampleRR R-R interval sample to be cached
      */
     void cacheRRSample(RRIntervalModel iSampleRR) throws Exception;
+
+    /**
+     * @brief save a batch of seizure events in the local storage
+     *
+     * @param iStartDate collected data sample timestamps are newer than iStartData
+     * @param iEndDate collected data samples timestamp is older than iEndData
+     *
+     * @return a list of seizure events
+     *
+     * @throws Exception
+     */
+    ArrayList<SeizureEventModel> querySeizures(Date iStartDate, Date iEndDate) throws Exception;
+
+    /**
+     * @brief save a seizure event
+     *
+     * @param iSeizureEventModel seizure event
+     *
+     * @throws Exception
+     */
+    void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception;
 
     /**
      * @brief clear cache and store data from heap to local data storage
