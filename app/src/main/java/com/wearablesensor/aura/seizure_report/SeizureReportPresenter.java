@@ -4,20 +4,23 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.wearablesensor.aura.SeizureReportActivity;
-import com.wearablesensor.aura.data_repository.models.SeizureReportModel;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
+import com.wearablesensor.aura.data_repository.LocalDataRepository;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.util.Date;
 
 public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
-    SeizureReportContract.View mView;
-    Activity mActivity;
+    private SeizureReportContract.View mView;
+    private Activity mActivity;
+    private LocalDataRepository mLocalDataRepository;
 
-    public SeizureReportPresenter(SeizureReportContract.View iView, Activity iActivity){
+    public SeizureReportPresenter(SeizureReportContract.View iView, Activity iActivity, LocalDataRepository iLocalDataRepository){
         mActivity = iActivity;
-
         mView = iView;
         mView.setPresenter(this);
+        mLocalDataRepository = iLocalDataRepository;
     }
 
     @Override
@@ -34,8 +37,13 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
     @Override
     public void reportSeizure(Date iDate, String iComment) {
-        SeizureReportModel seizureEvent = new SeizureReportModel();
-        seizureEvent.setSeizureDate(iDate);
+        SeizureEventModel seizureEvent = new SeizureEventModel(DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(iDate), iComment);
+        try {
+            mLocalDataRepository.saveSeizure(seizureEvent);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

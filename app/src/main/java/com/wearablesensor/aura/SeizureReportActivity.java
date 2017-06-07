@@ -30,7 +30,8 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
     public void confirmCallback(View v) {
 
         Date seizureDate = new Date(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-
+        String comment = "blabla";
+        mSeizureReportPresenter.reportSeizure(seizureDate, comment);
     }
 
     @BindView(R.id.seizure_report_cancel_button) AppCompatButton mCancelButton;   /** cancel button  */
@@ -49,7 +50,7 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
 
         setContentView(R.layout.activity_seizure_report);
 
-        mSeizureReportPresenter = new SeizureReportPresenter(this, this);
+        mSeizureReportPresenter = new SeizureReportPresenter(this, this, ((AuraApplication) getApplication()).getLocalDataRepository());
 
         ButterKnife.bind(this);
     }

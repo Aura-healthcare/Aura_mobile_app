@@ -103,7 +103,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
 
         mSeizureStatusFragment = (SeizureStatusFragment) getSupportFragmentManager().findFragmentById(R.id.seizure_status_fragment);
-        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureStatusFragment, this);
+        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureStatusFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository());
 
         ButterKnife.bind(this);
 
