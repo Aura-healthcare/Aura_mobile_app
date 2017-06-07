@@ -30,7 +30,7 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
     public void confirmCallback(View v) {
 
         Date seizureDate = new Date(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-        
+
     }
 
     @BindView(R.id.seizure_report_cancel_button) AppCompatButton mCancelButton;   /** cancel button  */
