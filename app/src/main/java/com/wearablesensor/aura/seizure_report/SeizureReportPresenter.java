@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.wearablesensor.aura.SeizureReportActivity;
+import com.wearablesensor.aura.data_repository.models.SeizureReportModel;
+
+import java.util.Date;
 
 public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
@@ -30,8 +33,9 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     }
 
     @Override
-    public void reportSeizure() {
-
+    public void reportSeizure(Date iDate, String iComment) {
+        SeizureReportModel seizureEvent = new SeizureReportModel();
+        seizureEvent.setSeizureDate(iDate);
     }
 
 }

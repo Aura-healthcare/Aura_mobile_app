@@ -21,19 +21,22 @@ package com.wearablesensor.aura.seizure_report;
 import com.wearablesensor.aura.utils.BasePresenter;
 import com.wearablesensor.aura.utils.BaseView;
 
+import java.util.Date;
+
 
 public class SeizureReportContract {
 
-    interface View extends BaseView<Presenter> {
+    public interface View extends BaseView<Presenter> {
 
 
         void setPresenter(Presenter iPresenter);
     }
 
 
-    interface Presenter extends BasePresenter {
+    public interface Presenter extends BasePresenter {
 
         void startReportSeizureDetails();
-        void reportSeizure();
+        void reportSeizure(Date iDate, String iComment);
     }
 }
+

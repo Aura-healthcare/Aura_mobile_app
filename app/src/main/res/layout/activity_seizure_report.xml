@@ -9,7 +9,7 @@
         android:text="@string/title_seizure_report"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/Title"
+        android:id="@+id/seizure_report_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
     <LinearLayout
@@ -23,7 +23,7 @@
         <DatePicker
             android:layout_width="184dp"
             android:layout_height="176dp"
-            android:id="@+id/SeizureDatePicker"
+            android:id="@+id/seizure_report_date_picker"
             android:headerBackground="@color/app_primary"
             style="@android:style/Widget.DatePicker"
             android:animationCache="false"
@@ -33,7 +33,7 @@
         <TimePicker
             android:layout_width="wrap_content"
             android:layout_height="176dp"
-            android:id="@+id/SeizureTimePicker"
+            android:id="@+id/seizure_report_time_picker"
             android:headerBackground="@color/app_primary"
             android:numbersSelectorColor="@color/app_primary_dark"
             android:elevation="0dp"
@@ -54,14 +54,14 @@
             android:inputType="textPersonName"
             android:text="@string/seizure_reports_comments"
             android:ems="10"
-            android:id="@+id/CommentTitle" />
+            android:id="@+id/comment_title" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
             android:ems="10"
-            android:id="@+id/CommentBlock"
+            android:id="@+id/comment_block"
             android:layout_weight="2" />
 
     </LinearLayout>
@@ -78,14 +78,14 @@
             android:text="@string/cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/CancelButton"
+            android:id="@+id/seizure_report_cancel_button"
             android:layout_weight="1" />
 
         <Button
             android:text="@string/confirm_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ConfirmButton"
+            android:id="@+id/seizure_report_confirm_button"
             android:layout_weight="1" />
 
     </LinearLayout>

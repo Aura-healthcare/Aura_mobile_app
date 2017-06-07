@@ -36,11 +36,11 @@ public class SeizureReportModel {
     }
 
     @DynamoDBAttribute(attributeName = "seizureDate")
-    public Date getUser() {
+    public Date getSeizureDate() {
         return seizureDate;
     }
 
-    public void setUser(Date date) {
+    public void setSeizureDate(Date date) {
         this.seizureDate = date;
     }
 }
