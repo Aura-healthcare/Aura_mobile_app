@@ -70,21 +70,26 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private DatabaseOptions mDBOptions; /** local couchbase database options */
 
     private View mRRSamplesView; /** pre-formatted view to query R-R interval on a date interval */
-    //private View mSensitiveEventsView; /** pre-formatted view to sensitive event on a date interval */
+    private View mSensitiveEventsView; /** pre-formatted view to sensitive event on a date interval */
 
     private final static String DB_NAME = "dbaura"; /** couchbase database name */
 
     private final static String PHYSIO_SIGNAL_DOCUMENT= "physioSignalDocument"; /** document storing every physiological data */
     private final static String SENSITIVE_EVENT_DOCUMENT="sensitiveEventDocument"; /** document storing reported sensitive events */
-    private final static String UUID_PARAM= "uuid"; /** UUID param used to map couchbase json to PhysioSignal model */
-    private final static String TIMESTAMP_PARAM = "timestamp"; /** timestamp param used to map couchbase json to PhysioSignal model */
-    private final static String USER_PARAM = "user"; /** user param used to map couchbase json to PhysioSignal model */
+
+    private final static String UUID_PARAM= "uuid"; /** UUID param used to identify model */
+    private final static String TYPE_PARAM = "type"; /** type param used to specify model  */
+    private final static String TIMESTAMP_PARAM = "timestamp"; /** timestamp param used to map couchbase object to model */
+    private final static String USER_PARAM = "user"; /** user param used to map couchbase object to model */
+
     private final static String RR_INTERVAL_PARAM = "rrInterval"; /** rrInterval param used to map couchbase json to PhysioSignal model */
     private final static String DEVICE_ADRESS_PARAM = "deviceAdress"; /** deviceAdress param used to map couchbase json to PhysioSignal model */
 
+    private final static String SENSITIVE_EVENT_TIMESTAMP_PARAM = "sensitiveEventTimestamp"; /** event timestamp */
+    private final static String COMMENT_PARAM = "comments"; /** comments giving more details about sensitive events */
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView"; /** RR Sample view name */
-    //private final static String SENSITIVE_EVENTS_VIEW = "sensitiveEventView"; /** sensitive event view */
+    private final static String SENSITIVE_EVENTS_VIEW = "sensitiveEventView"; /** sensitive event view */
     private ArrayList<RRIntervalModel> mRRSamplesCache; /* temporary storage in an array to avoid call overhead to local data repository */
 
     /**
@@ -119,20 +124,20 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         mRRSamplesView.setMap(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
-
                 for (Map.Entry<String, Object> entry : document.entrySet())
                 {
                     if(entry.getValue() instanceof LinkedHashMap) {
-                        LinkedHashMap<String, Object> rr = (LinkedHashMap<String, Object>) entry.getValue();
-                        if (rr.get(TIMESTAMP_PARAM) instanceof String) {
-                            emitter.emit(DateIso8601Mapper.getDate((String) rr.get(TIMESTAMP_PARAM)), rr);
+                        LinkedHashMap<String, Object> lRr = (LinkedHashMap<String, Object>) entry.getValue();
+                        if ( lRr.get(TYPE_PARAM) instanceof String && lRr.get(TYPE_PARAM).equals(RRIntervalModel.RR_INTERVAL_TYPE)
+                                && lRr.get(TIMESTAMP_PARAM) instanceof String) {
+                            emitter.emit(DateIso8601Mapper.getDate((String) lRr.get(TIMESTAMP_PARAM)), lRr);
                         }
                     }
                 }
             }
         },"1.0");
 
-        /*mSensitiveEventsView = mDB.getView(SENSITIVE_EVENTS_VIEW);
+        mSensitiveEventsView = mDB.getView(SENSITIVE_EVENTS_VIEW);
         mSensitiveEventsView.setMap(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
@@ -140,14 +145,16 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
                 for (Map.Entry<String, Object> entry : document.entrySet())
                 {
                     if(entry.getValue() instanceof LinkedHashMap) {
-                        LinkedHashMap<String, Object> rr = (LinkedHashMap<String, Object>) entry.getValue();
-                        if (rr.get(TIMESTAMP_PARAM) instanceof String) {
-                            emitter.emit(DateIso8601Mapper.getDate((String) rr.get(TIMESTAMP_PARAM)), rr);
+                        LinkedHashMap<String, Object> lSensitiveEvent = (LinkedHashMap<String, Object>) entry.getValue();
+
+                        if (lSensitiveEvent.get(TYPE_PARAM) instanceof String && lSensitiveEvent.get(TYPE_PARAM).equals(SeizureEventModel.SENSITIVE_EVENT_TYPE)
+                                && lSensitiveEvent.get(TIMESTAMP_PARAM) instanceof String) {
+                            emitter.emit(DateIso8601Mapper.getDate((String) lSensitiveEvent.get(TIMESTAMP_PARAM)), lSensitiveEvent);
                         }
                     }
                 }
             }
-        },"1.0");*/
+        },"1.0");
 
         mRRSamplesCache = new ArrayList<RRIntervalModel>();
     }
@@ -165,20 +172,12 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
     @Override
     public ArrayList<RRIntervalModel> queryRRSamples(Date iStartDate, Date iEndDate) throws Exception {
-        Log.d(TAG, "start query RR Samples");
-        Document lRrDocument = null;
-        try {
-            lRrDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
-            Log.d(TAG, "Get Document - id:" + lRrDocument.getId());
-        }catch(Exception e){
-            e.printStackTrace();
-            throw e;
-        }
 
         ArrayList<RRIntervalModel> lRrSamples = new ArrayList<RRIntervalModel>();
 
         try {
             Query query = mRRSamplesView.createQuery();
+
             query.setStartKey(iStartDate);
             query.setEndKey(iEndDate);
             QueryEnumerator queryEnum = query.run();
@@ -274,10 +273,55 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         }
     }
 
+    /**
+     * @brief query a list of seizure events in a time range [iStartDate, iEndDate]
+     *
+     * @param iStartDate collected data sample timestamps are newer than iStartData
+     * @param iEndDate collected data samples timestamp is older than iEndData
+     *
+     * @return a list of seizure events
+     *
+     * @throws Exception
+     */
     @Override
     public ArrayList<SeizureEventModel> querySeizures(Date iStartDate, Date iEndDate) throws Exception {
-        //TODO: to be implemented
-        return null;
+
+        ArrayList<SeizureEventModel> lSensitiveEventSamples = new ArrayList<SeizureEventModel>();
+
+        try {
+            Query query = mSensitiveEventsView.createQuery();
+
+            query.setStartKey(iStartDate);
+            query.setEndKey(iEndDate);
+
+            QueryEnumerator queryEnum = query.run();
+            Log.d(TAG,"Query size: " + queryEnum.getCount());
+
+            for (Iterator<QueryRow> it = queryEnum; it.hasNext(); ) {
+                QueryRow row=it.next();
+                //TODO: implement a mapper to SeizureEventModel - need to understand why Couchbase does not systematically return same object type
+                SeizureEventModel lSensitiveEvent;
+                if(row.getValue() instanceof  LinkedHashMap) {
+                    LinkedHashMap<String, Object> jsonMap = (LinkedHashMap<String, Object>) row.getValue();
+                    lSensitiveEvent = new SeizureEventModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (String) jsonMap.get(SENSITIVE_EVENT_TIMESTAMP_PARAM), (String) jsonMap.get(COMMENT_PARAM));
+                }
+                else if(row.getValue() instanceof LazyJsonObject) {
+                    LazyJsonObject jsonMap = (LazyJsonObject) row.getValue();
+                    lSensitiveEvent = new SeizureEventModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (String) jsonMap.get(SENSITIVE_EVENT_TIMESTAMP_PARAM), (String) jsonMap.get(COMMENT_PARAM));
+                }
+                else{
+                    lSensitiveEvent = (SeizureEventModel) row.getValue();
+                }
+                lSensitiveEventSamples.add(lSensitiveEvent);
+                Log.d(TAG,"Document contents: " + row.getKey() + " "+ row.getValue());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+
+        Log.d(TAG, "Samples count - " + lSensitiveEventSamples.size());
+        return lSensitiveEventSamples;
     }
 
     /**
@@ -333,9 +377,10 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     @Override
     public void clear() {
         Document lPhysioSignalDocument = null;
-
+        Document lSensitiveEventDocument = null;
         try {
             lPhysioSignalDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
+            lSensitiveEventDocument = mDB.getDocument(SENSITIVE_EVENT_DOCUMENT);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -343,6 +388,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
 
         try {
             lPhysioSignalDocument.delete();
+            lSensitiveEventDocument.delete();
             android.util.Log.d(TAG, "Documents deleted" );
 
         } catch (CouchbaseLiteException e) {

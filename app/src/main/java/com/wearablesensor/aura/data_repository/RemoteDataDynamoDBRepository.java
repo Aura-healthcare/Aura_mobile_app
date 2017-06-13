@@ -48,6 +48,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
@@ -127,6 +128,28 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
         catch(Exception e){
             e.printStackTrace();
             Log.d(TAG, "Error RR Samples DynamoDB" + e.getMessage());
+            throw e;
+        }
+    }
+    /**
+     * @brief save a list of seizure event samples
+     *
+     * @param iSensitiveEvents list of seizure event samples
+     *
+     * @throws Exception
+     */
+
+    @Override
+    public void saveSeizures(final ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception {
+        Log.d(TAG, "save Seizure event: " + iSensitiveEvents.size());
+
+        try{
+            mDynamoDBMapper.batchSave(iSensitiveEvents);
+            Log.d(TAG, "Success save seizure event DynamoDB");
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            Log.d(TAG, "Error save seizure event DynamoDB" + e.getMessage());
             throw e;
         }
     }

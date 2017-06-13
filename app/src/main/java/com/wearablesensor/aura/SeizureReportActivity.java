@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TimePicker;
 
 import com.wearablesensor.aura.seizure_report.SeizureReportContract;
@@ -29,19 +30,21 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
     @OnClick(R.id.seizure_report_confirm_button)
     public void confirmCallback(View v) {
 
-        Date seizureDate = new Date(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-        String comment = "blabla";
-        mSeizureReportPresenter.reportSeizure(seizureDate, comment);
+        Date lSeizureDate = new Date(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
+        String lComments = mSeizureReportComments.getText().toString();
+        mSeizureReportPresenter.reportSeizure(lSeizureDate, lComments);
     }
 
     @BindView(R.id.seizure_report_cancel_button) AppCompatButton mCancelButton;   /** cancel button  */
     @OnClick(R.id.seizure_report_cancel_button)
     public void cancelCallback(View v) {
-
+        mSeizureReportPresenter.cancelReportSeizureDetails();
     }
 
     @BindView(R.id.seizure_report_date_picker) DatePicker mDatePicker;
     @BindView(R.id.seizure_report_time_picker) TimePicker mTimePicker;
+
+    @BindView(R.id.seizure_report_comments) EditText mSeizureReportComments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -50,9 +53,10 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
 
         setContentView(R.layout.activity_seizure_report);
 
-        mSeizureReportPresenter = new SeizureReportPresenter(this, this, ((AuraApplication) getApplication()).getLocalDataRepository());
-
         ButterKnife.bind(this);
+
+        mSeizureReportPresenter = new SeizureReportPresenter(this, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
+
     }
 
     @Override

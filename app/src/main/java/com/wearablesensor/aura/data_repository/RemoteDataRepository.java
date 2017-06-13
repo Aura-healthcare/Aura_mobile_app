@@ -33,6 +33,7 @@
 package com.wearablesensor.aura.data_repository;
 
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 
@@ -57,6 +58,14 @@ public interface RemoteDataRepository {
      */
     void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception;
 
+    /**
+     * @brief save a list of seizure event samples
+     *
+     * @param iSensitiveEvents list of seizure event samples
+     *
+     * @throws Exception
+     */
+    void saveSeizures(final ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception;
 
     /**
      * @brief query a user following authentification

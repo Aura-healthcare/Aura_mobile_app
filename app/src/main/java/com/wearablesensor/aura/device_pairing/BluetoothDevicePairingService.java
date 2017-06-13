@@ -177,7 +177,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 BluetoothDevice lDevice =  null;
 
                 for(int i = 0;i < mBluetoothDeviceList.size(); i++){
-                    if(mBluetoothDeviceList.get(i).getName().contains("Polar")){
+                    if(mBluetoothDeviceList.get(i).getName() != null && mBluetoothDeviceList.get(i).getName().contains("RHYTHM")){
                         lDevice = mBluetoothDeviceList.get(i);
                     }
                 }

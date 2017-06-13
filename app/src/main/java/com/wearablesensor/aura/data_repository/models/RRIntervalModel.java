@@ -32,8 +32,7 @@ import java.util.UUID;
 public class RRIntervalModel extends PhysioSignalModel {
 
     private int mRrInterval; // RR interval in ms
-    private static final String RR_INTERVAL_TYPE = "RrInterval";
-
+    public static final String RR_INTERVAL_TYPE = "RrInterval";
 
     public RRIntervalModel(){
 

@@ -69,7 +69,7 @@ public interface LocalDataRepository {
     void cacheRRSample(RRIntervalModel iSampleRR) throws Exception;
 
     /**
-     * @brief save a batch of seizure events in the local storage
+     * @brief query a list of seizure events in a time range [iStartDate, iEndDate]
      *
      * @param iStartDate collected data sample timestamps are newer than iStartData
      * @param iEndDate collected data samples timestamp is older than iEndData

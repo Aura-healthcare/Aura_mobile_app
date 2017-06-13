@@ -39,6 +39,7 @@ import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
@@ -152,9 +153,14 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
 
                 Date lLastSync = getLastSync();
                 publishProgress(10);
-                final ArrayList<RRIntervalModel> rrSamples = mLocalDataRepository.queryRRSamples(lLastSync, mCurrentSync);
+                final ArrayList<RRIntervalModel> lRrSamples = mLocalDataRepository.queryRRSamples(lLastSync, mCurrentSync);
+                publishProgress(20);
+                final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lLastSync, mCurrentSync);
                 publishProgress(30);
-                mRemoteDataRepository.saveRRSample(rrSamples);
+
+                mRemoteDataRepository.saveRRSample(lRrSamples);
+                publishProgress(60);
+                mRemoteDataRepository.saveSeizures(lSensitiveEvents);
                 publishProgress(90);
 
                 saveLastSync(mCurrentSync);

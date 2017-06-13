@@ -51,17 +51,10 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:text="@string/seizure_reports_comments"
-            android:ems="10"
-            android:id="@+id/comment_title" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:inputType="textMultiLine"
+            android:hint="Comments"
             android:ems="10"
-            android:id="@+id/comment_block"
+            android:id="@+id/seizure_report_comments"
             android:layout_weight="2" />
 
     </LinearLayout>
