@@ -1,20 +1,31 @@
-/*
-Aura Mobile Application
-Copyright (C) 2017 Aura Healthcare
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/
-*/
+/**
+ * @file RealTimePhysioSignalListAdapter.java
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ *
+ *
+ */
 
 package com.wearablesensor.aura.data_visualisation;
 
@@ -28,6 +39,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
@@ -40,6 +52,8 @@ import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,21 +61,15 @@ import butterknife.ButterKnife;
 public class RRSamplesVisualisationFragment extends Fragment implements DataVisualisationContract.View {
     private final String TAG = this.getClass().getSimpleName();
 
-    @BindView(R.id.hrv_realtime_graph) GraphView mGraphView;
-    @BindView(R.id.hrv_realtime_image_view) ImageView mImageView;
-    @BindView(R.id.hrv_realtime_value) TextView mHrvTextView;
+    @BindView(R.id.realtime_physio_signal_list_view) ListView mRealtimePhysioSignalListView;
+    private RealTimePhysioSignalListAdapter mPhysioSignalListAdapter;
+
+    private HashMap<String, RRIntervalModel> mCurrentRRIntervals;
 
     private OnFragmentInteractionListener mListener;
 
     private DataVisualisationContract.Presenter mPresenter;
 
-    private final int GRAPH_POINT_NB = 3600;
-    private final int GRAPH_POINT_SIZE = 5;
-    private final int GRAPH_HORIZONTAL_LABEL_NB = 3;
-    private final int MAX_HRV_VALUE = 2000;
-    private final int MIN_HRV_VALUE = 0;
-    // TODO: points graph series should be handled by DataSyncPresenter
-    private PointsGraphSeries<DataPoint> mSeries;
     public RRSamplesVisualisationFragment() {
         // Required empty public constructor
     }
@@ -91,6 +99,10 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_hrv_realtime_display, container, false);
         ButterKnife.bind(this, view);
+
+        mCurrentRRIntervals = new HashMap<>();
+        mPhysioSignalListAdapter = new RealTimePhysioSignalListAdapter(this.getContext(), R.layout.realtime_physio_signal_item);
+        mRealtimePhysioSignalListView.setAdapter(mPhysioSignalListAdapter);
 
         return view;
     }
@@ -126,59 +138,30 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
     }
 
     @Override
-    public void initRRSamplesVisualisation(Date iWindowStart, Date iWindowEnd) {
-        mSeries = new PointsGraphSeries<>();
-
-        mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity(), new SimpleDateFormat("HH:mm:ss")));
-        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(GRAPH_HORIZONTAL_LABEL_NB);
-
-        mGraphView.getViewport().setYAxisBoundsManual(true);
-        mGraphView.getViewport().setMinY(MIN_HRV_VALUE);
-        mGraphView.getViewport().setMaxY(MAX_HRV_VALUE);
-
-        DataPoint[] lData = new DataPoint[]{};
-        mSeries.resetData(lData);
-
-        int lHrvGrey = getContext().getResources().getColor(R.color.hrv_grey);
-        mSeries.setColor(lHrvGrey);
-        mSeries.setSize(GRAPH_POINT_SIZE);
-
-        mGraphView.getViewport().setXAxisBoundsManual(true);
-        mGraphView.getViewport().setMinX(iWindowStart.getTime());
-        mGraphView.getViewport().setMaxX(iWindowEnd.getTime());
-        mGraphView.addSeries(mSeries);
-    }
-
-    @Override
     public void enableRRSamplesVisualisation() {
-        Drawable lEnableHrvPulse = ContextCompat.getDrawable(getContext(), R.drawable.hrv_pulse_enable);
-        mImageView.setImageDrawable(lEnableHrvPulse);
+        mPhysioSignalListAdapter.clear();
+        for(Map.Entry<String, RRIntervalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+            mPhysioSignalListAdapter.add(lEntry.getValue());
+        }
 
-        int lHrvBlue = getContext().getResources().getColor(R.color.hrv_blue);
-        mSeries.setColor(lHrvBlue);
-        mGraphView.invalidate();
+        mPhysioSignalListAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void disableRRSamplesVisualisation() {
-        mHrvTextView.setText(getString(R.string.default_hrv));
-
-        Drawable lDisableHrvPulse = ContextCompat.getDrawable(getContext(), R.drawable.hrv_pulse_disable);
-        mImageView.setImageDrawable(lDisableHrvPulse);
-
-        int lHrvGrey = getContext().getResources().getColor(R.color.hrv_grey);
-        mSeries.setColor(lHrvGrey);
-        mGraphView.invalidate();
+        mPhysioSignalListAdapter.clear();
+        mPhysioSignalListAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void refreshRRSamplesVisualisation(RRIntervalModel iSampleRR) {
-        int lCurrentRr = iSampleRR.getRrInterval();
-        Date lCurrentDate = DateIso8601Mapper.getDate(iSampleRR.getTimestamp());
+        mCurrentRRIntervals.put(iSampleRR.getDeviceAdress(), iSampleRR);
+        mPhysioSignalListAdapter.clear();
+        for(Map.Entry<String, RRIntervalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+            mPhysioSignalListAdapter.add(lEntry.getValue());
+        }
 
-        mHrvTextView.setText(lCurrentRr + " ms");
-
-        mSeries.appendData( new DataPoint(lCurrentDate, lCurrentRr), true, GRAPH_POINT_NB);
+        mPhysioSignalListAdapter.notifyDataSetChanged();
     }
 
     @Override

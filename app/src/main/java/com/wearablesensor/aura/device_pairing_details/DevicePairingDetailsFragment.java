@@ -110,7 +110,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         View view = inflater.inflate(R.layout.fragment_device_pairing, container, false);
         ButterKnife.bind(this, view);
 
-        mDeviceListAdapter = new DeviceInfoListAdapter(this.getContext(), R.layout.device_info_list);
+        mDeviceListAdapter = new DeviceInfoListAdapter(this.getContext(), R.layout.device_info_item);
         mDeviceListView.setAdapter(mDeviceListAdapter);
         return view;
     }

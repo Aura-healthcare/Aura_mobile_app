@@ -24,10 +24,10 @@ public class PhysioSignalModel {
 
     }
 
-    public PhysioSignalModel(String iDeviceAdress, String iUser, String iTimestamp, String iType) {
+    public PhysioSignalModel(String iDeviceAdress, String iTimestamp, String iType) {
         mUuid = UUID.randomUUID().toString();
         mDeviceAdress = iDeviceAdress;
-        mUser = iUser;
+        mUser = null;
         mTimestamp = iTimestamp;
         mType = iType;
     }

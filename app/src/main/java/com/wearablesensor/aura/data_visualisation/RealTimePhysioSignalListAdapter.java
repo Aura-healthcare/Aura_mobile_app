@@ -1,5 +1,5 @@
 /**
- * @file DeviceInfoListAdapter.java
+ * @file RealTimePhysioSignalListAdapter.java
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
@@ -26,7 +26,7 @@
  *
  *
  */
-package com.wearablesensor.aura.device_pairing_details;
+package com.wearablesensor.aura.data_visualisation;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -36,27 +36,30 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.device_pairing.DeviceInfo;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 
-public class DeviceInfoListAdapter extends ArrayAdapter<DeviceInfo>{
-    public DeviceInfoListAdapter(Context context, int resource) {
+
+public class RealTimePhysioSignalListAdapter extends ArrayAdapter<RRIntervalModel> {
+
+    public RealTimePhysioSignalListAdapter(Context context, int resource) {
         super(context, resource);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        DeviceInfo lDeviceInfo = getItem(position);
+        RRIntervalModel lRrInterval = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.device_info_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.realtime_physio_signal_item, parent, false);
         }
         // Lookup view for data population
-        TextView lDeviceNameText = (TextView) convertView.findViewById(R.id.device_pairing_name);
-        TextView lDeviceAdressText = (TextView) convertView.findViewById(R.id.device_pairing_adress);
+        TextView lRrValueView = (TextView) convertView.findViewById(R.id.hrv_realtime_value);
+        TextView lDeviceAdressView = (TextView) convertView.findViewById(R.id.hrv_device_adress);
         // Populate the data into the template view using the data object
-        lDeviceNameText.setText(lDeviceInfo.getName());
-        lDeviceAdressText.setText(lDeviceInfo.getId());
+        lRrValueView.setText( Integer.toString(lRrInterval.getRrInterval()) );
+        lDeviceAdressView.setText(lRrInterval.getDeviceAdress());
+
         // Return the completed view to render on screen
         return convertView;
     }

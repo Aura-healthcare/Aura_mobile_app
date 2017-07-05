@@ -85,7 +85,6 @@ public class GattHeartRateCharacteristicReader  implements GattCharacteristicRea
         int lFormat = -1;
         int energy = -1;
         int lOffset = 1;
-        int rr_count = 0;
         if ((lFlag & 0x01) != 0) {
             lFormat = BluetoothGattCharacteristic.FORMAT_UINT16;
             lOffset = 3;
@@ -111,7 +110,7 @@ public class GattHeartRateCharacteristicReader  implements GattCharacteristicRea
             // RR stuff.
             mRrIntervalCount = ((iGattCharacteristic.getValue()).length - lOffset) / 2;
             mRrInterval = new Integer[mRrIntervalCount];
-            for (int i = 0; i < rr_count; i++) {
+            for (int i = 0; i < mRrIntervalCount; i++) {
                 mRrInterval[i] = iGattCharacteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, lOffset);
                 lOffset += 2;
                 Log.d(TAG, "Received RR: " + mRrInterval[i]);

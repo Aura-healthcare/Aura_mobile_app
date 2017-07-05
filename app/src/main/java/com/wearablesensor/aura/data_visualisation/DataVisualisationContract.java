@@ -29,7 +29,6 @@ import java.util.Date;
  */
 public class DataVisualisationContract {
     interface View extends BaseView<Presenter>{
-        void initRRSamplesVisualisation(Date iWindowStart, Date iWindowEnd);
         void enableRRSamplesVisualisation();
         void disableRRSamplesVisualisation();
 

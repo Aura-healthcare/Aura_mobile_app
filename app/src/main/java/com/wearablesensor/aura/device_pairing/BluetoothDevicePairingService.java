@@ -85,7 +85,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 } else if (BluetoothLeService.ACTION_GATT_END_PAIRING.equals(action)) {
                     endPairing();
                 } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                    Log.d(TAG, "BluetoothLeService data received");
                     String lDeviceAddress = intent.getStringExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA);
                     String lTimestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
                     Integer lRr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);

@@ -43,8 +43,8 @@ public class RRIntervalModel extends PhysioSignalModel {
         mRrInterval = iRrInterval;
     }
 
-    public RRIntervalModel(String iDeviceAdress, String iUser, String iTimestamp, int iRrInterval){
-        super(iDeviceAdress, iUser, iTimestamp, RR_INTERVAL_TYPE);
+    public RRIntervalModel(String iDeviceAdress, String iTimestamp, int iRrInterval){
+        super(iDeviceAdress, iTimestamp, RR_INTERVAL_TYPE);
         mRrInterval = iRrInterval;
     }
 
