@@ -3,7 +3,7 @@ The "Aura Project" app will alert an user from an epilepsy seizure within few mi
 
 # Pre-requisites #
 1. AndroidSdk version 23.0
-2. Connected device transfering HRV data through Heart Rate bluetooth profile 
+2. Connected device transfering HRV data through Heart Rate bluetooth profile
 
 # References #
 Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
@@ -11,6 +11,9 @@ Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
 
 Android Architecture Blueprints
 [link](https://github.com/googlesamples/android-architecture)
+
+Nordic Semiconductor - puck-central-android - support multi BLE connection
+[link](https://github.com/NordicSemiconductor/puck-central-android)
 # User Experience #
 ![Scheme](documentation/epi_ux_flowchart_loading.jpg)
 
