@@ -32,20 +32,20 @@
         android:layout_gravity="center_vertical">
 
         <TextView
-            android:id="@+id/device_pairing_name"
+            android:id="@+id/device_pairing_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="6dp"
             android:text="@string/default_device_name"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-        <TextView
-            android:id="@+id/device_pairing_adress"
-            android:layout_width="match_parent"
+        <ListView
+            android:id="@+id/device_list_view"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:divider="#CCCCCC"
+            android:dividerHeight="1dp">
+        </ListView>
 
         <Button
             android:id="@+id/device_pairing_button"

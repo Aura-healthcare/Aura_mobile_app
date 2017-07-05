@@ -27,13 +27,18 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.device_pairing.DeviceInfo;
+
+import java.util.LinkedList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,10 +59,12 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
     private DevicePairingDetailsContract.Presenter mPresenter;
 
+    private ArrayAdapter<DeviceInfo> mDeviceListAdapter;
+
     @BindView(R.id.device_pairing_image) ImageView mImageView;
     @BindView(R.id.device_pairing_progress_bar) ProgressBar mPropressBar;
-    @BindView(R.id.device_pairing_name) TextView mDeviceNameView;
-    @BindView(R.id.device_pairing_adress) TextView mDeviceParingAdressView;
+    @BindView(R.id.device_pairing_status) TextView mDeviceStatusView;
+    @BindView(R.id.device_list_view) ListView mDeviceListView;
 
     @BindView(R.id.device_pairing_button) Button mDevicePairingButton;
     @OnClick(R.id.device_pairing_button)
@@ -103,6 +110,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         View view = inflater.inflate(R.layout.fragment_device_pairing, container, false);
         ButterKnife.bind(this, view);
 
+        mDeviceListAdapter = new DeviceInfoListAdapter(this.getContext(), R.layout.device_info_list);
+        mDeviceListView.setAdapter(mDeviceListAdapter);
         return view;
     }
 
@@ -137,12 +146,13 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     }
 
     @Override
-    public void successPairing(String iDeviceName, String iDeviceAdress) {
+    public void successPairing(LinkedList<DeviceInfo> iDeviceList) {
         mPropressBar.setVisibility(View.GONE);
 
-        mDeviceNameView.setText(iDeviceName );
-        mDeviceParingAdressView.setVisibility(View.VISIBLE);
-        mDeviceParingAdressView.setText(iDeviceAdress);
+        mDeviceStatusView.setVisibility(View.GONE);
+
+        mDeviceListAdapter.addAll(iDeviceList);
+        mDeviceListView.setVisibility(View.VISIBLE);
 
         Drawable successPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_success);
         mImageView.setImageDrawable(successPairingDrawable);
@@ -156,10 +166,10 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     public void failParing() {
         mPropressBar.setVisibility(View.GONE);
 
-        String lNoDevicePairedText = getString(R.string.default_device_name);
-        mDeviceNameView.setText( lNoDevicePairedText );
-        mDeviceParingAdressView.setVisibility(View.GONE);
-        mDeviceParingAdressView.setText("");
+        mDeviceStatusView.setVisibility(View.VISIBLE);
+
+        mDeviceListAdapter.clear();
+        mDeviceListView.setVisibility(View.GONE);
 
         Drawable failPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_fail);
         mImageView.setImageDrawable(failPairingDrawable);

@@ -18,19 +18,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.device_pairing_details;
 
+import com.wearablesensor.aura.device_pairing.DeviceInfo;
 import com.wearablesensor.aura.utils.BasePresenter;
 import com.wearablesensor.aura.utils.BaseView;
 
-/**
- * Created by lecoucl on 07/04/17.
- */
+import java.util.LinkedList;
+
 public class DevicePairingDetailsContract {
 
     interface View extends BaseView<Presenter> {
 
         void progressPairing();
 
-        void successPairing(String iDeviceName, String iDeviceAdress);
+        void successPairing(LinkedList<DeviceInfo> iDeviceList);
 
         void failParing();
 

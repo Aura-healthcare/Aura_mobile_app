@@ -313,6 +313,9 @@ public class BluetoothLeService extends Service {
         }
     }
 
+    public ConcurrentHashMap<String, BluetoothDevice> getDeviceList(){
+        return mConnectedDevices;
+    }
     /**
      * @brief wrapper method use to force a process to run on UI Thread
      * @details used to force Gatt connection on UI Thread

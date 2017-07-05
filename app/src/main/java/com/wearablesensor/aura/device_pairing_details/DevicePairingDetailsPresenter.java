@@ -61,7 +61,7 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
 
         if(lStatus == DevicePairingStatus.CONNECTED){
             DevicePairingConnectedNotification lDevicePairingNotification = (DevicePairingConnectedNotification) iDevicePairingNotification;
-            mView.successPairing(lDevicePairingNotification.getDeviceName(), lDevicePairingNotification.getDeviceAdress());
+            mView.successPairing(mBluetoothDevicePairingService.getDeviceList());
         }
         else if(lStatus == DevicePairingStatus.DISCONNECTED){
             mView.failParing();

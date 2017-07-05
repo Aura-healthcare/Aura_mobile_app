@@ -77,4 +77,8 @@ public class BluetoothServiceConnection implements ServiceConnection {
         mDeviceList = iDeviceList;
     }
 
+    public BluetoothLeService getBluetoothLeService(){
+        return mBluetoothLeService;
+    }
+
 }

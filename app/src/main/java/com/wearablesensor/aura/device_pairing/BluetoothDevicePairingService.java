@@ -35,6 +35,9 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceive
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
@@ -77,24 +80,17 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             @Override
             public void onReceive(Context context, Intent intent) {
                 final String action = intent.getAction();
-                if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                    mPaired = true;
+                if (BluetoothLeService.ACTION_GATT_START_PAIRING.equals(action)) {
                     startPairing();
-                } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                    mPaired = false;
+                } else if (BluetoothLeService.ACTION_GATT_END_PAIRING.equals(action)) {
                     endPairing();
-                    mContext.unbindService(mDeviceServiceConnection);
-                } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                    mDeviceServiceConnection.startHeartProfileMonitoring();
-                    // Show all the supported services and characteristics on the user interface.
                 } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                     Log.d(TAG, "BluetoothLeService data received");
-                    String uuid = intent.getStringExtra(BluetoothLeService.ID_EXTRA_DATA);
-                    String user = intent.getStringExtra(BluetoothLeService.USER_EXTRA_DATA);
-                    String timestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
-                    Integer rr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
+                    String lDeviceAddress = intent.getStringExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA);
+                    String lTimestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
+                    Integer lRr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
 
-                    RRIntervalModel lRRIntervalModel = new RRIntervalModel(user, mPairedDeviceAddress, timestamp, rr);
+                    RRIntervalModel lRRIntervalModel = new RRIntervalModel(lDeviceAddress, lTimestamp, lRr);
                     Log.d(TAG, lRRIntervalModel.getTimestamp() + " " + lRRIntervalModel.getUuid() + " " + lRRIntervalModel.getRrInterval() + " " + lRRIntervalModel.getUser());
                     receiveData(lRRIntervalModel);
                 }
@@ -109,7 +105,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         };
 
         mDeviceServiceConnection = new BluetoothServiceConnection(this);
-
     }
 
     public Boolean checkBluetoothIsEnabled(){
@@ -162,6 +157,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     }
 
+
     private void scanLeDevices() {
 
         mBluetoothDeviceList.clear();
@@ -174,23 +170,21 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
 
+                LinkedList<BluetoothDevice> lDeviceList = new LinkedList<BluetoothDevice>();
                 BluetoothDevice lDevice =  null;
 
                 for(int i = 0;i < mBluetoothDeviceList.size(); i++){
-                    if(mBluetoothDeviceList.get(i).getName() != null && mBluetoothDeviceList.get(i).getName().contains("RHYTHM")){
-                        lDevice = mBluetoothDeviceList.get(i);
+                    if(mBluetoothDeviceList.get(i).getName() != null && (mBluetoothDeviceList.get(i).getName().contains("RHYTHM") || mBluetoothDeviceList.get(i).getName().contains("Polar")) ){
+                        lDeviceList.add(mBluetoothDeviceList.get(i));
                     }
                 }
 
-                if(lDevice == null){
+                if(lDeviceList.size() == 0){
                     endPairing();
                     return;
                 }
 
-                mPairedDeviceName = lDevice.getName();
-                mPairedDeviceAddress = lDevice.getAddress();
-
-                mDeviceServiceConnection.setDeviceAdress(mPairedDeviceAddress);
+                mDeviceServiceConnection.setDeviceList(lDeviceList);
                 mContext.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
                 Intent gattServiceIntent = new Intent(mContext, BluetoothLeService.class);
                 mContext.bindService(gattServiceIntent, mDeviceServiceConnection, Context.BIND_AUTO_CREATE);
@@ -215,11 +209,27 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_START_PAIRING);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_END_PAIRING);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
+    }
+
+    /**
+     * @brief get connected devices though Bluetooth LE
+     *
+     * @return device info list
+     */
+    @Override
+    public LinkedList<DeviceInfo> getDeviceList(){
+        LinkedList<DeviceInfo> oDeviceList = new LinkedList<>();
+
+        ConcurrentHashMap<String, BluetoothDevice> lDeviceList = mDeviceServiceConnection.getBluetoothLeService().getDeviceList();
+        for ( Map.Entry<String, BluetoothDevice> lEntry : lDeviceList.entrySet() ) {
+            oDeviceList.add(new DeviceInfo(lEntry.getValue().getAddress(), lEntry.getValue().getName()));
+        }
+
+        return oDeviceList;
     }
 
 
