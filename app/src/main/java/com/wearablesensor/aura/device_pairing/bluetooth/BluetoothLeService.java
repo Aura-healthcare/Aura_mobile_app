@@ -151,6 +151,7 @@ public class BluetoothLeService extends Service {
      * @brief close every Gatt connections with the devices
      */
     public void close() {
+        Log.d(TAG, "closeGattConnection");
 
         BluetoothDevice lDevice;
         BluetoothLeConstant.DeviceConnectionState lDeviceStatus;

@@ -149,6 +149,8 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
 
     @Override
     public void disableRRSamplesVisualisation() {
+        mCurrentRRIntervals.clear();
+
         mPhysioSignalListAdapter.clear();
         mPhysioSignalListAdapter.notifyDataSetChanged();
     }

@@ -57,7 +57,7 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<RRIntervalMode
         TextView lRrValueView = (TextView) convertView.findViewById(R.id.hrv_realtime_value);
         TextView lDeviceAdressView = (TextView) convertView.findViewById(R.id.hrv_device_adress);
         // Populate the data into the template view using the data object
-        lRrValueView.setText( Integer.toString(lRrInterval.getRrInterval()) );
+        lRrValueView.setText(String.valueOf( Math.round((Double)(60000.0 / lRrInterval.getRrInterval() * 1.0)) ) + " bpm");
         lDeviceAdressView.setText(lRrInterval.getDeviceAdress());
 
         // Return the completed view to render on screen

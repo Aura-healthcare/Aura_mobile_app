@@ -30,16 +30,13 @@ package com.wearablesensor.aura.device_pairing.bluetooth;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
-import com.wearablesensor.aura.AuraApplication;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
-import com.wearablesensor.aura.device_pairing.bluetooth.gatt.GattManager;
-import com.wearablesensor.aura.device_pairing.bluetooth.gatt.operations.GattSetNotificationOperation;
+
 
 import java.util.LinkedList;
 
@@ -58,6 +55,8 @@ public class BluetoothServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+        Log.d(TAG, "onServiceConnected");
+
         mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
         if (!mBluetoothLeService.initialize()) {
             mDevicePairingService.endPairing();
@@ -68,7 +67,9 @@ public class BluetoothServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        Log.d(TAG, "onServiceDisconnected");
         mBluetoothLeService.close();
+        mBluetoothLeService = null;
 
         mDevicePairingService.endPairing();
     }
