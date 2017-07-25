@@ -155,11 +155,13 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
                 publishProgress(10);
                 final ArrayList<RRIntervalModel> lRrSamples = mLocalDataRepository.queryRRSamples(lLastSync, mCurrentSync);
                 publishProgress(20);
+
                 final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lLastSync, mCurrentSync);
                 publishProgress(30);
 
                 mRemoteDataRepository.saveRRSample(lRrSamples);
                 publishProgress(60);
+
                 mRemoteDataRepository.saveSeizures(lSensitiveEvents);
                 publishProgress(90);
 

@@ -35,6 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
@@ -92,6 +93,16 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         setContentView(R.layout.activity_seizure_monitoring);
         mDevicePairingService =  (BluetoothDevicePairingService) ((AuraApplication) getApplication()).getDevicePairingService();
+        //TODO: remove as soon as with fully swith to InfluxDB backend
+        // hack to change backend on the fly
+        ((AuraApplication) getApplication()).setRemoteDataRepository(new RemoteDataInfluxDBRepository());
+        try{
+            ((AuraApplication) getApplication()).getRemoteDataRepository().connect("");
+        }catch(Exception e){
+            Log.d(TAG, "Fail initialization InfluxDB");
+            e.printStackTrace();
+        }
+
 
         mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);

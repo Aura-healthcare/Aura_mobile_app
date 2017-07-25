@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
     compile 'com.android.support:support-v4:24.1.1'
     compile 'com.android.support:support-v13:24.1.1'
@@ -28,6 +29,7 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.2.+'
+    compile 'org.influxdb:influxdb-java:2.4'
     compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.3.2'
     compile 'com.couchbase.lite:couchbase-lite-android:+'
     compile 'com.jakewharton:butterknife:8.4.0'
@@ -51,6 +53,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 24
+
+        multiDexEnabled true
     }
 
     compileOptions {

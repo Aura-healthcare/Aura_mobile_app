@@ -18,10 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
-import android.app.Application;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
@@ -34,7 +35,7 @@ import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
-public class AuraApplication extends Application{
+public class AuraApplication extends MultiDexApplication {
     private DevicePairingService mDevicePairingService;
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository mRemoteDataRepository;
@@ -51,7 +52,6 @@ public class AuraApplication extends Application{
         Context lApplicationContext = getApplicationContext();
         boolean lIsBluetoothLeFeatureSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         BluetoothManager lBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
         mAuthentificationHelper.init(lApplicationContext);
 
@@ -63,6 +63,7 @@ public class AuraApplication extends Application{
 
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, mUserSessionService);
         mRealTimeDataProcessorService.init();
+
     }
 
     public DevicePairingService getDevicePairingService() {
@@ -80,4 +81,9 @@ public class AuraApplication extends Application{
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
 
     public UserSessionService getUserSessionService(){return mUserSessionService;}
+
+    // TODO: remove as soon as we fully swith to InfluxDB backend
+    public void setRemoteDataRepository(RemoteDataRepository iRemoteDataRepository) {
+        mRemoteDataRepository = iRemoteDataRepository;
+    }
 }
