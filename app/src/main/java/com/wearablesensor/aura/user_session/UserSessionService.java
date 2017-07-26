@@ -59,7 +59,7 @@ public class UserSessionService {
     private Context mApplicationContext; /** application context */
     private Activity mActivity; /** user session launcher activity */
 
-    private RemoteDataRepository mRemoteDataRepository; /** remote database that stores user information */
+    private RemoteDataRepository.Session mRemoteDataRepository; /** remote database that stores user information */
 
     private UserModel mUserModel; /** user information */
     private UserPreferencesModel mUserPrefs; /** user preferences */
@@ -73,7 +73,7 @@ public class UserSessionService {
      * @param iRemoteDataRepository remote database that stores user information
      * @param iApplicationContext application context
      */
-    public UserSessionService(RemoteDataRepository iRemoteDataRepository,
+    public UserSessionService(RemoteDataRepository.Session iRemoteDataRepository,
                               Context iApplicationContext){
         mApplicationContext = iApplicationContext;
 

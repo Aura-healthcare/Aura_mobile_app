@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
+public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Session{
     private final String TAG = this.getClass().getSimpleName();
 
     private static final String DYNAMO_DB_IDENTITY_POOL_ID = "eu-west-1:8dbf4eef-78e6-4ac9-9ace-fa164cd83538"; /** Amazon dynamoDB identit/y pool */
@@ -117,7 +117,6 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
      * @throws Exception
      */
 
-    @Override
     public void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception {
         Log.d(TAG, "save RR Samples: " + iRrSamples.size());
 
@@ -139,7 +138,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository{
      * @throws Exception
      */
 
-    @Override
+
     public void saveSeizures(final ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception {
         Log.d(TAG, "save Seizure event: " + iSensitiveEvents.size());
 

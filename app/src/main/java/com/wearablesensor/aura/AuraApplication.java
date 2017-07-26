@@ -29,6 +29,7 @@ import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHel
 import com.wearablesensor.aura.data_repository.LocalDataCouchbaseRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
@@ -38,7 +39,9 @@ import com.wearablesensor.aura.user_session.UserSessionService;
 public class AuraApplication extends MultiDexApplication {
     private DevicePairingService mDevicePairingService;
     private LocalDataRepository mLocalDataRepository;
-    private RemoteDataRepository mRemoteDataRepository;
+    private RemoteDataRepository.Session mRemoteDataSessionRepository;
+    private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
+
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
     private UserSessionService mUserSessionService;
 
@@ -57,9 +60,10 @@ public class AuraApplication extends MultiDexApplication {
 
         mDevicePairingService = new BluetoothDevicePairingService(lIsBluetoothLeFeatureSupported, lBluetoothManager, lApplicationContext);
         mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
-        mRemoteDataRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
+        mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
+        mRemoteDataTimeSeriesRepository = new RemoteDataInfluxDBRepository();
 
-        mUserSessionService = new UserSessionService(mRemoteDataRepository, lApplicationContext);
+        mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
 
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, mUserSessionService);
         mRealTimeDataProcessorService.init();
@@ -74,16 +78,16 @@ public class AuraApplication extends MultiDexApplication {
         return mLocalDataRepository;
     }
 
-    public RemoteDataRepository getRemoteDataRepository() {
-        return mRemoteDataRepository;
+    public RemoteDataRepository.Session getRemoteDataSessionRepository() {
+        return mRemoteDataSessionRepository;
+    }
+
+    public RemoteDataRepository.TimeSeries getRemoteDataTimeSeriesRepository(){
+        return mRemoteDataTimeSeriesRepository;
     }
 
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
 
     public UserSessionService getUserSessionService(){return mUserSessionService;}
 
-    // TODO: remove as soon as we fully swith to InfluxDB backend
-    public void setRemoteDataRepository(RemoteDataRepository iRemoteDataRepository) {
-        mRemoteDataRepository = iRemoteDataRepository;
-    }
 }

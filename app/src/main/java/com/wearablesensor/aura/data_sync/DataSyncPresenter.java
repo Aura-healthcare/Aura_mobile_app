@@ -50,7 +50,8 @@ import java.util.Date;
 public class DataSyncPresenter implements DataSyncContract.Presenter {
 
     private final LocalDataRepository mLocalDataRepository;
-    private final RemoteDataRepository mRemoteDataRepository;
+    private final RemoteDataRepository.Session mRemoteDataSessionRepository;
+    private final RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
 
     private final UserSessionService mUserSessionService; /** user session service is required to keep user preferences updated on data push */
 
@@ -61,18 +62,21 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
     /**
      *
      * @param iLocalDataRepository local data repository that stored to-be-pushed data
-     * @param iRemoteDataRepository remote data repository that need to be synced
+     * @param iRemoteDataSessionRepository remote data repository that need to be synced
+     * @param iRemoteDataTimeSeriesRepository remote data repository that need to be synced
      * @param iView UI component that displays data push state to user
      * @param iApplicationContext application context
      * @param iUserSessionService user session information
      */
     public DataSyncPresenter(LocalDataRepository iLocalDataRepository,
-                             RemoteDataRepository iRemoteDataRepository,
+                             RemoteDataRepository.Session iRemoteDataSessionRepository,
+                             RemoteDataRepository.TimeSeries iRemoteDataTimeSeriesRepository,
                              DataSyncContract.View iView,
                              Context iApplicationContext,
                              UserSessionService iUserSessionService) {
         mLocalDataRepository = iLocalDataRepository;
-        mRemoteDataRepository = iRemoteDataRepository;
+        mRemoteDataSessionRepository = iRemoteDataSessionRepository;
+        mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
         mView = iView;
         mApplicationContext = iApplicationContext;
         mUserSessionService = iUserSessionService;
@@ -109,7 +113,7 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
             UserPreferencesModel lFormerUserPrefs = mUserSessionService.getUserPreferences();
             UserPreferencesModel lNewUserPrefs= new UserPreferencesModel(lFormerUserPrefs.getUserId(), DateIso8601Mapper.getString(iLastSync) );
             mUserSessionService.setUserPreferences(lNewUserPrefs);
-            mRemoteDataRepository.saveUserPreferences(lNewUserPrefs);
+            mRemoteDataSessionRepository.saveUserPreferences(lNewUserPrefs);
         }catch(Exception e){
             throw e;
         }
@@ -159,10 +163,10 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
                 final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lLastSync, mCurrentSync);
                 publishProgress(30);
 
-                mRemoteDataRepository.saveRRSample(lRrSamples);
+                mRemoteDataTimeSeriesRepository.saveRRSample(lRrSamples);
                 publishProgress(60);
 
-                mRemoteDataRepository.saveSeizures(lSensitiveEvents);
+                mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);
                 publishProgress(90);
 
                 saveLastSync(mCurrentSync);

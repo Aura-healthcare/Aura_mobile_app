@@ -26,7 +26,7 @@
  * RemoteDataInfluxDBRepository is a remote data storage specialized in time series data storage
  *
  * We consider a two-step initialization:
- *  1) connect to DynamoDB database
+ *  1) connect to InfluxDB database
  * Currently secured connection to database is done using basic user/password credentials.
  *  2) 3 .. N) query or save data in database
  */
@@ -34,12 +34,9 @@
 
 package com.wearablesensor.aura.data_repository;
 
-import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
-import com.wearablesensor.aura.user_session.UserModel;
-import com.wearablesensor.aura.user_session.UserPreferencesModel;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -50,13 +47,24 @@ import org.influxdb.dto.Point;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class RemoteDataInfluxDBRepository implements RemoteDataRepository {
+public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSeries {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public final static String INFLUX_DB_URL = "http://192.168.8.100:8086";
+    public final static String INFLUX_DB_URL = "http://192.168.1.48:8086";
     private final static String INFLUX_DB_PHYSIO_SIGNAL_NAME = "physio_signal";
     private final static String INFLUX_DB_NAME_SENSITIVE_EVENT_NAME = "sensitive_event";
+
+    private final static String DB_HEART_MEASUREMENT = "heart";
+    private final static String DB_USER_EVENT_MEASUREMENT = "user_event";
+
+    private final static String DB_USER_TAG = "user";
+    private final static String DB_UUID_TAG = "uuid";
+    private final static String DB_TYPE_TAG = "type";
+    private final static String DB_DEVICE_ADDRESS_TAG = "device_address";
+    private final static String DB_COMMENTS_TAG = "comments";
+    private final static String DB_RR_INTERVAL_TAG = "rr_interval";
+    private final static String DB_SENSITIVE_EVENT_TIMESTAMP_TAG = "sensitive_event_timestamp";
 
     private InfluxDB mInfluxDB;
 
@@ -64,11 +72,12 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository {
     /**
      * @brief initialize connection between remote database and Aura application
      *
-     * @param lAuthToken no needed
+     * @param iUser username credential
+     * @param iPassword password credential
      * @throws Exception
      */
-    public void connect(String lAuthToken) throws Exception {
-        mInfluxDB = InfluxDBFactory.connect(INFLUX_DB_URL,"lecoued", "lecoued");
+    public void connect(String iUser, String iPassword) throws Exception {
+        mInfluxDB = InfluxDBFactory.connect(INFLUX_DB_URL, iUser, iPassword);
     }
 
     /**
@@ -85,13 +94,13 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository {
                 .build();
 
         for (RRIntervalModel lSample : iRrSamples) {
-            Point lPoint = Point.measurement("physio")
+            Point lPoint = Point.measurement(DB_HEART_MEASUREMENT)
                     .time(DateIso8601Mapper.getDate(lSample.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
-                    .tag("user", lSample.getUser())
-                    .tag("device_address", lSample.getDeviceAdress())
-                    .tag("uuid", lSample.getUuid())
-                    .tag("type", lSample.getType())
-                    .addField("rr_interval", lSample.getRrInterval())
+                    .tag(DB_USER_TAG, lSample.getUser())
+                    .tag(DB_DEVICE_ADDRESS_TAG, lSample.getDeviceAdress())
+                    .tag(DB_UUID_TAG, lSample.getUuid())
+                    .tag(DB_TYPE_TAG, lSample.getType())
+                    .addField(DB_RR_INTERVAL_TAG, lSample.getRrInterval())
                     .build();
 
             lBatchPoints.point(lPoint);
@@ -116,42 +125,18 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository {
                 .build();
 
         for (SeizureEventModel lSeizureEvent : iSensitiveEvents) {
-            Point lPoint = Point.measurement("event")
+            Point lPoint = Point.measurement(DB_USER_EVENT_MEASUREMENT)
                     .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-                    .tag("uuid", lSeizureEvent.getUuid())
-                    .tag("user", lSeizureEvent.getUser())
-                    .tag("type", lSeizureEvent.getType())
-                    .addField("comments", lSeizureEvent.getComments())
-                    .addField("sensitive_timestamp", DateIso8601Mapper.getDate(lSeizureEvent.getSensitiveEventTimestamp()).getTime())
+                    .tag(DB_UUID_TAG, lSeizureEvent.getUuid())
+                    .tag(DB_USER_TAG, lSeizureEvent.getUser())
+                    .tag(DB_TYPE_TAG, lSeizureEvent.getType())
+                    .addField(DB_COMMENTS_TAG, lSeizureEvent.getComments())
+                    .addField(DB_SENSITIVE_EVENT_TIMESTAMP_TAG, DateIso8601Mapper.getDate(lSeizureEvent.getSensitiveEventTimestamp()).getTime())
                     .build();
 
             lBatchPoints.point(lPoint);
         }
 
         mInfluxDB.write(lBatchPoints);
-    }
-
-    //TODO: to be implemented
-    @Override
-    public UserModel queryUser(String iAmazonId) throws Exception {
-        return null;
-    }
-
-    //TODO: to be implemented
-    @Override
-    public void saveUser(UserModel iUserModel) throws Exception {
-
-    }
-
-    //TODO: to be implemented
-    @Override
-    public UserPreferencesModel queryUserPreferences(String iUserId) throws Exception {
-        return null;
-    }
-
-    //TODO: to be implemented
-    @Override
-    public void saveUserPreferences(UserPreferencesModel iUserPreferencesModel) throws Exception {
-
     }
 }
