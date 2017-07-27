@@ -1,52 +1,42 @@
-# Headline #
+## Headline
 The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice 
 
-# Pre-requisites #
-1. AndroidSdk version 23.0
+## Pre-requisites
+1. Android Sdk version 25.0
 2. Connected device transfering HRV data through Heart Rate bluetooth profile
 
-# References #
-Bluetooth Low Energy pairing module is is based on AndroidBluetoothLEGatt Sample
-[link](https://developer.android.com/reference/android/bluetooth/BluetoothGatt.html)
+## References
 
 Android Architecture Blueprints
 [link](https://github.com/googlesamples/android-architecture)
 
 Nordic Semiconductor - puck-central-android - support multi BLE connection
 [link](https://github.com/NordicSemiconductor/puck-central-android)
-# User Experience #
-![Scheme](documentation/epi_ux_flowchart_loading.jpg)
 
-![Scheme](documentation/epi_ux_flowchart_buttonmenu_v2.jpg)
+## How to contribute
+
+We references all in-progress or future developpements on cards in [Github Project](https://github.com/clecoued/Aura_mobile_app/projects/1).
 
 
-# App Architecture #
+## User Experience
+
+<img src="documentation/splash-screen.png" width="230">
+<img src="documentation/login-screen.png" width="230">
+<img src="documentation/monitoring-screen.png" width="230">
+
+
+## App Architecture
 
 ![Scheme](documentation/auramobileapparchitecture.png)
 
-# Details #
-The "Aura project" app fetch HRV data from a armband device via Bluetooth Low Energy and process the data in order to anticipate an epilepsy seizure.
+## Details
+The "Aura project" mobile application:
 
-The "Aura project" app will provides the following functionnalities:
+1. fetch physiological data from a armband device via Bluetooth Low Energy
 
-* automatic pairing with Bluetooth Low Energy and fetch HRV data
-* fine tune Bluetooth pairing
-* synchronize data on Cloud
-* report an epilepsy seizure
-* report an aura
-* report a false seizure alert
-* visualize streamed HRV data
-* secure user authentification
+2. process the data in order to anticipate an epilepsy seizure
 
-# TODO #
-The remaining functionalities need to be implemented:
-
-* fine tune Bluetooth pairing
-* report an epilepsy seizure
-* report an aura WIP
-* report a false seizure alert
-* visualize streamed HRV data
-* secure user authentification
+3. alerts the user
 
 # Generate Documentation #
 ```
