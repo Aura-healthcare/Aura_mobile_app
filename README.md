@@ -20,9 +20,7 @@ We references all in-progress or future developpements on cards in [Github Proje
 
 ## User Experience
 
-<img src="documentation/splash-screen.png" width="230">
-<img src="documentation/login-screen.png" width="230">
-<img src="documentation/monitoring-screen.png" width="230">
+<img src="documentation/splash-screen.png" width="230">  <img src="documentation/login-screen.png" width="230">  <img src="documentation/monitoring-screen.png" width="230">
 
 
 ## App Architecture
