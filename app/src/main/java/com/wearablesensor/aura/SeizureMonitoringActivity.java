@@ -99,6 +99,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             e.printStackTrace();
         }
 
+        ((AuraApplication) getApplication()).getDataSyncService().initialize();
 
         mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
@@ -128,6 +129,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         catch(Exception e){
             Log.d(TAG, "Fail to save cache data on exit");
         }
+
+        ((AuraApplication) getApplication()).getDataSyncService().close();
         super.onStop();
     }
 

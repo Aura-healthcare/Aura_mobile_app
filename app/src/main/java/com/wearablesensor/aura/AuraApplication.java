@@ -31,6 +31,7 @@ import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
+import com.wearablesensor.aura.data_sync.DataSyncService;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
@@ -38,11 +39,14 @@ import com.wearablesensor.aura.user_session.UserSessionService;
 
 public class AuraApplication extends MultiDexApplication {
     private DevicePairingService mDevicePairingService;
+
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository.Session mRemoteDataSessionRepository;
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
+    private DataSyncService mDataSyncService;
 
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
+
     private UserSessionService mUserSessionService;
 
     private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
@@ -65,9 +69,14 @@ public class AuraApplication extends MultiDexApplication {
 
         mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
 
+        mDataSyncService = new DataSyncService(mLocalDataRepository,
+                                               mRemoteDataSessionRepository,
+                                               mRemoteDataTimeSeriesRepository,
+                                               lApplicationContext,
+                                               mUserSessionService);
+
         mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, mUserSessionService);
         mRealTimeDataProcessorService.init();
-
     }
 
     public DevicePairingService getDevicePairingService() {
@@ -84,6 +93,10 @@ public class AuraApplication extends MultiDexApplication {
 
     public RemoteDataRepository.TimeSeries getRemoteDataTimeSeriesRepository(){
         return mRemoteDataTimeSeriesRepository;
+    }
+
+    public DataSyncService getDataSyncService(){
+        return mDataSyncService;
     }
 
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}

@@ -51,7 +51,7 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public final static String INFLUX_DB_URL = "http://192.168.1.48:8086";
+    public final static String INFLUX_DB_URL = "http://193.251.229.249:8086";
     private final static String INFLUX_DB_PHYSIO_SIGNAL_NAME = "physio_signal";
     private final static String INFLUX_DB_NAME_SENSITIVE_EVENT_NAME = "sensitive_event";
 
@@ -89,6 +89,11 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
      */
     @Override
     public void saveRRSample(ArrayList<RRIntervalModel> iRrSamples) throws Exception {
+
+        if(iRrSamples.size() == 0){
+            return;
+        }
+
         BatchPoints lBatchPoints = BatchPoints
                 .database(INFLUX_DB_PHYSIO_SIGNAL_NAME)
                 .build();
@@ -119,6 +124,10 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
     @Override
     public void saveSeizures(ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception {
+
+        if(iSensitiveEvents.size() == 0){
+            return;
+        }
 
         BatchPoints lBatchPoints = BatchPoints
                 .database(INFLUX_DB_NAME_SENSITIVE_EVENT_NAME)
