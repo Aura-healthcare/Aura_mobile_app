@@ -66,16 +66,19 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final String TAG = this.getClass().getSimpleName();
 
     private Manager mCouchBaseManager; /** couchbase manager */
-    private Database mDB; /** local couchbase database */
+
+    private Database mPhysioSignalDB; /** local couchbase database */
+    private Database mSensitiveEventDB;
     private DatabaseOptions mDBOptions; /** local couchbase database options */
 
     private View mRRSamplesView; /** pre-formatted view to query R-R interval on a date interval */
     private View mSensitiveEventsView; /** pre-formatted view to sensitive event on a date interval */
 
-    private final static String DB_NAME = "dbaura"; /** couchbase database name */
+    private final static String DB_PHYSIO_SIGNAL_NAME = "dbaura_physio_signal"; /** couchbase physio signal database name */
+    private final static String DB_SESSION_NAME = "dbaura_session"; /** couchbase session database name */
+    private final static String DB_SENSITIVE_EVENT_NAME = "dbaura_sensitive_event"; /** couchbase sensitive event DB name */
 
-    private final static String PHYSIO_SIGNAL_DOCUMENT= "physioSignalDocument"; /** document storing every physiological data */
-    private final static String SENSITIVE_EVENT_DOCUMENT="sensitiveEventDocument"; /** document storing reported sensitive events */
+    private final static String MY_DOCUMENT="myDocument"; /** document storing reported sensitive events */
 
     private final static String UUID_PARAM= "uuid"; /** UUID param used to identify model */
     private final static String TYPE_PARAM = "type"; /** type param used to specify model  */
@@ -114,13 +117,14 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             e.printStackTrace();
         }
         try {
-            mDB = mCouchBaseManager.openDatabase(DB_NAME, mDBOptions);
+            mPhysioSignalDB = mCouchBaseManager.openDatabase(DB_PHYSIO_SIGNAL_NAME, mDBOptions);
+            mSensitiveEventDB= mCouchBaseManager.openDatabase(DB_SENSITIVE_EVENT_NAME, mDBOptions);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
 
         // create Couchbase view used to query RRSamples
-        mRRSamplesView = mDB.getView(RR_SAMPLES_VIEW);
+        mRRSamplesView = mPhysioSignalDB.getView(RR_SAMPLES_VIEW);
         mRRSamplesView.setMap(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
@@ -128,29 +132,21 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
                 {
                     if(entry.getValue() instanceof LinkedHashMap) {
                         LinkedHashMap<String, Object> lRr = (LinkedHashMap<String, Object>) entry.getValue();
-                        if ( lRr.get(TYPE_PARAM) instanceof String && lRr.get(TYPE_PARAM).equals(RRIntervalModel.RR_INTERVAL_TYPE)
-                                && lRr.get(TIMESTAMP_PARAM) instanceof String) {
-                            emitter.emit(DateIso8601Mapper.getDate((String) lRr.get(TIMESTAMP_PARAM)), lRr);
-                        }
+                        emitter.emit(DateIso8601Mapper.getDate((String) lRr.get(TIMESTAMP_PARAM)), lRr);
                     }
                 }
             }
         },"1.0");
 
-        mSensitiveEventsView = mDB.getView(SENSITIVE_EVENTS_VIEW);
+        mSensitiveEventsView = mSensitiveEventDB.getView(SENSITIVE_EVENTS_VIEW);
         mSensitiveEventsView.setMap(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
 
-                for (Map.Entry<String, Object> entry : document.entrySet())
-                {
-                    if(entry.getValue() instanceof LinkedHashMap) {
+                for (Map.Entry<String, Object> entry : document.entrySet()) {
+                    if (entry.getValue() instanceof LinkedHashMap) {
                         LinkedHashMap<String, Object> lSensitiveEvent = (LinkedHashMap<String, Object>) entry.getValue();
-
-                        if (lSensitiveEvent.get(TYPE_PARAM) instanceof String && lSensitiveEvent.get(TYPE_PARAM).equals(SeizureEventModel.SENSITIVE_EVENT_TYPE)
-                                && lSensitiveEvent.get(TIMESTAMP_PARAM) instanceof String) {
-                            emitter.emit(DateIso8601Mapper.getDate((String) lSensitiveEvent.get(TIMESTAMP_PARAM)), lSensitiveEvent);
-                        }
+                        emitter.emit(DateIso8601Mapper.getDate((String) lSensitiveEvent.get(TIMESTAMP_PARAM)), lSensitiveEvent);
                     }
                 }
             }
@@ -221,7 +217,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     public void saveRRSamples(final ArrayList<RRIntervalModel> iSamplesRR) throws Exception{
         Document rrDocument = null;
         try {
-            rrDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
+            rrDocument = mPhysioSignalDB.getDocument(MY_DOCUMENT);
             Log.d(TAG, "Get Document - id:" + rrDocument.getId());
         }catch(Exception e){
             e.printStackTrace();
@@ -335,7 +331,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     public void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception {
         Document lSensitiveEventDocument = null;
         try {
-            lSensitiveEventDocument = mDB.getDocument(SENSITIVE_EVENT_DOCUMENT);
+            lSensitiveEventDocument = mSensitiveEventDB.getDocument(MY_DOCUMENT);
             Log.d(TAG, "Get Document - id:" + lSensitiveEventDocument.getId());
         }catch(Exception e){
             e.printStackTrace();
@@ -379,8 +375,9 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         Document lPhysioSignalDocument = null;
         Document lSensitiveEventDocument = null;
         try {
-            lPhysioSignalDocument = mDB.getDocument(PHYSIO_SIGNAL_DOCUMENT);
-            lSensitiveEventDocument = mDB.getDocument(SENSITIVE_EVENT_DOCUMENT);
+            lPhysioSignalDocument = mPhysioSignalDB.getDocument(MY_DOCUMENT);
+            lSensitiveEventDocument = mSensitiveEventDB.getDocument(MY_DOCUMENT);
+
 
         }catch(Exception e){
             e.printStackTrace();
