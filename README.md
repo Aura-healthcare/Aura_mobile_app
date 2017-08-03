@@ -25,7 +25,7 @@ We references all in-progress or future developpements on cards in [Github Proje
 
 ## App Architecture
 
-![Scheme](documentation/auramobileapparchitecture.png)
+![Scheme](documentation/auramobileapparchitecture-2.png)
 
 ## Details
 The "Aura project" mobile application:
