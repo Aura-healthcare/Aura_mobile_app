@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="100dp"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
     android:layout_marginTop="6dp"
@@ -25,36 +25,37 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="4"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/data_sync_last_sync"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="2"
             android:layout_marginLeft="6dp"
             android:text="@string/last_sync"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-        <Button
-            android:id="@+id/data_sync_button"
-            android:drawableLeft="@drawable/action_push_data"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
+        <TextView
+            android:id="@+id/data_sync_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:text="@string/data_sync_button" />
+            android:text="@string/data_sync_comment"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
         <ProgressBar
             android:id="@+id/data_sync_progress_bar"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_gravity="center"
             style="?android:attr/progressBarStyleHorizontal"
-            android:progress="0"
-            android:max="100"
+            android:indeterminate="true"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_weight="1"
             android:visibility="gone"/>
 
     </LinearLayout>

@@ -53,14 +53,6 @@ public class DataSyncContract {
         void endPushDataOnCloud();
 
         /**
-         * @brief refresh progress bar display during data push
-         *
-         * @param iProgress data push progress state in percent
-         */
-
-        void refreshProgressPushDataOnCloud(Integer iProgress);
-
-        /**
          * @brief refresh last syncing date display
          *
          * @param iLastSync last time data has been push on Cloud
@@ -85,10 +77,6 @@ public class DataSyncContract {
 
     interface Presenter extends BasePresenter{
 
-        /**
-         * @brief callback triggered when user push data on Cloud
-         */
-        void pushData();
 
     }
 }

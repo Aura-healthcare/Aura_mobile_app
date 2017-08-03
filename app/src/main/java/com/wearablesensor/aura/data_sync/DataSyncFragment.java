@@ -1,4 +1,3 @@
-
 /**
  * @file
  * @author  clecoued <clement.lecouedic@aura.healthcare>
@@ -64,11 +63,7 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
     @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar; /** data push progress bar */
     @BindView(R.id.data_sync_image_view) ImageView mImageView; /** data push image state */
     @BindView(R.id.data_sync_last_sync) TextView mLastSyncView; /** text view displaying last sync date */
-    @BindView(R.id.data_sync_button) Button mDataSyncButton;
-    @OnClick(R.id.data_sync_button)
-    public void onClickDataSyncButton(View v){
-        mPresenter.pushData();
-    }
+    @BindView(R.id.data_sync_comment) TextView mDataSyncComment;
 
     private OnFragmentInteractionListener mListener;
 
@@ -144,9 +139,10 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
      */
     @Override
     public void startPushDataOnCloud() {
+        Log.d(TAG, "startPushDataOnCloud");
         mProgressBar.setVisibility(View.VISIBLE);
 
-        mDataSyncButton.setVisibility(View.GONE);
+        mDataSyncComment.setVisibility(View.GONE);
     }
 
     /**
@@ -154,20 +150,10 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
      */
     @Override
     public void endPushDataOnCloud() {
+        Log.d(TAG, "endPushDataOnCloud");
         mProgressBar.setVisibility(View.GONE);
-        mProgressBar.setProgress(0);
 
-        mDataSyncButton.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * @brief refresh progress bar display during data push
-     *
-     * @param iProgress data push progress state in percent
-     */
-    @Override
-    public void refreshProgressPushDataOnCloud(Integer iProgress) {
-        mProgressBar.setProgress(iProgress);
+        mDataSyncComment.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -177,6 +163,8 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
      */
     @Override
     public void refreshLastSync(Date iLastSync) {
+        Log.d(TAG, "refreshLastSync" + iLastSync);
+
         long iCurrentTimeInMs = Calendar.getInstance().getTimeInMillis();
 
         Calendar lFormerDate = Calendar.getInstance();

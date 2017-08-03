@@ -77,7 +77,7 @@
     <!-- Strings related to data syncing -->
     <string name="push_data_fail">Push data on Cloud failed</string>
 
-    <string name="data_sync_button">Sync Data</string>
+    <string name="data_sync_comment">Please enable Wifi to sync data</string>
     <string name="last_sync">Last Synchro: \n</string>
 
     <!-- Strings related to seizure report panel -->

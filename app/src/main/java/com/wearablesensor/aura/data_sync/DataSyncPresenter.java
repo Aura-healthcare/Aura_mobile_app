@@ -31,56 +31,31 @@
 
 package com.wearablesensor.aura.data_sync;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncNotification;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncServiceObserver;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncStatus;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 
-import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
-import com.wearablesensor.aura.data_repository.LocalDataRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
-import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
-import com.wearablesensor.aura.user_session.UserPreferencesModel;
-import com.wearablesensor.aura.user_session.UserSessionService;
-
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
-public class DataSyncPresenter implements DataSyncContract.Presenter {
+public class DataSyncPresenter extends DataSyncServiceObserver implements DataSyncContract.Presenter {
+    private final String TAG = this.getClass().getSimpleName();
 
-    private final LocalDataRepository mLocalDataRepository;
-    private final RemoteDataRepository.Session mRemoteDataSessionRepository;
-    private final RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
-
-    private final UserSessionService mUserSessionService; /** user session service is required to keep user preferences updated on data push */
-
-    private final DataSyncContract.View mView;
-
-    private final Context mApplicationContext;
+    private DataSyncService mDataSyncService;
+    private DataSyncContract.View mView;
 
     /**
+     * @brief constructor
      *
-     * @param iLocalDataRepository local data repository that stored to-be-pushed data
-     * @param iRemoteDataSessionRepository remote data repository that need to be synced
-     * @param iRemoteDataTimeSeriesRepository remote data repository that need to be synced
-     * @param iView UI component that displays data push state to user
-     * @param iApplicationContext application context
-     * @param iUserSessionService user session information
+     * @param iDataSyncService data sync service
+     * @param iView view to be updated as it is done in MVP architecture
      */
-    public DataSyncPresenter(LocalDataRepository iLocalDataRepository,
-                             RemoteDataRepository.Session iRemoteDataSessionRepository,
-                             RemoteDataRepository.TimeSeries iRemoteDataTimeSeriesRepository,
-                             DataSyncContract.View iView,
-                             Context iApplicationContext,
-                             UserSessionService iUserSessionService) {
-        mLocalDataRepository = iLocalDataRepository;
-        mRemoteDataSessionRepository = iRemoteDataSessionRepository;
-        mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
+    public DataSyncPresenter(DataSyncService iDataSyncService, DataSyncContract.View iView) {
+        mDataSyncService = iDataSyncService;
+        mDataSyncService.addObserver(this);
+
         mView = iView;
-        mApplicationContext = iApplicationContext;
-        mUserSessionService = iUserSessionService;
-        Log.d("DataSyncPresenter","constructor" );
 
         mView.setPresenter(this);
     }
@@ -90,112 +65,29 @@ public class DataSyncPresenter implements DataSyncContract.Presenter {
      */
     @Override
     public void start() {
-        Date lLastSync = getLastSync();
+        Date lLastSync = mDataSyncService.getLastSync();
         mView.refreshLastSync(lLastSync);
+
     }
 
     /**
-     * @brief callback triggered when user push data on Cloud
+     * @brief method executed by observer class when receiving a data sync notification event
+     *
+     * @param iDataSyncNotification notification to be processed by observer class
      */
     @Override
-    public void pushData() {
-        new PushDataOnRemoteAsync().execute();
-    }
-
-    /**
-     * @brief update last sync attribute from user preferences
-     *
-     * @param iLastSync last sync value to apply
-     * @throws Exception
-     */
-    private void saveLastSync(Date iLastSync) throws Exception {
-        try {
-            UserPreferencesModel lFormerUserPrefs = mUserSessionService.getUserPreferences();
-            UserPreferencesModel lNewUserPrefs= new UserPreferencesModel(lFormerUserPrefs.getUserId(), DateIso8601Mapper.getString(iLastSync) );
-            mUserSessionService.setUserPreferences(lNewUserPrefs);
-            mRemoteDataSessionRepository.saveUserPreferences(lNewUserPrefs);
-        }catch(Exception e){
-            throw e;
-        }
-    }
-
-    /**
-     * @brief get last sync value from user preferences
-     *
-     * @return last sync date if exists, otherwise null
-     */
-    private Date getLastSync(){
-        String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
-        return DateIso8601Mapper.getDate(lLastSync);
-    }
-
-
-    /**
-     * @brief asynchronous task that handles the data push on a background thread
-     */
-    // TODO: we should implement a Loader and cache/remote data sync logic
-    class PushDataOnRemoteAsync extends AsyncTask<Void, Integer, Boolean> {
-        final private String TAG = PushDataOnRemoteAsync.class.getSimpleName();
-        private Date mCurrentSync;
-        private String mFailMessage;
-
-        protected void onPreExecute() {
-            Log.d(TAG, "OnPreExecute");
-            mCurrentSync = null;
-            mFailMessage = "";
+    public void onDataSyncServiceNotification(DataSyncNotification iDataSyncNotification){
+        Log.d(TAG, "DataSyncNotification " + iDataSyncNotification.getStatus());
+        if(iDataSyncNotification.getStatus() == DataSyncStatus.START_SYNC){
             mView.startPushDataOnCloud();
         }
-
-        protected Boolean doInBackground(Void... arg0) {
-            Log.d(TAG, "doInBackground");
-
-            try {
-                publishProgress(1);
-                mLocalDataRepository.clearCache();
-                Calendar c = Calendar.getInstance();
-                mCurrentSync = c.getTime();
-
-                Date lLastSync = getLastSync();
-                publishProgress(10);
-                final ArrayList<RRIntervalModel> lRrSamples = mLocalDataRepository.queryRRSamples(lLastSync, mCurrentSync);
-                publishProgress(20);
-
-                final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lLastSync, mCurrentSync);
-                publishProgress(30);
-
-                mRemoteDataTimeSeriesRepository.saveRRSample(lRrSamples);
-                publishProgress(60);
-
-                mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);
-                publishProgress(90);
-
-                saveLastSync(mCurrentSync);
-                return true;
-            } catch (Exception e) {
-                Log.d(TAG, "Fail to save RR data");
-                mFailMessage = e.toString();
-                return false;
-            }
-        }
-
-
-        protected void onProgressUpdate(Integer...a){
-            Log.d(TAG , "onProgressUpdate");
-            mView.refreshProgressPushDataOnCloud(a[0]);
-        }
-
-
-        protected void onPostExecute(Boolean iSuccess) {
-            Log.d(TAG , "onPostExecute");
-            if(iSuccess) {
-                mView.refreshLastSync(mCurrentSync);
-            }
-            else{
-                mView.displayFailMessageOnPushData(mApplicationContext, mFailMessage);
-            }
-
+        else if(iDataSyncNotification.getStatus() == DataSyncStatus.END_SYNC){
             mView.endPushDataOnCloud();
         }
-
+        else if(iDataSyncNotification.getStatus() == DataSyncStatus.UPDATE_SYNC_STATE){
+            DataSyncUpdateStateNotification lDataSyncUpdateStateNotification = (DataSyncUpdateStateNotification) iDataSyncNotification;
+            mView.refreshLastSync(lDataSyncUpdateStateNotification.getLastSync());
+        }
     }
+
 }

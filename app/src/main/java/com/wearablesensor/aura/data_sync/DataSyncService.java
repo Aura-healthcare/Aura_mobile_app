@@ -41,19 +41,23 @@ import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Observable;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class DataSyncService {
+public class DataSyncService extends Observable{
     private final String TAG = this.getClass().getSimpleName();
 
     private Context mApplicationContext;
@@ -86,7 +90,7 @@ public class DataSyncService {
         mUserSessionService = iUserSessionService;
 
         mIsDataSyncEnabled = false;
-        mIsDataSyncInProgress = false;
+        setDataSyncIsInProgress(false);
 
     }
 
@@ -137,6 +141,23 @@ public class DataSyncService {
     }
 
     /**
+     * @brief setter for data sync is in progress
+     *
+     * @param iStatus progress status
+     */
+    public void setDataSyncIsInProgress(Boolean iStatus){
+        mIsDataSyncInProgress = iStatus;
+
+        this.setChanged();
+        if(iStatus == true){
+            this.notifyObservers( new DataSyncStartNotification() );
+        }
+        else {
+            this.notifyObservers(new DataSyncEndNotification());
+        }
+    }
+
+    /**
      * @brief start data sync
      */
 
@@ -148,7 +169,7 @@ public class DataSyncService {
         }
 
         mIsDataSyncEnabled = true;
-        mIsDataSyncInProgress = true;
+        setDataSyncIsInProgress(true);
 
 
         Log.d(TAG, "clear cache");
@@ -158,7 +179,7 @@ public class DataSyncService {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "push data packets");
+        Log.d(TAG, "push data packets - " + mIsDataSyncEnabled + " " + mIsDataSyncInProgress);
         new PushDataPacketsOnRemoteAsync().execute();
     }
 
@@ -200,6 +221,9 @@ public class DataSyncService {
                 }});
 
             t1.start();
+
+            this.setChanged();
+            this.notifyObservers(new DataSyncUpdateStateNotification(iLastSync));
         }catch(Exception e){
             throw e;
         }
@@ -210,7 +234,7 @@ public class DataSyncService {
      *
      * @return last sync date if exists, otherwise null
      */
-    private Date getLastSync(){
+    public Date getLastSync(){
         String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
         return DateIso8601Mapper.getDate(lLastSync);
     }
@@ -291,7 +315,7 @@ public class DataSyncService {
                 e.printStackTrace();
             }
 
-            mIsDataSyncInProgress = false;
+            setDataSyncIsInProgress(false);
 
         }
 
