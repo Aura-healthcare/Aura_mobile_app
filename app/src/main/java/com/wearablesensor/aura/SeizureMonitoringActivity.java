@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -118,6 +119,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         setupDrawer();
 
         startAutomaticPairing();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -132,6 +134,11 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         ((AuraApplication) getApplication()).getDataSyncService().close();
         super.onStop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //disable leaving activity on back button pressed
     }
 
     private void setupDrawer(){
