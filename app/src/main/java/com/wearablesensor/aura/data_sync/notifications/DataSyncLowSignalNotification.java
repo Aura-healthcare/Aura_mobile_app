@@ -1,5 +1,5 @@
 /**
- * @file DataSyncEndNotification
+ * @file DataSyncLowSignalNotification
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
@@ -22,16 +22,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  *
  * @section DESCRIPTION
- * DataSyncStatus is an enum describing the data sync events
+ * DataSyncLowSignalNotification class use to send low wifi signal state event
  *
  */
+
 package com.wearablesensor.aura.data_sync.notifications;
 
-public enum DataSyncStatus {
-    START_SYNC,
-    END_SYNC,
-    UPDATE_SYNC_STATE,
-    SIGNAL_STATE_LOW,
-    SIGNAL_STATE_NONE,
-    UNDEFINED
+public class DataSyncLowSignalNotification extends DataSyncNotification{
+    public DataSyncLowSignalNotification() {
+        super(DataSyncStatus.SIGNAL_STATE_LOW);
+    }
 }

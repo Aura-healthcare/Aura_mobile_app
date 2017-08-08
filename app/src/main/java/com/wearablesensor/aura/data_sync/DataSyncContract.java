@@ -73,6 +73,16 @@ public class DataSyncContract {
          * @param iPresenter presenter to be attached
          */
         void setPresenter(Presenter iPresenter);
+
+        /**
+         * @brief display low wifi signal state
+         */
+        void displayLowSignalState();
+
+        /**
+         * @brief display no wifi signal state
+         */
+        void displayNoSignalState();
     }
 
     interface Presenter extends BasePresenter{

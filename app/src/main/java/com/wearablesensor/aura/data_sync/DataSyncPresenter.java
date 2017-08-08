@@ -84,6 +84,12 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         else if(iDataSyncNotification.getStatus() == DataSyncStatus.END_SYNC){
             mView.endPushDataOnCloud();
         }
+        else if(iDataSyncNotification.getStatus() == DataSyncStatus.LOW_SIGNAL_STATE){
+            mView.displayLowSignalState();
+        }
+        else if(iDataSyncNotification.getStatus() == DataSyncStatus.NO_SIGNAL_STATE){
+            mView.displayNoSignalState();
+        }
         else if(iDataSyncNotification.getStatus() == DataSyncStatus.UPDATE_SYNC_STATE){
             DataSyncUpdateStateNotification lDataSyncUpdateStateNotification = (DataSyncUpdateStateNotification) iDataSyncNotification;
             mView.refreshLastSync(lDataSyncUpdateStateNotification.getLastSync());

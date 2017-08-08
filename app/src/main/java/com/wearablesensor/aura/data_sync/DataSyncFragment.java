@@ -32,19 +32,18 @@ package com.wearablesensor.aura.data_sync;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -52,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 
 public class DataSyncFragment extends Fragment implements DataSyncContract.View {
@@ -221,6 +219,22 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
     @Override
     public void setPresenter(DataSyncContract.Presenter iPresenter) {
         mPresenter = iPresenter;
+    }
+
+    /**
+     * @brief display low wifi signal state
+     */
+    @Override
+    public void displayLowSignalState() {
+        mDataSyncComment.setText(getString(R.string.data_sync_low_signal));
+    }
+
+    /**
+     * @brief display no wifi signal state
+     */
+    @Override
+    public void displayNoSignalState() {
+        mDataSyncComment.setText(getString(R.string.data_sync_no_signal));
     }
 
 

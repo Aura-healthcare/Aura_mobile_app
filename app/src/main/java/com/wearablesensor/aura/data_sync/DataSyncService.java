@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
 //import com.github.pwittchen.reactivewifi.WifiSignalLevel;
+import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
@@ -42,6 +43,8 @@ import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncLowSignalNotification;
+import com.wearablesensor.aura.data_sync.notifications.DataSyncNoSignalNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
@@ -67,10 +70,12 @@ public class DataSyncService extends Observable{
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
     private UserSessionService mUserSessionService;
 
+    private Boolean mIsWifiEnabled;
     private Boolean mIsDataSyncEnabled;
     private Boolean mIsDataSyncInProgress;
 
     private Subscription mWifiStateChangeSubscription;
+    private Subscription mWifiSignalLevelChangeSubscription;
 
     /**
      * @brief constructor
@@ -89,6 +94,7 @@ public class DataSyncService extends Observable{
         mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
         mUserSessionService = iUserSessionService;
 
+        mIsWifiEnabled = false;
         mIsDataSyncEnabled = false;
         setDataSyncIsInProgress(false);
 
@@ -105,28 +111,43 @@ public class DataSyncService extends Observable{
                                                     .subscribe(new Action1<WifiState>() {
                                                         @Override public void call(WifiState wifiState) {
                                                             if(wifiState.equals(WifiState.DISABLED)){
+                                                                Log.d(TAG, "Wifi Disable");
+                                                                mIsWifiEnabled = false;
+                                                                setChanged();
+                                                                notifyObservers(new DataSyncNoSignalNotification());
+
                                                                 stopDataSync();
                                                             }
                                                             else if(wifiState.equals(WifiState.ENABLED)){
-                                                                startDataSync();
+                                                                mIsWifiEnabled = true;
+                                                                Log.d(TAG, "Wifi Enable");
                                                             }
                                                         }
                                                     });
 
 
-        /*ReactiveWifi.observeWifiSignalLevel(mApplicationContext)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<WifiSignalLevel>() {
-                    @Override public void call(WifiSignalLevel signalLevel) {
-                        if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR){
-                            stopDataTransfert();
-                        }
-                        else{
-                            startDataTransfert();
-                        }
-                    }
-                });*/
+        mWifiSignalLevelChangeSubscription = ReactiveWifi.observeWifiSignalLevel(mApplicationContext)
+                                                         .subscribeOn(Schedulers.io())
+                                                         .observeOn(AndroidSchedulers.mainThread())
+                                                         .subscribe(new Action1<WifiSignalLevel>() {
+                                                            @Override public void call(WifiSignalLevel signalLevel) {
+
+                                                                if(!mIsWifiEnabled){
+                                                                    return;
+                                                                }
+
+                                                                 Log.d(TAG, "Wifi Signal Level - " + signalLevel);
+                                                                 if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR || signalLevel == WifiSignalLevel.FAIR){
+                                                                     stopDataSync();
+
+                                                                     setChanged();
+                                                                     notifyObservers(new DataSyncLowSignalNotification());
+                                                                 }
+                                                                 else{
+                                                                    startDataSync();
+                                                                 }
+                                                            }
+                                                        });
     }
 
     /**
@@ -137,6 +158,10 @@ public class DataSyncService extends Observable{
 
         if (mWifiStateChangeSubscription != null && !mWifiStateChangeSubscription.isUnsubscribed()) {
             mWifiStateChangeSubscription.unsubscribe();
+        }
+
+        if (mWifiSignalLevelChangeSubscription != null && !mWifiSignalLevelChangeSubscription.isUnsubscribed()) {
+            mWifiSignalLevelChangeSubscription.unsubscribe();
         }
     }
 
