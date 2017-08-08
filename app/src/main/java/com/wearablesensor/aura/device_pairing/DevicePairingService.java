@@ -81,4 +81,8 @@ public class DevicePairingService extends Observable{
     public LinkedList<DeviceInfo> getDeviceList(){
         return new LinkedList<>();
     }
+
+    public void close() {
+        Log.d(TAG, "close Service");
+    }
 }

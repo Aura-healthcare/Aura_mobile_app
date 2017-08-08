@@ -124,6 +124,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @Override
     public void onStop(){
+
+        ((AuraApplication) getApplication()).getDevicePairingService().close();
         try {
             ((AuraApplication) getApplication()).getLocalDataRepository().clearCache();
 

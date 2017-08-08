@@ -232,5 +232,16 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         return oDeviceList;
     }
 
+    /**
+     * @brief close service in the application exit
+     */
+    @Override
+    public void close(){
+        if(mDeviceServiceConnection != null && mDeviceServiceConnection.getBluetoothLeService() != null) {
+            mDeviceServiceConnection.getBluetoothLeService().close();
+        }
+        super.close();
+    }
+
 
 }

@@ -130,7 +130,7 @@ public class DataSyncService extends Observable{
     }
 
     /**
-     * @brief close service, detach observers on Wifi state and stop data transfert
+     * @brief close service, detach observers on Wifi state and stop data transfer
      */
     public void close(){
         stopDataSync();
