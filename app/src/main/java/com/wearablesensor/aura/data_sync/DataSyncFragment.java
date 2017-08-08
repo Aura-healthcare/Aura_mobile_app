@@ -162,9 +162,29 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
      * @param iLastSync last time data has been push on Cloud
      */
     @Override
-    public void refreshLastSync(Date iLastSync) {
+    public void refreshLastSync(final Date iLastSync) {
         Log.d(TAG, "refreshLastSync" + iLastSync);
 
+        // Current Thread is Main Thread.
+        if(Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            refreshLastSyncOnThread(iLastSync);
+        }
+        else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLastSyncOnThread(iLastSync);
+                }
+            });
+        }
+    }
+
+    /**
+     * @brief internal method used to update last sync text view on a specific thread
+     *
+     * @param iLastSync last time data has been push on Cloud
+     */
+    private void refreshLastSyncOnThread(final Date iLastSync){
         long iCurrentTimeInMs = Calendar.getInstance().getTimeInMillis();
 
         Calendar lFormerDate = Calendar.getInstance();

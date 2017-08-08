@@ -222,8 +222,6 @@ public class DataSyncService extends Observable{
 
             t1.start();
 
-            this.setChanged();
-            this.notifyObservers(new DataSyncUpdateStateNotification(iLastSync));
         }catch(Exception e){
             throw e;
         }
@@ -297,8 +295,12 @@ public class DataSyncService extends Observable{
 
                     mCurrentSync = lWindowEnd;
 
+                    setChanged();
+                    notifyObservers(new DataSyncUpdateStateNotification(mCurrentSync));
+
                 } catch (Exception e) {
                     Log.d(TAG, "Fail to save data packet");
+                    e.printStackTrace();
                     return false;
                 }
             }
