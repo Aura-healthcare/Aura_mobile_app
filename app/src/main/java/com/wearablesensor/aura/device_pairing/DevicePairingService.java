@@ -22,6 +22,8 @@ import android.content.Context;
 
 import java.util.LinkedList;
 import java.util.Observable;
+
+import android.os.Vibrator;
 import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
@@ -29,6 +31,8 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconn
 
 public class DevicePairingService extends Observable{
     private final String TAG = this.getClass().getSimpleName();
+
+    private final static int PHONE_VIBRATION_DURATION = 1500; // in milliseconds
     protected Context mContext;
 
     protected Boolean mPaired;
@@ -51,6 +55,11 @@ public class DevicePairingService extends Observable{
 
         this.setChanged();
         this.notifyObservers( new DevicePairingConnectedNotification() );
+
+        Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(PHONE_VIBRATION_DURATION);
+
+
     }
 
     public void endPairing(){
@@ -60,6 +69,9 @@ public class DevicePairingService extends Observable{
 
         this.setChanged();
         this.notifyObservers(new DevicePairingDisconnectedNotification());
+
+        Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(PHONE_VIBRATION_DURATION);
     }
 
     public Boolean isPaired(){
