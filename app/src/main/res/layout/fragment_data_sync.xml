@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/data_sync_comment"
+            android:text="@string/data_sync_no_signal"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
         <ProgressBar
