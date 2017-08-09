@@ -61,7 +61,6 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     }
 
     public void endReportSeizureDetails(){
-        FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
         mActivity.getSupportFragmentManager().popBackStackImmediate();
     }
 

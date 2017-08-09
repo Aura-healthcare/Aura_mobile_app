@@ -183,6 +183,15 @@ public class DataSyncService extends Observable{
     }
 
     /**
+     * @brief getter for data syn is in progress
+     *
+     * @return true if data sync is in progress, false otherwise
+     */
+
+    public boolean isDataSyncInProgress() {
+        return mIsDataSyncInProgress;
+    }
+    /**
      * @brief start data sync
      */
 
@@ -261,7 +270,6 @@ public class DataSyncService extends Observable{
         String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
         return DateIso8601Mapper.getDate(lLastSync);
     }
-
 
     /**
      * @brief asynchronous task that handles the data packets push on a background thread

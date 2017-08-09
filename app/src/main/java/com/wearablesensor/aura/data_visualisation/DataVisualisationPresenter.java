@@ -49,15 +49,17 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
 
     public DataVisualisationPresenter(DevicePairingService iDevicePairingService,
                                       DataVisualisationContract.View iView){
-            mDevicePairingService = iDevicePairingService;
+        mDevicePairingService = iDevicePairingService;
 
-            mView = iView;
-            mView.setPresenter(this);
+        mView = iView;
+        mView.setPresenter(this);
+
+        listenDevicePairingObserver();
     }
 
     @Override
     public void start() {
-        listenDevicePairingObserver();
+
     }
 
     @Override

@@ -68,6 +68,12 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         Date lLastSync = mDataSyncService.getLastSync();
         mView.refreshLastSync(lLastSync);
 
+        if(mDataSyncService.isDataSyncInProgress()){
+            mView.startPushDataOnCloud();
+        }
+        else{
+            mView.endPushDataOnCloud();
+        }
     }
 
     /**

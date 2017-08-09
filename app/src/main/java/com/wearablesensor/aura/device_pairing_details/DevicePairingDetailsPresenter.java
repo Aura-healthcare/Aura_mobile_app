@@ -20,11 +20,14 @@ package com.wearablesensor.aura.device_pairing_details;
 
 import android.util.Log;
 
+import com.wearablesensor.aura.device_pairing.DeviceInfo;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+
+import java.util.LinkedList;
 
 /**
  * Created by lecoucl on 07/04/17.
@@ -42,11 +45,19 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
         mView = iView;
 
         mView.setPresenter(this);
+
+        listenDevicePairingService();
     }
 
     @Override
     public void start() {
-        listenDevicePairingService();
+        if(mBluetoothDevicePairingService.isPaired()){
+            LinkedList<DeviceInfo> lDeviceList = mBluetoothDevicePairingService.getDeviceList();
+            mView.successPairing(lDeviceList);
+        }
+        else{
+            mView.failParing();
+        }
     }
 
     @Override
