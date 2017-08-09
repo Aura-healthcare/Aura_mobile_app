@@ -34,8 +34,6 @@ public class SeizureReportContract {
 
 
     public interface Presenter extends BasePresenter {
-
-        void startReportSeizureDetails();
         void cancelReportSeizureDetails();
 
         void reportSeizure(Date iDate, String iComment);

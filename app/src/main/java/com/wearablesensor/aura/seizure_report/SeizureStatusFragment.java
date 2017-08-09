@@ -42,7 +42,7 @@ import butterknife.OnClick;
  * Use the {@link SeizureStatusFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SeizureStatusFragment extends Fragment implements SeizureReportContract.View{
+public class SeizureStatusFragment extends Fragment implements SeizureStatusContract.View{
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -52,7 +52,7 @@ public class SeizureStatusFragment extends Fragment implements SeizureReportCont
         mPresenter.startReportSeizureDetails();
     }
 
-    private SeizureReportContract.Presenter mPresenter;
+    private SeizureStatusContract.Presenter mPresenter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -121,7 +121,7 @@ public class SeizureStatusFragment extends Fragment implements SeizureReportCont
     }
 
     @Override
-    public void setPresenter(SeizureReportContract.Presenter iPresenter) {
+    public void setPresenter(SeizureStatusContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }
 

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,14 +44,16 @@ import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
+import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureStatusFragment;
+import com.wearablesensor.aura.seizure_report.SeizureStatusPresenter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener{
+public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
@@ -71,10 +74,12 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private RRSamplesVisualisationFragment mRRSamplesVisualisationFragment;
 
     private SeizureStatusFragment mSeizureStatusFragment;
+    private SeizureStatusPresenter mSeizureStatusPresenter;
+
+    private SeizureReportFragment mSeizureReportFragment;
     private SeizureReportPresenter mSeizureReportPresenter;
 
     private static final int REQUEST_ENABLE_BT = 1;
-
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
@@ -102,23 +107,29 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         ((AuraApplication) getApplication()).getDataSyncService().initialize();
 
-        mDevicePairingFragment = (DevicePairingDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.device_pairing_details_fragment);
+        mDevicePairingFragment = new DevicePairingDetailsFragment();
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
 
-        mDataSyncFragment = (DataSyncFragment) getSupportFragmentManager().findFragmentById(R.id.data_sync_fragment);
+        mDataSyncFragment = new DataSyncFragment();
         mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
 
-        mRRSamplesVisualisationFragment = (RRSamplesVisualisationFragment) getSupportFragmentManager().findFragmentById(R.id.hrv_realtime_display_fragment);
+        mRRSamplesVisualisationFragment = new RRSamplesVisualisationFragment();
         mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
 
-        mSeizureStatusFragment = (SeizureStatusFragment) getSupportFragmentManager().findFragmentById(R.id.seizure_status_fragment);
-        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureStatusFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
+        mSeizureReportFragment = new SeizureReportFragment();
+        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
+
+        mSeizureStatusFragment = new SeizureStatusFragment();
+        mSeizureStatusPresenter = new SeizureStatusPresenter(mSeizureStatusFragment, mSeizureReportFragment, this);
+
+        displayFragments();
 
         ButterKnife.bind(this);
 
         setupDrawer();
 
         startAutomaticPairing();
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -186,6 +197,18 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         }
     }
 
+    private void displayFragments(){
+        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+
+        lTransaction.add(R.id.content_frame, mDevicePairingFragment, DevicePairingDetailsFragment.class.getSimpleName());
+        lTransaction.add(R.id.content_frame, mDataSyncFragment , DataSyncFragment.class.getSimpleName());
+        lTransaction.add(R.id.content_frame, mRRSamplesVisualisationFragment, RRSamplesVisualisationFragment.class.getSimpleName() );
+        lTransaction.add(R.id.content_frame, mSeizureStatusFragment, SeizureStatusFragment.class.getSimpleName());
+        lTransaction.addToBackStack(null);
+
+        // Commit the transaction
+        lTransaction.commit();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
@@ -242,4 +265,11 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     public void onSeizureStatusFragmentInteraction(Uri uri) {
 
     }
+
+
+    @Override
+    public void onSeizureReportFragmentInteraction(Uri uri) {
+
+    }
+
 }
