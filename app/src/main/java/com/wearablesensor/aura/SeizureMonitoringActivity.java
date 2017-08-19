@@ -40,7 +40,7 @@ import android.widget.Toast;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
-import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment;
+import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
@@ -53,7 +53,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, RRSamplesVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener{
+public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, PhysioSignalVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
@@ -71,7 +71,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private DataSyncFragment mDataSyncFragment;
 
     private DataVisualisationPresenter mDataVisualisationPresenter;
-    private RRSamplesVisualisationFragment mRRSamplesVisualisationFragment;
+    private PhysioSignalVisualisationFragment mPhysioSignalVisualisationFragment;
 
     private SeizureStatusFragment mSeizureStatusFragment;
     private SeizureStatusPresenter mSeizureStatusPresenter;
@@ -113,8 +113,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDataSyncFragment = new DataSyncFragment();
         mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
 
-        mRRSamplesVisualisationFragment = new RRSamplesVisualisationFragment();
-        mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mRRSamplesVisualisationFragment);
+        mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
+        mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mPhysioSignalVisualisationFragment);
 
         mSeizureReportFragment = new SeizureReportFragment();
         mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
@@ -202,7 +202,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         lTransaction.add(R.id.content_frame, mDevicePairingFragment, DevicePairingDetailsFragment.class.getSimpleName());
         lTransaction.add(R.id.content_frame, mDataSyncFragment , DataSyncFragment.class.getSimpleName());
-        lTransaction.add(R.id.content_frame, mRRSamplesVisualisationFragment, RRSamplesVisualisationFragment.class.getSimpleName() );
+        lTransaction.add(R.id.content_frame, mPhysioSignalVisualisationFragment, PhysioSignalVisualisationFragment.class.getSimpleName() );
         lTransaction.add(R.id.content_frame, mSeizureStatusFragment, SeizureStatusFragment.class.getSimpleName());
         lTransaction.addToBackStack(null);
 

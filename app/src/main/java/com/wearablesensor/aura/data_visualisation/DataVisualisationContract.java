@@ -18,24 +18,39 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.data_visualisation;
 
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.utils.BasePresenter;
 import com.wearablesensor.aura.utils.BaseView;
-
-import java.util.Date;
 
 /**
  * Created by lecoucl on 21/04/17.
  */
 public class DataVisualisationContract {
     interface View extends BaseView<Presenter>{
-        void enableRRSamplesVisualisation();
-        void disableRRSamplesVisualisation();
+        /**
+         * @brief enable data visualisation on app
+         */
+        void enablePhysioSignalVisualisation();
 
-        void refreshRRSamplesVisualisation(RRIntervalModel iSampleRR);
+        /**
+         * @brief disable data visualisation on app
+         */
+        void disablePhysioSignalVisualisation();
+
+        /**
+         * brief refresh data visualisation when receiving a new data sample
+         *
+         * @param iPhysioSignal physiological data sample
+         */
+        void refreshPhysioSignalVisualisation(PhysioSignalModel iPhysioSignal);
     }
 
     interface Presenter extends BasePresenter{
-        void receiveNewHRVSample(RRIntervalModel iSampleRR);
+        /**
+         * @brief handle receiving a new data sample
+         *
+         * @param iPhysioSignal physiological data sample
+         */
+        void receiveNewPhysioSample(PhysioSignalModel iPhysioSignal);
     }
 }

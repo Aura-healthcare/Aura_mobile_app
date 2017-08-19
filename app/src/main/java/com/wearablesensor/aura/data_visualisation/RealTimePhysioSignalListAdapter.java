@@ -29,17 +29,23 @@
 package com.wearablesensor.aura.data_visualisation;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 
 
-public class RealTimePhysioSignalListAdapter extends ArrayAdapter<RRIntervalModel> {
+public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalModel> {
 
     public RealTimePhysioSignalListAdapter(Context context, int resource) {
         super(context, resource);
@@ -48,18 +54,42 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<RRIntervalMode
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        RRIntervalModel lRrInterval = getItem(position);
+        PhysioSignalModel lPhysioSignal = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.realtime_physio_signal_item, parent, false);
         }
         // Lookup view for data population
-        TextView lRrValueView = (TextView) convertView.findViewById(R.id.hrv_realtime_value);
-        TextView lDeviceAdressView = (TextView) convertView.findViewById(R.id.hrv_device_adress);
-        // Populate the data into the template view using the data object
-        lRrValueView.setText(String.valueOf( Math.round((Double)(60000.0 / lRrInterval.getRrInterval() * 1.0)) ) + " bpm");
-        lDeviceAdressView.setText(lRrInterval.getDeviceAdress());
 
+        ImageView lImageView = (ImageView) convertView.findViewById(R.id.physio_signal_item_picture);
+        TextView lValueView = (TextView) convertView.findViewById(R.id.physio_signal_item_value);
+        TextView lDeviceAdressView = (TextView) convertView.findViewById(R.id.physio_signal_item_device_adress);
+
+        // Populate the data into the template view using the data object
+        if(lPhysioSignal.getType().equals(RRIntervalModel.RR_INTERVAL_TYPE)) {
+            RRIntervalModel lRrInterval = ((RRIntervalModel) lPhysioSignal);
+
+            Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+            lImageView.setImageBitmap(lHrvBitmap);
+            lValueView.setText(String.valueOf(Math.round(60000.0 / lRrInterval.getRrInterval() * 1.0)) + " bpm");
+            lDeviceAdressView.setText(lRrInterval.getDeviceAdress());
+        }
+        else if(lPhysioSignal.getType().equals(SkinTemperatureModel.SKIN_TEMPERATURE_TYPE)){
+            SkinTemperatureModel lSkinTemperatureModel = ((SkinTemperatureModel) lPhysioSignal);
+
+            Bitmap lSkinTemperatureBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.skin_temperature_picture);
+            lImageView.setImageBitmap(lSkinTemperatureBitmap);
+            lValueView.setText(String.valueOf(lSkinTemperatureModel.getTemperature()) + " Celsius");
+            lDeviceAdressView.setText(lSkinTemperatureModel.getDeviceAdress());
+        }
+        else if(lPhysioSignal.getType().equals(ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY)){
+            ElectroDermalActivityModel lElectroDermalActivityModel = ((ElectroDermalActivityModel) lPhysioSignal);
+
+            Bitmap lElectroDermalActivityBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.electro_dermal_activity_picture);
+            lImageView.setImageBitmap(lElectroDermalActivityBitmap);
+            lValueView.setText(String.valueOf((float) (lElectroDermalActivityModel.getElectroDermalActivity() * 1.0/ 1000)) + " kOhm" );
+            lDeviceAdressView.setText(lElectroDermalActivityModel.getDeviceAdress());
+        }
         // Return the completed view to render on screen
         return convertView;
     }

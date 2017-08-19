@@ -29,6 +29,7 @@
 
 package com.wearablesensor.aura.data_visualisation;
 
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
@@ -62,11 +63,19 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
 
     }
 
+    /**
+     * @brief handle receiving a new data sample
+     *
+     * @param iPhysioSignal physiological data sample
+     */
     @Override
-    public void receiveNewHRVSample(RRIntervalModel iSampleRR) {
-        mView.refreshRRSamplesVisualisation(iSampleRR);
+    public void receiveNewPhysioSample(PhysioSignalModel iPhysioSignal) {
+        mView.refreshPhysioSignalVisualisation(iPhysioSignal);
     }
 
+    /**
+     * @brief connect observer to DevicePairingService
+     */
     private void listenDevicePairingObserver(){
         mDevicePairingService.addObserver(this);
     }
@@ -76,14 +85,14 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
         DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
 
         if(lStatus == DevicePairingStatus.CONNECTED){
-            mView.enableRRSamplesVisualisation();
+            mView.enablePhysioSignalVisualisation();
         }
         else if(lStatus == DevicePairingStatus.DISCONNECTED){
-            mView.disableRRSamplesVisualisation();
+            mView.disablePhysioSignalVisualisation();
         }
         if(lStatus == DevicePairingStatus.RECEIVED_DATA){
             DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
-                receiveNewHRVSample(lDevicePairingNotification.getSampleRrInterval());
+                receiveNewPhysioSample(lDevicePairingNotification.getPhysioSignal());
         }
     }
 }

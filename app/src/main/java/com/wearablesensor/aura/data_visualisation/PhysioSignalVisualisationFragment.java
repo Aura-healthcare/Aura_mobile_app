@@ -1,5 +1,5 @@
 /**
- * @file RealTimePhysioSignalListAdapter.java
+ * @file PhysioSignalVisualisationFragment.java
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
@@ -30,47 +30,36 @@
 package com.wearablesensor.aura.data_visualisation;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RRSamplesVisualisationFragment extends Fragment implements DataVisualisationContract.View {
+public class PhysioSignalVisualisationFragment extends Fragment implements DataVisualisationContract.View {
     private final String TAG = this.getClass().getSimpleName();
 
     @BindView(R.id.realtime_physio_signal_list_view) ListView mRealtimePhysioSignalListView;
     private RealTimePhysioSignalListAdapter mPhysioSignalListAdapter;
 
-    private HashMap<String, RRIntervalModel> mCurrentRRIntervals;
+    private HashMap<String, PhysioSignalModel> mCurrentRRIntervals;
 
     private OnFragmentInteractionListener mListener;
 
     private DataVisualisationContract.Presenter mPresenter;
 
-    public RRSamplesVisualisationFragment() {
+    public PhysioSignalVisualisationFragment() {
         // Required empty public constructor
     }
 
@@ -80,8 +69,8 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
      *
      * @return A new instance of fragment RRSamplesVisualisationFragment.
      */
-    public static RRSamplesVisualisationFragment newInstance() {
-        RRSamplesVisualisationFragment fragment = new RRSamplesVisualisationFragment();
+    public static PhysioSignalVisualisationFragment newInstance() {
+        PhysioSignalVisualisationFragment fragment = new PhysioSignalVisualisationFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -138,9 +127,12 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
     }
 
     @Override
-    public void enableRRSamplesVisualisation() {
+    /**
+     * @brief enable data visualisation on app
+     */
+    public void enablePhysioSignalVisualisation() {
         mPhysioSignalListAdapter.clear();
-        for(Map.Entry<String, RRIntervalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentRRIntervals.entrySet()) {
             mPhysioSignalListAdapter.add(lEntry.getValue());
         }
 
@@ -148,7 +140,10 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
     }
 
     @Override
-    public void disableRRSamplesVisualisation() {
+    /**
+     * @brief disable data visualisation on app
+     */
+    public void disablePhysioSignalVisualisation() {
         mCurrentRRIntervals.clear();
 
         mPhysioSignalListAdapter.clear();
@@ -156,10 +151,15 @@ public class RRSamplesVisualisationFragment extends Fragment implements DataVisu
     }
 
     @Override
-    public void refreshRRSamplesVisualisation(RRIntervalModel iSampleRR) {
-        mCurrentRRIntervals.put(iSampleRR.getDeviceAdress(), iSampleRR);
+    /**
+     * @brief  refresh data visualisation when receiving a new data sample
+     *
+     * @param physiological data sample
+     */
+    public void refreshPhysioSignalVisualisation(PhysioSignalModel iPhysioSignal) {
+        mCurrentRRIntervals.put(iPhysioSignal.getDeviceAdress() + "-" + iPhysioSignal.getType(), iPhysioSignal);
         mPhysioSignalListAdapter.clear();
-        for(Map.Entry<String, RRIntervalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentRRIntervals.entrySet()) {
             mPhysioSignalListAdapter.add(lEntry.getValue());
         }
 
