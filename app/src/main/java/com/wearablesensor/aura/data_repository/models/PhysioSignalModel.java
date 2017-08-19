@@ -1,16 +1,36 @@
+/**
+ * @file PhysioSignalModel.java
+ * @author  clecoued <clement.lecouedic@aura.healthcare>
+ * @version 1.0
+ *
+ *
+ * @section LICENSE
+ *
+ * Aura Mobile Application
+ * Copyright (C) 2017 Aura Healthcare
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ *
+ * @section DESCRIPTION
+ *
+ * abstract data model for physiological sigmal sample
+ */
 package com.wearablesensor.aura.data_repository.models;
-
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
 import java.util.UUID;
 
-/**
- * Created by lecoucl on 03/05/17.
- */
-@DynamoDBTable(tableName = "PhysioSignal")
+
 public class PhysioSignalModel {
     protected String mUuid;          // sample data uuid
     protected String mDeviceAdress;  // device adress uuid
@@ -20,11 +40,11 @@ public class PhysioSignalModel {
 
     protected String mType;          // data type
 
-    public PhysioSignalModel() {
+    protected PhysioSignalModel() {
 
     }
 
-    public PhysioSignalModel(String iDeviceAdress, String iTimestamp, String iType) {
+    protected PhysioSignalModel(String iDeviceAdress, String iTimestamp, String iType) {
         mUuid = UUID.randomUUID().toString();
         mDeviceAdress = iDeviceAdress;
         mUser = null;
@@ -32,7 +52,7 @@ public class PhysioSignalModel {
         mType = iType;
     }
 
-    public PhysioSignalModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, String iType) {
+    protected PhysioSignalModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, String iType) {
         mUuid = iUuid;
         mDeviceAdress = iDeviceAdress;
         mUser = iUser;
@@ -40,25 +60,20 @@ public class PhysioSignalModel {
         mType = iType;
     }
 
-    @DynamoDBHashKey(attributeName = "UUID")
     public String getUuid(){
         return mUuid;
     }
-
     public void setUuid(String iUuid){
         mUuid = iUuid;
     }
 
-    @DynamoDBAttribute(attributeName = "DeviceAdress")
     public String getDeviceAdress(){
         return mDeviceAdress;
     }
-
     public void setDeviceAdress(String iDeviceAdress){
         mDeviceAdress = iDeviceAdress;
     }
 
-    @DynamoDBIndexHashKey(attributeName = "User", globalSecondaryIndexName = "User-index")
     public String getUser(){
         return mUser;
     }
@@ -67,20 +82,16 @@ public class PhysioSignalModel {
         mUser = iUser;
     }
 
-    @DynamoDBIndexHashKey(attributeName = "Timestamp", globalSecondaryIndexName = "Timestamp-index")
     public String getTimestamp(){
         return mTimestamp;
     }
-
     public void setTimestamp(String iTimestamp){
         mTimestamp = iTimestamp;
     }
 
-    @DynamoDBIndexHashKey(attributeName = "Type", globalSecondaryIndexName = "Type-index")
     public String getType(){
         return mType;
     }
-
     public void setType(String iType){
         mType = iType;
     }

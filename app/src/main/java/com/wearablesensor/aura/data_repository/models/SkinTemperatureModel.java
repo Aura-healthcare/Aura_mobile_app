@@ -1,5 +1,5 @@
 /**
- * @file RRIntervalModel.java
+ * @file SkinTemperatureModel.java
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
@@ -24,30 +24,31 @@
  *
  * @section DESCRIPTION
  *
- * data model used to describe cardiac RR-interval sample
+ * data model used to describe skin temperature sample
  */
+
 package com.wearablesensor.aura.data_repository.models;
 
-public class RRIntervalModel extends PhysioSignalModel {
+public class SkinTemperatureModel extends PhysioSignalModel {
+    private float mTemperature; // temperature in degree celsius
 
-    private int mRrInterval; // RR interval in ms
-    public static final String RR_INTERVAL_TYPE = "RrInterval";
+    public static final String SKIN_TEMPERATURE_TYPE = "SkinTemperature";
 
-    public RRIntervalModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, int iRrInterval){
-        super(iUuid, iDeviceAdress, iUser, iTimestamp, RR_INTERVAL_TYPE);
-        mRrInterval = iRrInterval;
+    public SkinTemperatureModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, float iTemperature){
+        super(iUuid, iDeviceAdress, iUser, iTimestamp, SKIN_TEMPERATURE_TYPE);
+        mTemperature = iTemperature;
     }
 
-    public RRIntervalModel(String iDeviceAdress, String iTimestamp, int iRrInterval){
-        super(iDeviceAdress, iTimestamp, RR_INTERVAL_TYPE);
-        mRrInterval = iRrInterval;
+    public SkinTemperatureModel(String iDeviceAdress, String iTimestamp, float iTemperature){
+        super(iDeviceAdress, iTimestamp, SKIN_TEMPERATURE_TYPE);
+        mTemperature = iTemperature;
     }
 
-    public int getRrInterval() {
-        return mRrInterval;
+    public float getTemperature() {
+        return mTemperature;
     }
 
-    public void setRrInterval(int iRrInterval) {
-        mRrInterval = iRrInterval;
+    public void setTemperature(float iTemperature) {
+        mTemperature = iTemperature;
     }
 }
