@@ -39,7 +39,7 @@ import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
-import com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment;
+import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
@@ -68,7 +68,7 @@ public class SeizureStatusPresenter implements SeizureStatusContract.Presenter {
         FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
         lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
         lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(RRSamplesVisualisationFragment.class.getSimpleName()));
+        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
         lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
 
         lTransaction.add(R.id.content_frame, mReportFragment, SeizureReportFragment.class.getSimpleName());
