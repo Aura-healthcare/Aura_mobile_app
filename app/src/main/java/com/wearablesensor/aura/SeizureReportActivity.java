@@ -51,7 +51,7 @@ public class SeizureReportActivity extends AppCompatActivity implements SeizureR
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_seizure_report);
+        setContentView(R.layout.fragment_seizure_report);
 
         ButterKnife.bind(this);
 
