@@ -31,6 +31,7 @@
 
 package com.wearablesensor.aura.data_repository;
 
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
@@ -40,33 +41,34 @@ import java.util.Date;
 
 public interface LocalDataRepository {
     /**
-     * @brief query a list of R-R interval samples in a time range [iStartDate, iEndDate]
+     * @brief query a list of physiological data samples in a time range [iStartDate, iEndDate]
      *
-     * @param iStartDate collected data sample timestamps are newer than iStartData
+     * @param iStartDate collected data samples timestamps are newer than iStartData
      * @param iEndDate collected data samples timestamp is older than iEndData
      *
-     * @return a list of R-R interval samples
+     * @return a list of physiological data samples
      *
      * @throws Exception
      */
-    ArrayList<RRIntervalModel> queryRRSamples(Date iStartDate, Date iEndDate) throws Exception;
+
+    public ArrayList<PhysioSignalModel> queryPhysioSignalSamples(Date iStartDate, Date iEndDate) throws Exception;
 
     /**
-     * @brief save a batch of R-R interval in the local storage
+     * @brief save a batch of physiological signal sample in the local storage
      *
-     * @param iSamplesRR R-R interval list to be stored
+     * @param iPhysioSignalSamples physiological data list to be stored
      *
      * @throws Exception
      */
-    void saveRRSamples(final ArrayList<RRIntervalModel> iSamplesRR) throws Exception;
+    public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
 
     /**
-     * @brief cache an R-R interval in the heap and periodically clear cache and save data to local
+     * @brief cache a physiological data sample in the heap and periodically clear cache and save data to local
      * storage
      *
-     * @param iSampleRR R-R interval sample to be cached
+     * @param iPhysioSignal physiological data sample to be cached
      */
-    void cacheRRSample(RRIntervalModel iSampleRR) throws Exception;
+    void cachePhysioSignalSample(PhysioSignalModel iPhysioSignal) throws Exception;
 
     /**
      * @brief query a list of seizure events in a time range [iStartDate, iEndDate]

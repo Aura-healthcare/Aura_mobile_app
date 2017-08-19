@@ -51,8 +51,11 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.support.LazyJsonObject;
+import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
+import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +74,7 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private Database mSensitiveEventDB;
     private DatabaseOptions mDBOptions; /** local couchbase database options */
 
-    private View mRRSamplesView; /** pre-formatted view to query R-R interval on a date interval */
+    private View mPhysioSignalSamplesView; /** pre-formatted view to query physiological data samples on a date interval */
     private View mSensitiveEventsView; /** pre-formatted view to sensitive event on a date interval */
 
     private final static String DB_PHYSIO_SIGNAL_NAME = "dbaura_physio_signal"; /** couchbase physio signal database name */
@@ -88,12 +91,16 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     private final static String RR_INTERVAL_PARAM = "rrInterval"; /** rrInterval param used to map couchbase json to PhysioSignal model */
     private final static String DEVICE_ADRESS_PARAM = "deviceAdress"; /** deviceAdress param used to map couchbase json to PhysioSignal model */
 
+    private final static String TEMPERATURE_PARAM = "temperature";
+    private final static String SENSOR_OUTPUT_FREQUENCY_PARAM = "sensorOutputFrequency";
+    private final static String ELETRO_DERMAL_ACTIVITY_PARAM = "electroDermalActivity";
+
     private final static String SENSITIVE_EVENT_TIMESTAMP_PARAM = "sensitiveEventTimestamp"; /** event timestamp */
     private final static String COMMENT_PARAM = "comments"; /** comments giving more details about sensitive events */
 
     private final static String RR_SAMPLES_VIEW = "rrSamplesView"; /** RR Sample view name */
     private final static String SENSITIVE_EVENTS_VIEW = "sensitiveEventView"; /** sensitive event view */
-    private ArrayList<RRIntervalModel> mRRSamplesCache; /* temporary storage in an array to avoid call overhead to local data repository */
+    private ArrayList<PhysioSignalModel> mPhysioSignalCache; /* temporary storage in an array to avoid call overhead to local data repository */
 
     /**
      * @brief constructor
@@ -124,15 +131,15 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
         }
 
         // create Couchbase view used to query RRSamples
-        mRRSamplesView = mPhysioSignalDB.getView(RR_SAMPLES_VIEW);
-        mRRSamplesView.setMap(new Mapper() {
+        mPhysioSignalSamplesView = mPhysioSignalDB.getView(RR_SAMPLES_VIEW);
+        mPhysioSignalSamplesView.setMap(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
                 for (Map.Entry<String, Object> entry : document.entrySet())
                 {
                     if(entry.getValue() instanceof LinkedHashMap) {
-                        LinkedHashMap<String, Object> lRr = (LinkedHashMap<String, Object>) entry.getValue();
-                        emitter.emit(DateIso8601Mapper.getDate((String) lRr.get(TIMESTAMP_PARAM)), lRr);
+                        LinkedHashMap<String, Object> lPhysioSignal = (LinkedHashMap<String, Object>) entry.getValue();
+                        emitter.emit(DateIso8601Mapper.getDate((String) lPhysioSignal.get(TIMESTAMP_PARAM)), lPhysioSignal);
                     }
                 }
             }
@@ -152,27 +159,27 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             }
         },"1.0");
 
-        mRRSamplesCache = new ArrayList<RRIntervalModel>();
+        mPhysioSignalCache = new ArrayList<PhysioSignalModel>();
     }
 
     /**
-     * @brief query a list of R-R interval samples in a time range [iStartDate, iEndDate]
+     * @brief query a list of physiological data samples in a time range [iStartDate, iEndDate]
      *
-     * @param iStartDate collected data sample timestamps are newer than iStartData
+     * @param iStartDate collected data samples timestamps are newer than iStartData
      * @param iEndDate collected data samples timestamp is older than iEndData
      *
-     * @return a list of R-R interval samples
+     * @return a list of physiological data samples
      *
      * @throws Exception
      */
 
     @Override
-    public ArrayList<RRIntervalModel> queryRRSamples(Date iStartDate, Date iEndDate) throws Exception {
+    public ArrayList<PhysioSignalModel> queryPhysioSignalSamples(Date iStartDate, Date iEndDate) throws Exception {
 
-        ArrayList<RRIntervalModel> lRrSamples = new ArrayList<RRIntervalModel>();
+        ArrayList<PhysioSignalModel> lPhysioSignalSamples = new ArrayList<PhysioSignalModel>();
 
         try {
-            Query query = mRRSamplesView.createQuery();
+            Query query = mPhysioSignalSamplesView.createQuery();
 
             query.setStartKey(iStartDate);
             query.setEndKey(iEndDate);
@@ -182,19 +189,22 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             for (Iterator<QueryRow> it = queryEnum; it.hasNext(); ) {
                 QueryRow row=it.next();
                 //TODO: implement a mapper to RRIntervalModel - need to understand why Couchbase does not systematically return same object type
-                RRIntervalModel lRrSample;
-                if(row.getValue() instanceof  LinkedHashMap) {
-                    LinkedHashMap<String, Object> jsonMap = (LinkedHashMap<String, Object>) row.getValue();
-                    lRrSample = new RRIntervalModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_INTERVAL_PARAM));
-                }
-                else if(row.getValue() instanceof LazyJsonObject) {
+                PhysioSignalModel lPhysioSignalSample;
+                if(row.getValue() instanceof LazyJsonObject){
                     LazyJsonObject jsonMap = (LazyJsonObject) row.getValue();
-                    lRrSample = new RRIntervalModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_INTERVAL_PARAM));
+                    if( ((String) jsonMap.get(TYPE_PARAM)).equals(RRIntervalModel.RR_INTERVAL_TYPE) ){
+                        lPhysioSignalSample = new RRIntervalModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (Integer) jsonMap.get(RR_INTERVAL_PARAM));
+                        lPhysioSignalSamples.add(lPhysioSignalSample);
+                    }
+                    else if( ((String) jsonMap.get(TYPE_PARAM)).equals(SkinTemperatureModel.SKIN_TEMPERATURE_TYPE) ){
+                        lPhysioSignalSample = new SkinTemperatureModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), ((Double) jsonMap.get(TEMPERATURE_PARAM)).floatValue());
+                        lPhysioSignalSamples.add(lPhysioSignalSample);
+                    }
+                    else if( ((String) jsonMap.get(TYPE_PARAM)).equals(ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY) ){
+                        lPhysioSignalSample = new ElectroDermalActivityModel((String) jsonMap.get(UUID_PARAM), (String) jsonMap.get(DEVICE_ADRESS_PARAM), (String) jsonMap.get(USER_PARAM), (String) jsonMap.get(TIMESTAMP_PARAM), (int) jsonMap.get(SENSOR_OUTPUT_FREQUENCY_PARAM), (int) jsonMap.get(ELETRO_DERMAL_ACTIVITY_PARAM));
+                        lPhysioSignalSamples.add(lPhysioSignalSample);
+                    }
                 }
-                else{
-                    lRrSample = (RRIntervalModel) row.getValue();
-                }
-                lRrSamples.add(lRrSample);
                 Log.d(TAG,"Document contents: " + row.getKey() + " "+ row.getValue());
             }
         }catch (Exception e){
@@ -202,19 +212,19 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             throw e;
         }
 
-        Log.d(TAG, "Samples count - " + lRrSamples.size());
-        return lRrSamples;
+        Log.d(TAG, "Samples count - " + lPhysioSignalSamples.size());
+        return lPhysioSignalSamples;
     }
 
     /**
-     * @brief save a batch of R-R interval in the local storage
+     * @brief save a batch of physiological signal sample in the local storage
      *
-     * @param iSamplesRR R-R interval list to be stored
+     * @param iPhysioSignalSamples physiological data list to be stored
      *
      * @throws Exception
      */
     @Override
-    public void saveRRSamples(final ArrayList<RRIntervalModel> iSamplesRR) throws Exception{
+    public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception{
         Document rrDocument = null;
         try {
             rrDocument = mPhysioSignalDB.getDocument(MY_DOCUMENT);
@@ -224,15 +234,15 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
             throw e;
         }
 
-        Log.d(TAG, "Start Recording - iSamples:" + iSamplesRR.size());
+        Log.d(TAG, "Start Recording - iSamples:" + iPhysioSignalSamples.size());
 
         try {
             rrDocument.update(new Document.DocumentUpdater() {
                 @Override
                 public boolean update(UnsavedRevision newRevision) {
                     Map<String, Object> properties = newRevision.getUserProperties();
-                    for(int i = 0; i < iSamplesRR.size(); i++){
-                        properties.put(iSamplesRR.get(i).getUuid(), iSamplesRR.get(i));
+                    for(int i = 0; i < iPhysioSignalSamples.size(); i++){
+                        properties.put(iPhysioSignalSamples.get(i).getUuid(), iPhysioSignalSamples.get(i));
                     }
 
                     newRevision.setUserProperties(properties);
@@ -249,14 +259,14 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     }
 
     /**
-     * @brief cache an R-R interval in the heap and periodically clear cache and save data to local
+     * @brief cache a physiological data sample in the heap and periodically clear cache and save data to local
      * storage
      *
-     * @param iSampleRR R-R interval sample to be cached
+     * @param iPhysioSignal physiological data sample to be cached
      */
-    public void cacheRRSample(RRIntervalModel iSampleRR) throws Exception{
-        if(mRRSamplesCache.size() < 100) {
-            mRRSamplesCache.add(iSampleRR);
+    public void cachePhysioSignalSample(PhysioSignalModel iPhysioSignal) throws Exception{
+        if(mPhysioSignalCache.size() < 100) {
+            mPhysioSignalCache.add(iPhysioSignal);
         }
         else {
             try {
@@ -363,8 +373,8 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
      *
      */
     public void clearCache() throws Exception{
-        saveRRSamples(mRRSamplesCache);
-        mRRSamplesCache.clear();
+        savePhysioSignalSamples(mPhysioSignalCache);
+        mPhysioSignalCache.clear();
     }
 
     /**

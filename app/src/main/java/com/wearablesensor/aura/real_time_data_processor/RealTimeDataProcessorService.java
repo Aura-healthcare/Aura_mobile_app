@@ -21,6 +21,7 @@ package com.wearablesensor.aura.real_time_data_processor;
 import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
@@ -65,15 +66,15 @@ public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
                 return;
             }
 
-            RRIntervalModel lRrIntervalModel = lDevicePairingNotification.getSampleRrInterval();
-            lRrIntervalModel.setUser(mUserSessionService.getUser().getUuid());
-            putSampleInCache(lDevicePairingNotification.getSampleRrInterval());
+            PhysioSignalModel lPhysioSignal = lDevicePairingNotification.getPhysioSignal();
+            lPhysioSignal.setUser(mUserSessionService.getUser().getUuid());
+            putSampleInCache(lPhysioSignal);
         }
     }
 
-    private void putSampleInCache(RRIntervalModel iRrIntervalModel){
+    private void putSampleInCache(PhysioSignalModel iPhysioSignal){
         try{
-            mLocalDataRepository.cacheRRSample(iRrIntervalModel);
+            mLocalDataRepository.cachePhysioSignalSample(iPhysioSignal);
         }
         catch (Exception e){
             Log.d(TAG, "Fail to cache RrSample");
