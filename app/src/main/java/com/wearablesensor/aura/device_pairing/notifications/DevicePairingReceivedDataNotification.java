@@ -1,19 +1,16 @@
 package com.wearablesensor.aura.device_pairing.notifications;
 
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 
-/**
- * Created by lecoucl on 13/04/17.
- */
 public class DevicePairingReceivedDataNotification extends DevicePairingNotification {
-    private RRIntervalModel mRrIntervalModel;
+    private PhysioSignalModel mPhysioSignalModel;
 
-    public DevicePairingReceivedDataNotification(RRIntervalModel iRrIntervalModel) {
+    public DevicePairingReceivedDataNotification(PhysioSignalModel iPhysioSignalModel) {
         super(DevicePairingStatus.RECEIVED_DATA);
-        mRrIntervalModel = iRrIntervalModel;
+        mPhysioSignalModel = iPhysioSignalModel;
     }
 
-    public RRIntervalModel getSampleRrInterval(){
-        return mRrIntervalModel;
+    public PhysioSignalModel getPhysioSignal(){
+        return mPhysioSignalModel;
     }
 }

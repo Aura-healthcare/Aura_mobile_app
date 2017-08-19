@@ -28,7 +28,10 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
+import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
 import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
@@ -63,6 +66,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private BluetoothServiceConnection mDeviceServiceConnection;
     private BroadcastReceiver mGattUpdateReceiver;
 
+
+
     public BluetoothDevicePairingService(boolean iIsBluetoothFeatureLeSupported, BluetoothManager iBluetoothManager, Context iContext){
         super(iContext);
 
@@ -86,13 +91,28 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     endPairing();
                     mContext.unbindService(mDeviceServiceConnection);
                 } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                    String lSource = intent.getStringExtra(BluetoothLeService.SOURCE_DATA);
                     String lDeviceAddress = intent.getStringExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA);
                     String lTimestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
-                    Integer lRr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
 
-                    RRIntervalModel lRRIntervalModel = new RRIntervalModel(lDeviceAddress, lTimestamp, lRr);
-                    Log.d(TAG, lRRIntervalModel.getTimestamp() + " " + lRRIntervalModel.getUuid() + " " + lRRIntervalModel.getRrInterval() + " " + lRRIntervalModel.getUser());
-                    receiveData(lRRIntervalModel);
+                    if(lSource.equals(BluetoothLeService.GATT_PROFILE_STANDARD)) {
+                        Integer lRr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
+
+                        RRIntervalModel lRrIntervalModel = new RRIntervalModel(lDeviceAddress, lTimestamp, lRr);
+                        Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
+                        receiveData(lRrIntervalModel);
+
+                    }
+                    else if(lSource.equals(BluetoothLeService.GATT_PROFILE_CUSTOM)){
+                        float lSkinTemperature = intent.getFloatExtra(BluetoothLeService.SKIN_TEMPERATURE_DATA, 0.f);
+                        int lElectroDermalActivity = intent.getIntExtra(BluetoothLeService.ELECTRO_DERMAL_ACTIVITY_DATA, 0);
+
+                        SkinTemperatureModel lSkinTemperatureModel = new SkinTemperatureModel(lDeviceAddress, lTimestamp, lSkinTemperature);
+                        ElectroDermalActivityModel lElectroDermalActivityModel = new ElectroDermalActivityModel(lDeviceAddress, lTimestamp, 7812, lElectroDermalActivity);
+
+                        receiveData(lSkinTemperatureModel);
+                        receiveData(lElectroDermalActivityModel);
+                    }
                 }
             }
         };
@@ -100,6 +120,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
             @Override
             public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                Log.d(TAG, "Device " + device.getName() + " " + device.getAddress());
                 mBluetoothDeviceList.add(device);
             }
         };
@@ -125,11 +146,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
-        if (!mBluetoothAdapter.isEnabled()) {
-            return false;
-        }
+        return mBluetoothAdapter.isEnabled();
 
-        return true;
     }
 
     public void automaticPairing(){
@@ -174,7 +192,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 BluetoothDevice lDevice =  null;
 
                 for(int i = 0;i < mBluetoothDeviceList.size(); i++){
-                    if(mBluetoothDeviceList.get(i).getName() != null && (mBluetoothDeviceList.get(i).getName().contains("RHYTHM") || mBluetoothDeviceList.get(i).getName().contains("Polar")) ){
+                    if(mBluetoothDeviceList.get(i).getName() != null && (mBluetoothDeviceList.get(i).getName().contains("RHYTHM") || mBluetoothDeviceList.get(i).getName().contains("Polar") || mBluetoothDeviceList.get(i).getName().contains("MAXREFDES73") || mBluetoothDeviceList.get(i).getName().toUpperCase().contains("MIO")) ){
                         lDeviceList.add(mBluetoothDeviceList.get(i));
                     }
                 }
@@ -196,15 +214,18 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
 
-    private void receiveData(RRIntervalModel iRrIntervalModel){
+    private void receiveData(PhysioSignalModel iPhysioSignal){
         // filter corrupted cardiac R-R intervals
-        if(iRrIntervalModel.getRrInterval() == 0 || iRrIntervalModel.getTimestamp() == null
-                || iRrIntervalModel.getTimestamp() == ""){
-            return;
+        if( iPhysioSignal.getType().equals(RRIntervalModel.RR_INTERVAL_TYPE) ){
+            RRIntervalModel lRrIntervalModel = ((RRIntervalModel) iPhysioSignal);
+            if(lRrIntervalModel.getRrInterval() == 0 || lRrIntervalModel.getTimestamp() == null
+                    || lRrIntervalModel.getTimestamp() == ""){
+                return;
+            }
         }
 
         this.setChanged();
-        this.notifyObservers(new DevicePairingReceivedDataNotification(iRrIntervalModel));
+        this.notifyObservers(new DevicePairingReceivedDataNotification(iPhysioSignal));
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

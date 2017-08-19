@@ -43,9 +43,11 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
+import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.GattManager;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.operations.GattDisconnectOperation;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.operations.GattSetNotificationOperation;
+import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
 
 import java.util.Calendar;
@@ -72,10 +74,15 @@ public class BluetoothLeService extends Service {
     public final static String ACTION_DATA_AVAILABLE =
             "com.wearablesensor.aura.bluetooth.ACTION_DATA_AVAILABLE";
 
+    public final static String SOURCE_DATA = "com.example.bluetooth.le.SOURCE_DATA";
     public final static String DEVICEADRESS_EXTRA_DATA = "com.example.bluetooth.le.DEVICEADRESS_EXTRA_DATA";
-    public final static String TIMESTAMP_EXTRA_DATA = "com.example.bluetooth.le.TIMESTAMP_EXTRA_DATA";;
-    public final static String RR_EXTRA_DATA = "com.example.bluetooth.le.RR_EXTRA_DATA";;
+    public final static String TIMESTAMP_EXTRA_DATA = "com.example.bluetooth.le.TIMESTAMP_EXTRA_DATA";
+    public final static String RR_EXTRA_DATA = "com.example.bluetooth.le.RR_EXTRA_DATA";
+    public final static String SKIN_TEMPERATURE_DATA = "com.example.bluetooth.le.SKIN_TEMPERATURE_DATA";
+    public final static String ELECTRO_DERMAL_ACTIVITY_DATA = "com.example.bluetooth.le.ELECTRO_DERMAL_ACTIVITY_DATA";
 
+    public static final String GATT_PROFILE_STANDARD = "StandardProfile";
+    public static final String GATT_PROFILE_CUSTOM = "CustomProfile";
 
     public class LocalBinder extends Binder {
         public BluetoothLeService getService() {
@@ -151,8 +158,6 @@ public class BluetoothLeService extends Service {
      * @brief close every Gatt connections with the devices
      */
     public void close() {
-        Log.d(TAG, "closeGattConnection");
-
         BluetoothDevice lDevice;
         BluetoothLeConstant.DeviceConnectionState lDeviceStatus;
 
@@ -298,18 +303,29 @@ public class BluetoothLeService extends Service {
         final Intent intent = new Intent(action);
 
         if (BluetoothLeConstant.UUID_HEART_RATE_MEASUREMENT.equals(iGattCharacteristic.getUuid())) {
+            if(iDevice.getName().contains("MAXREFDES73")){
+                GattCustomGSRTemperatureCharacteristicReader lGattGSRTemperatureCharacteristicReader = new GattCustomGSRTemperatureCharacteristicReader();
+                lGattGSRTemperatureCharacteristicReader.read(iGattCharacteristic);
 
-            GattHeartRateCharacteristicReader lGattCharacteristicReader = new GattHeartRateCharacteristicReader();
-            lGattCharacteristicReader.read(iGattCharacteristic);
+                intent.putExtra(BluetoothLeService.SOURCE_DATA, BluetoothLeService.GATT_PROFILE_CUSTOM);
+                intent.putExtra(BluetoothLeService.SKIN_TEMPERATURE_DATA, lGattGSRTemperatureCharacteristicReader.getSkinTemperature());
+                intent.putExtra(BluetoothLeService.ELECTRO_DERMAL_ACTIVITY_DATA, lGattGSRTemperatureCharacteristicReader.getElectroDermalActivity());
+            }
+            else {
+                GattHeartRateCharacteristicReader lGattCharacteristicReader = new GattHeartRateCharacteristicReader();
+                lGattCharacteristicReader.read(iGattCharacteristic);
+
+                intent.putExtra(BluetoothLeService.SOURCE_DATA, BluetoothLeService.GATT_PROFILE_STANDARD);
+                intent.putExtra(BluetoothLeService.RR_EXTRA_DATA, lGattCharacteristicReader.getRrInterval());
+            }
 
             Calendar c = Calendar.getInstance();
             String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
-            Log.d(TAG, "BROADCAST UPDATE " + iDevice + " " + lGattCharacteristicReader);
 
             //TODO:replace by Parcelable
             intent.putExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA, iDevice.getAddress());
             intent.putExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA, lCurrentTimestamp);
-            intent.putExtra(BluetoothLeService.RR_EXTRA_DATA, lGattCharacteristicReader.getRrInterval());
+
             sendBroadcast(intent);
         }
     }
