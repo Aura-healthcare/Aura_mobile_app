@@ -47,6 +47,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserModel;
@@ -110,18 +111,18 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
     }
 
     /**
-     * @brief save a list of R-R interval samples
-     *
-     * @param iRrSamples list of R-R interval samples to be saved
+     * @param iPhysioSignalSamples list of physiological signal samples to be saved
      *
      * @throws Exception
+     *
+     * @brief save a list of physiological signal samples
      */
 
-    public void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception {
-        Log.d(TAG, "save RR Samples: " + iRrSamples.size());
+    public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception {
+        Log.d(TAG, "save Physio Signal Samples: " + iPhysioSignalSamples.size());
 
         try{
-            mDynamoDBMapper.batchSave(iRrSamples);
+            mDynamoDBMapper.batchSave(iPhysioSignalSamples);
             Log.d(TAG, "Success RR Samples DynamoDB");
         }
         catch(Exception e){

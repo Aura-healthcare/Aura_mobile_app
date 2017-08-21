@@ -35,8 +35,11 @@
 package com.wearablesensor.aura.data_repository;
 
 
+import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
+import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -56,6 +59,9 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String INFLUX_DB_NAME_SENSITIVE_EVENT_NAME = "sensitive_event";
 
     private final static String DB_HEART_MEASUREMENT = "heart";
+    private final static String DB_TEMPERATURE_MEASUREMENT = "temperature";
+    private final static String DB_ELECTRO_DERMAL_ACTIVITY_MEASUREMENT = "electro_dermal_activity";
+
     private final static String DB_USER_EVENT_MEASUREMENT = "user_event";
 
     private final static String DB_USER_TAG = "user";
@@ -64,6 +70,9 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_DEVICE_ADDRESS_TAG = "device_address";
     private final static String DB_COMMENTS_TAG = "comments";
     private final static String DB_RR_INTERVAL_TAG = "rr_interval";
+    private final static String DB_SKIN_TEMPERATURE = "skin_temperature";
+    private final static String DB_SENSOR_OUTPUT_FREQUENCY = "dsensor_output_frequency";
+    private final static String DB_ELECTRO_DERMAL_ACTIVITY = "electro_dermal_activity";
     private final static String DB_SENSITIVE_EVENT_TIMESTAMP_TAG = "sensitive_event_timestamp";
 
     private InfluxDB mInfluxDB;
@@ -81,16 +90,16 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     }
 
     /**
-     * @brief save a list of R-R interval samples
-     *
-     * @param iRrSamples list of R-R interval samples to be saved
+     * @param iPhysioSignalSamples list of physiological signal samples to be saved
      *
      * @throws Exception
+     *
+     * @brief save a list of physiological signal samples
      */
     @Override
-    public void saveRRSample(ArrayList<RRIntervalModel> iRrSamples) throws Exception {
+    public void savePhysioSignalSamples(ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception {
 
-        if(iRrSamples.size() == 0){
+        if(iPhysioSignalSamples.size() == 0){
             return;
         }
 
@@ -98,16 +107,8 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
                 .database(INFLUX_DB_PHYSIO_SIGNAL_NAME)
                 .build();
 
-        for (RRIntervalModel lSample : iRrSamples) {
-            Point lPoint = Point.measurement(DB_HEART_MEASUREMENT)
-                    .time(DateIso8601Mapper.getDate(lSample.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
-                    .tag(DB_USER_TAG, lSample.getUser())
-                    .tag(DB_DEVICE_ADDRESS_TAG, lSample.getDeviceAdress())
-                    .tag(DB_UUID_TAG, lSample.getUuid())
-                    .tag(DB_TYPE_TAG, lSample.getType())
-                    .addField(DB_RR_INTERVAL_TAG, lSample.getRrInterval())
-                    .build();
-
+        for (PhysioSignalModel lSample : iPhysioSignalSamples) {
+            Point lPoint = buildPhysioSignalPoint(lSample);
             lBatchPoints.point(lPoint);
         }
 
@@ -148,4 +149,84 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
         mInfluxDB.write(lBatchPoints);
     }
+
+    /**
+     * @brief map a physio signal model to an influxDB point
+     *
+     * @param iPhysioSignalModel input physiological signal model
+     * @return mapped influxDB point
+     */
+    private Point buildPhysioSignalPoint(PhysioSignalModel iPhysioSignalModel){
+        if(iPhysioSignalModel.getType() == RRIntervalModel.RR_INTERVAL_TYPE){
+            return buildRRIntervalPoint((RRIntervalModel) iPhysioSignalModel);
+        }
+        else if(iPhysioSignalModel.getType() == SkinTemperatureModel.SKIN_TEMPERATURE_TYPE){
+            return buildSkinTemperaturePoint((SkinTemperatureModel) iPhysioSignalModel);
+        }
+        else if(iPhysioSignalModel.getType() == ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY){
+            return buildElectroDermalActivityPoint((ElectroDermalActivityModel) iPhysioSignalModel);
+        }
+
+        return null;
+    }
+
+    /**
+     * @brief map a RR interval model to an influxDB point
+     *
+     * @param iRrIntervalModel input RR interval model
+     * @return mapped influxDB point
+     */
+    private Point buildRRIntervalPoint(RRIntervalModel iRrIntervalModel) {
+        Point lPoint = Point.measurement(DB_HEART_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iRrIntervalModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iRrIntervalModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iRrIntervalModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iRrIntervalModel.getUuid())
+                .tag(DB_TYPE_TAG, iRrIntervalModel.getType())
+                .addField(DB_RR_INTERVAL_TAG, iRrIntervalModel.getRrInterval())
+                .build();
+
+        return lPoint;
+    }
+
+    /**
+     * @brief map a skin temperature model to an influxDB point
+     *
+     * @param iSkinTemperatureModel input skin temperature model
+     * @return mapped influxDB point
+     */
+    private Point buildSkinTemperaturePoint(SkinTemperatureModel iSkinTemperatureModel) {
+        Point lPoint = Point.measurement(DB_TEMPERATURE_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iSkinTemperatureModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iSkinTemperatureModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iSkinTemperatureModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iSkinTemperatureModel.getUuid())
+                .tag(DB_TYPE_TAG, iSkinTemperatureModel.getType())
+                .addField(DB_SKIN_TEMPERATURE, iSkinTemperatureModel.getTemperature())
+                .build();
+
+        return lPoint;
+    }
+
+    /**
+     * @brief map a electro dermal activity model to an influxDB point
+     *
+     * @param iElectroDermalActivityModel input electro dermal activity model
+     * @return mapped influxDB point
+     */
+    private Point buildElectroDermalActivityPoint(ElectroDermalActivityModel iElectroDermalActivityModel){
+        Point lPoint = Point.measurement(DB_ELECTRO_DERMAL_ACTIVITY_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iElectroDermalActivityModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iElectroDermalActivityModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iElectroDermalActivityModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iElectroDermalActivityModel.getUuid())
+                .tag(DB_TYPE_TAG, iElectroDermalActivityModel.getType())
+                .addField(DB_SENSOR_OUTPUT_FREQUENCY, iElectroDermalActivityModel.getSensorOutputFrequency())
+                .addField(DB_ELECTRO_DERMAL_ACTIVITY, iElectroDermalActivityModel.getElectroDermalActivity())
+                .build();
+
+        return lPoint;
+    }
+
+
 }

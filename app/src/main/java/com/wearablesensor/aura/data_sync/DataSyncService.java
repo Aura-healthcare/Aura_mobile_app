@@ -40,7 +40,7 @@ import com.github.pwittchen.reactivewifi.WifiState;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncLowSignalNotification;
@@ -320,8 +320,8 @@ public class DataSyncService extends Observable{
                     Date lWindowEnd = getDateEndWindow(lWindowStart, mFinalSync);
                     Log.d(TAG, "data packet - time window " + lWindowStart + " - " + lWindowEnd);
 
-                    final ArrayList<RRIntervalModel> lRrSamples = mLocalDataRepository.queryRRSamples(lWindowStart, lWindowEnd);
-                    mRemoteDataTimeSeriesRepository.saveRRSample(lRrSamples);
+                    final ArrayList<PhysioSignalModel> lPhysioSignalSamples = mLocalDataRepository.queryPhysioSignalSamples(lWindowStart, lWindowEnd);
+                    mRemoteDataTimeSeriesRepository.savePhysioSignalSamples(lPhysioSignalSamples);
 
                     final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lWindowStart, lWindowEnd);
                     mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);

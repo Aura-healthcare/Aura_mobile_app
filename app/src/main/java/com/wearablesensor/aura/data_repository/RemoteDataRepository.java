@@ -32,6 +32,7 @@
 
 package com.wearablesensor.aura.data_repository;
 
+import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserModel;
@@ -94,11 +95,11 @@ public interface RemoteDataRepository {
         void connect(String iUser, String iPassword) throws Exception;
 
         /**
-         * @param iRrSamples list of R-R interval samples to be saved
+         * @param iPhysioSignalSamples list of physiological signal samples to be saved
          * @throws Exception
-         * @brief save a list of R-R interval samples
+         * @brief save a list of physiological signal samples
          */
-        void saveRRSample(final ArrayList<RRIntervalModel> iRrSamples) throws Exception;
+        void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
 
         /**
          * @param iSensitiveEvents list of seizure event samples
