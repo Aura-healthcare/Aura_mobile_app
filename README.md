@@ -4,6 +4,7 @@ The "Aura Project" app will alert an user from an epilepsy seizure within few mi
 ## Pre-requisites
 1. Android Sdk version 25.0
 2. Connected device transfering HRV data through Heart Rate bluetooth profile
+3. Connected device - MaximIntegrated - MAXREFDES73# - Skin temperature / Electro dermal activity
 
 ## References
 
