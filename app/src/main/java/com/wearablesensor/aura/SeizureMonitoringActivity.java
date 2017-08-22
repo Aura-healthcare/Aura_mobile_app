@@ -128,9 +128,16 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         setupDrawer();
 
-        startAutomaticPairing();
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        //wait the fragment to be fully displayed before starting automatic pairing
+        startAutomaticPairing();
     }
 
     @Override

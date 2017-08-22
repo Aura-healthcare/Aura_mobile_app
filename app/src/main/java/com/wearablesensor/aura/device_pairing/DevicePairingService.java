@@ -36,22 +36,26 @@ public class DevicePairingService extends Observable{
     protected Context mContext;
 
     protected Boolean mPaired;
+    protected Boolean mIsPairing;
 
 
     public DevicePairingService(Context iContext){
         mContext = iContext;
 
         mPaired = false;
+        mIsPairing = false;
     }
 
     public void automaticPairing(){
         Log.d(TAG, "Start automatic Pairing");
+        mIsPairing = true;
     }
 
     public void startPairing(){
         Log.d(TAG, "start Pairing ");
 
         mPaired = true;
+        mIsPairing = false;
 
         this.setChanged();
         this.notifyObservers( new DevicePairingConnectedNotification() );
@@ -66,6 +70,7 @@ public class DevicePairingService extends Observable{
         Log.d(TAG, "end Pairing");
 
         mPaired = false;
+        mIsPairing = false;
 
         this.setChanged();
         this.notifyObservers(new DevicePairingDisconnectedNotification());
@@ -77,6 +82,8 @@ public class DevicePairingService extends Observable{
     public Boolean isPaired(){
         return mPaired;
     }
+
+    public Boolean isPairing(){ return mIsPairing; }
 
     public LinkedList<DeviceInfo> getDeviceList(){
         return new LinkedList<>();

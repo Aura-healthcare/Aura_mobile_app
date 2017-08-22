@@ -51,7 +51,10 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
 
     @Override
     public void start() {
-        if(mBluetoothDevicePairingService.isPaired()){
+        if(mBluetoothDevicePairingService.isPairing()){
+            mView.progressPairing();
+        }
+        else if(mBluetoothDevicePairingService.isPaired()){
             LinkedList<DeviceInfo> lDeviceList = mBluetoothDevicePairingService.getDeviceList();
             mView.successPairing(lDeviceList);
         }
