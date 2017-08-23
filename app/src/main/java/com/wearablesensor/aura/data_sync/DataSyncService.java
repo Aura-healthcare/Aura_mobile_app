@@ -137,7 +137,7 @@ public class DataSyncService extends Observable{
                                                                 }
 
                                                                  Log.d(TAG, "Wifi Signal Level - " + signalLevel);
-                                                                 if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR || signalLevel == WifiSignalLevel.FAIR){
+                                                                 if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR){
                                                                      stopDataSync();
 
                                                                      setChanged();
