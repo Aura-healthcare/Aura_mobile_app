@@ -127,9 +127,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         ButterKnife.bind(this);
 
         setupDrawer();
-
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -137,13 +134,13 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onStart();
 
         //wait the fragment to be fully displayed before starting automatic pairing
-        startAutomaticPairing();
+        if(!mDevicePairingService.isPairing() && !mDevicePairingService.isPaired()) {
+            startAutomaticPairing();
+        }
     }
 
     @Override
     public void onStop(){
-
-        ((AuraApplication) getApplication()).getDevicePairingService().close();
         try {
             ((AuraApplication) getApplication()).getLocalDataRepository().clearCache();
 
