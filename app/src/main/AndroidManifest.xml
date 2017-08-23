@@ -19,9 +19,6 @@
         android:name=".AuraApplication"
         android:allowBackup="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
 
         <activity
             android:name="com.wearablesensor.aura.SplashActivity"
