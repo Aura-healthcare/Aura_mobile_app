@@ -60,6 +60,11 @@
     <string name="fail_extra_message_no_internet">Please check your internet connection</string>
     <string name="fail_extra_message_invalid_credentials">Credentials are incorrect</string>
 
+    <string name="first_sign_in_new_password">New password</string>
+    <string name="first_sign_in_confirm_new_password">Confirm new password</string>
+    <string name="first_sign_in_invalid_password_format">New password must be minimum 8 characters, containing at least one lowercase, one uppercase alphabetical character and one digit</string>
+    <string name="first_sign_in_new_confirm_password_not_matching">New password and password confirmation does not match</string>
+
     <string name="session_signin_pending_message">"Enter Session..."</string>
 
     <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>

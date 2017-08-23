@@ -47,12 +47,14 @@ public class FirstSignInActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     @BindView(R.id.first_signin_new_password_input) EditText mNewPasswordInput; /** password input field */
+    @BindView(R.id.first_signin_confirm_password_input) EditText mConfirmNewPasswordInput; /** confirm password input */
     @BindView(R.id.btn_continue_signin) AppCompatButton mContinueSignInButton; /** confirm user account validation */
 
     @OnClick(R.id.btn_continue_signin)
     public void signInCallback(View v) {
         String lNewUserPassword = mNewPasswordInput.getText().toString();
-        if (lNewUserPassword != null) {
+        String lConfirmNewUserPassword = mConfirmNewPasswordInput.getText().toString();
+        if (validate(lNewUserPassword, lConfirmNewUserPassword)) {
             ((AuraApplication) getApplication()).getAuthentificationHelper().setPasswordForFirstTimeLogin(lNewUserPassword);
             continueSignIn();
         }
@@ -90,5 +92,25 @@ public class FirstSignInActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
+    private Boolean validate(String iNewPassword, String iConfirmNewPassword){
+
+        if(iNewPassword == null || iConfirmNewPassword == null){
+            mNewPasswordInput.setError(getString(R.string.first_sign_in_invalid_password_format));
+            return false;
+        }
+
+        if(!(iNewPassword.length() >= 8 && iNewPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"))){
+            mNewPasswordInput.setError(getString(R.string.first_sign_in_invalid_password_format));
+            return false;
+        }
+
+        if(!iNewPassword.equals(iConfirmNewPassword)){
+            mConfirmNewPasswordInput.setError(getString(R.string.first_sign_in_new_confirm_password_not_matching));
+            return false;
+        }
+
+        return true;
+
+    }
 }
 

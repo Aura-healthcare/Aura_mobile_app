@@ -18,7 +18,7 @@
             android:layout_marginBottom="24dp"
             android:layout_gravity="center_horizontal" />
 
-        <!-- New Password -->
+        <!-- new password -->
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,7 +28,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="New password" />
+                android:hint="@string/first_sign_in_new_password" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <!-- Confirm new password -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText android:id="@+id/first_signin_confirm_password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="@string/first_sign_in_confirm_new_password" />
+
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
