@@ -22,6 +22,7 @@
 
         <activity
             android:name="com.wearablesensor.aura.SplashActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/LaunchTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,18 +37,22 @@
 
         <activity
             android:name="com.wearablesensor.aura.SignInActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:label="@string/title_activity_sign_in" />
         <activity
             android:name="com.wearablesensor.aura.FirstSignInActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:label="@string/title_activity_first_sign_in" />
         <activity
             android:name="com.wearablesensor.aura.SessionSignInActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:label="@string/title_activity_first_sign_in" />
         <activity
             android:name="com.wearablesensor.aura.SeizureMonitoringActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name="com.wearablesensor.aura.SeizureReportActivity"></activity>
     </application>
