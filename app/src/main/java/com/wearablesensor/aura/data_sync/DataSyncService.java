@@ -322,6 +322,7 @@ public class DataSyncService extends Observable{
 
                     final ArrayList<PhysioSignalModel> lPhysioSignalSamples = mLocalDataRepository.queryPhysioSignalSamples(lWindowStart, lWindowEnd);
                     mRemoteDataTimeSeriesRepository.savePhysioSignalSamples(lPhysioSignalSamples);
+                    mLocalDataRepository.removePhysioSignalSamples(lPhysioSignalSamples);
 
                     final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lWindowStart, lWindowEnd);
                     mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);

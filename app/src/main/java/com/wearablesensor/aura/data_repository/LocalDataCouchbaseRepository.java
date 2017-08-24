@@ -369,6 +369,46 @@ public class LocalDataCouchbaseRepository implements LocalDataRepository {
     }
 
     /**
+     * @brief remove a batch of physiological signal samples from the local storage
+     *
+     * @param iPhysioSignalSamples physiological data list to be removed
+     *
+     * @throws Exception
+     */
+    @Override
+    public void removePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception{
+        Document lPhysioSignalDocument = null;
+        try {
+            lPhysioSignalDocument = mPhysioSignalDB.getDocument(MY_DOCUMENT);
+            Log.d(TAG, "Get Document - id:" + lPhysioSignalDocument.getId());
+        }catch(Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+
+        try {
+            lPhysioSignalDocument.update(new Document.DocumentUpdater() {
+                @Override
+                public boolean update(UnsavedRevision newRevision) {
+                    Map<String, Object> properties = newRevision.getUserProperties();
+                    for(int i = 0; i < iPhysioSignalSamples.size(); i++){
+                        properties.remove(iPhysioSignalSamples.get(i).getUuid());
+                    }
+
+                    newRevision.setUserProperties(properties);
+                    Log.d(TAG, "CleanDataSuccess");
+                    return true;
+                }
+            });
+        } catch (CouchbaseLiteException e) {
+            Log.d(TAG, "CleanDataFail " + e.getMessage());
+            throw e;
+        }
+
+        Log.d(TAG, "RecordHistory after clean - nbItems:" + lPhysioSignalDocument.getProperties().size());
+    }
+
+    /**
      * @brief clear cache and store data from heap to local data storage
      *
      */

@@ -63,6 +63,15 @@ public interface LocalDataRepository {
     public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
 
     /**
+     * @brief remove a batch of physiological signal samples from the local storage
+     *
+     * @param iPhysioSignalSamples physiological data list to be removed
+     *
+     * @throws Exception
+     */
+    public void removePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
+
+    /**
      * @brief cache a physiological data sample in the heap and periodically clear cache and save data to local
      * storage
      *
