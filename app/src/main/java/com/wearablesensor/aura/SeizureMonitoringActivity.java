@@ -105,8 +105,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             e.printStackTrace();
         }
 
-        ((AuraApplication) getApplication()).getDataSyncService().initialize();
-
         mDevicePairingFragment = new DevicePairingDetailsFragment();
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
 
@@ -137,6 +135,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         if(!mDevicePairingService.isPairing() && !mDevicePairingService.isPaired()) {
             startAutomaticPairing();
         }
+
+        ((AuraApplication) getApplication()).getDataSyncService().initialize();
     }
 
     @Override
