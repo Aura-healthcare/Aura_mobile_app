@@ -151,6 +151,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
         mDeviceStatusView.setVisibility(View.GONE);
 
+        mDeviceListAdapter.clear();
         mDeviceListAdapter.addAll(iDeviceList);
         mDeviceListView.setVisibility(View.VISIBLE);
 
