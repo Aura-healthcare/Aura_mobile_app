@@ -11,8 +11,8 @@ The "Aura Project" app will alert an user from an epilepsy seizure within few mi
 Android Architecture Blueprints
 [link](https://github.com/googlesamples/android-architecture)
 
-Nordic Semiconductor - puck-central-android - support multi BLE connection
-[link](https://github.com/NordicSemiconductor/puck-central-android)
+iDevicesInc - SweetBlue - support multi Bluetooth connection on most Android platforms and devices 
+[link](https://github.com/iDevicesInc/SweetBlue)
 
 ## How to contribute
 

@@ -19,7 +19,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -31,7 +30,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -132,9 +130,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onStart();
 
         //wait the fragment to be fully displayed before starting automatic pairing
-        if(!mDevicePairingService.isPairing() && !mDevicePairingService.isPaired()) {
-            startAutomaticPairing();
-        }
+        startAutomaticPairing();
 
         ((AuraApplication) getApplication()).getDataSyncService().initialize();
     }
@@ -191,13 +187,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
 
     private void startAutomaticPairing(){
-        if(mDevicePairingService.checkBluetoothIsEnabled()){
-            mDevicePairingService.automaticPairing();
-            mDevicePairingFragment.progressPairing();
-        }
-        else{
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+         if(!mDevicePairingService.isPairing() && !mDevicePairingService.isPaired()) {
+            mDevicePairingService.automaticPairing(this);
         }
     }
 
@@ -236,17 +227,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // User chose not to enable Bluetooth.
-        if (requestCode == REQUEST_ENABLE_BT){
-            if(resultCode == Activity.RESULT_OK){
-                startAutomaticPairing();
-                return;
-            }
-            else if(resultCode == Activity.RESULT_CANCELED) {
-                mDevicePairingService.endPairing();
-                return;
-            }
-        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 

@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingInProgressNotification;
 
 public class DevicePairingService extends Observable{
     private final String TAG = this.getClass().getSimpleName();
@@ -49,6 +50,9 @@ public class DevicePairingService extends Observable{
     public void automaticPairing(){
         Log.d(TAG, "Start automatic Pairing");
         mIsPairing = true;
+
+        this.setChanged();
+        this.notifyObservers( new DevicePairingInProgressNotification() );
     }
 
     public void startPairing(){

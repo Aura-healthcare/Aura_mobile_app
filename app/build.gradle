@@ -73,6 +73,10 @@ android {
                 res.srcDirs "src/${dir}/res"
             }
         }
+
+        main.java.srcDirs += 'src/main/lib/sweetblue/src'
+        main.res.srcDirs += 'src/main/lib/sweetblue/res'
+
         androidTest.setRoot('test')
         androidTest.java.srcDirs = ['test/src']
 

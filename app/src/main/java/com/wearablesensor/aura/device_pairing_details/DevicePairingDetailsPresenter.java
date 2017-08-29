@@ -80,5 +80,8 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
         else if(lStatus == DevicePairingStatus.DISCONNECTED){
             mView.failParing();
         }
+        else if(lStatus == DevicePairingStatus.IN_PROGRESS){
+            mView.progressPairing();
+        }
     }
 }

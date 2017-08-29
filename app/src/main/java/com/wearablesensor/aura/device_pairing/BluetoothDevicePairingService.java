@@ -18,152 +18,264 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.device_pairing;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
+import com.idevicesinc.sweetblue.BleDevice;
+import com.idevicesinc.sweetblue.BleDeviceState;
+import com.idevicesinc.sweetblue.BleManager;
+import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
+import com.idevicesinc.sweetblue.utils.Uuids;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
-import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeService;
-import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothServiceConnection;
+import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
+import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+
 public class BluetoothDevicePairingService extends DevicePairingService{
     private final String TAG = this.getClass().getSimpleName();
 
-    // Stops scanning after 5 seconds.
-    private static final long SCAN_PERIOD = 5000;
-
-    private Boolean mScanning;
-
-    // Bluetooth members
-    private boolean mIsBluetoothLeFeatureSupported;
-
-    private BluetoothManager mBluetoothManager;
-    private BluetoothAdapter mBluetoothAdapter;
+    // Stops scanning after 20 seconds.
+    private static final long SCAN_PERIOD = 20000;
 
     // Bluetooth scanning members
     private Handler mScanningHandler;
-    private BluetoothAdapter.LeScanCallback mLeScanCallback;
-    private ArrayList<BluetoothDevice> mBluetoothDeviceList;
+    private BleManager.DiscoveryListener mDiscoveryListener;
 
-    //Bluetooth connection members
-    private BluetoothServiceConnection mDeviceServiceConnection;
-    private BroadcastReceiver mGattUpdateReceiver;
+    //Bluetooth data streaming callbacks
+    private BleDevice.ReadWriteListener mHeartRateReadWriteListener;
+    private BleDevice.ReadWriteListener mCustomMAXREFDES73ReadWriteListener;
 
+    private ConcurrentHashMap<String, BleDevice> mConnectedDevices; // hashmap storing the currently connected devices list
 
+    private Activity mActivity;
 
-    public BluetoothDevicePairingService(boolean iIsBluetoothFeatureLeSupported, BluetoothManager iBluetoothManager, Context iContext){
+    public BluetoothDevicePairingService(Context iContext){
         super(iContext);
 
-        mDeviceServiceConnection = null;
-
-        mScanning = false;
-
-        mIsBluetoothLeFeatureSupported = iIsBluetoothFeatureLeSupported;
-
-        mBluetoothManager = iBluetoothManager;
-        mBluetoothAdapter = null;
-        mBluetoothDeviceList = new ArrayList<BluetoothDevice>();
-
-        mGattUpdateReceiver = new BroadcastReceiver() {
+        // callback used to handle standard Heart rate profile
+        mHeartRateReadWriteListener = new BleDevice.ReadWriteListener() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                if (BluetoothLeService.ACTION_GATT_START_PAIRING.equals(action)) {
-                    startPairing();
-                } else if (BluetoothLeService.ACTION_GATT_END_PAIRING.equals(action)) {
-                    endPairing();
-                    mContext.unbindService(mDeviceServiceConnection);
-                } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                    String lSource = intent.getStringExtra(BluetoothLeService.SOURCE_DATA);
-                    String lDeviceAddress = intent.getStringExtra(BluetoothLeService.DEVICEADRESS_EXTRA_DATA);
-                    String lTimestamp = intent.getStringExtra(BluetoothLeService.TIMESTAMP_EXTRA_DATA);
+            public void onEvent(ReadWriteEvent e) {
+                if(e.wasSuccess() && e.type() == Type.NOTIFICATION){
+                    GattHeartRateCharacteristicReader lGattCharacteristicReader = new GattHeartRateCharacteristicReader();
+                    lGattCharacteristicReader.read(e.characteristic());
 
-                    if(lSource.equals(BluetoothLeService.GATT_PROFILE_STANDARD)) {
-                        Integer lRr = intent.getIntExtra(BluetoothLeService.RR_EXTRA_DATA, 0);
+                    Calendar c = Calendar.getInstance();
+                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
 
-                        RRIntervalModel lRrIntervalModel = new RRIntervalModel(lDeviceAddress, lTimestamp, lRr);
-                        Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
-                        receiveData(lRrIntervalModel);
+                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(e.device().getMacAddress(), lCurrentTimestamp, lGattCharacteristicReader.getRrInterval());
+                    Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
+                    receiveData(lRrIntervalModel);
+                }
+            }
+        };
 
+        // Custom callback to handle data stream from Maxim Integrated MAXREFDES73 notifications
+        // listen to Heart Rate Measurement Caracteristic with private data format
+        mCustomMAXREFDES73ReadWriteListener = new BleDevice.ReadWriteListener(){
+            @Override
+            public void onEvent(ReadWriteEvent e) {
+                if(e.wasSuccess() && e.type() == Type.NOTIFICATION){
+                    GattCustomGSRTemperatureCharacteristicReader lGattCharacteristicReader = new GattCustomGSRTemperatureCharacteristicReader();
+                    lGattCharacteristicReader.read(e.characteristic());
+
+                    Calendar c = Calendar.getInstance();
+                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
+                    String lDeviceAddress = e.device().getMacAddress();
+
+                    SkinTemperatureModel lSkinTemperatureModel = new SkinTemperatureModel(lDeviceAddress, lCurrentTimestamp, lGattCharacteristicReader.getSkinTemperature());
+                    ElectroDermalActivityModel lElectroDermalActivityModel = new ElectroDermalActivityModel(lDeviceAddress, lCurrentTimestamp, 7812, lGattCharacteristicReader.getElectroDermalActivity());
+                    Log.d(TAG, lSkinTemperatureModel.getTimestamp() + " " + lSkinTemperatureModel.getUuid() + " " + lSkinTemperatureModel.getTemperature() + " " + lSkinTemperatureModel.getUser());
+                    Log.d(TAG, lElectroDermalActivityModel.getTimestamp() + " " + lElectroDermalActivityModel.getUuid() + " " + lElectroDermalActivityModel.getElectroDermalActivity() + " " + lElectroDermalActivityModel.getUser());
+
+
+                    receiveData(lSkinTemperatureModel);
+                    receiveData(lElectroDermalActivityModel);
+                }
+            }
+        };
+
+        //Callback use to handle Bluetooth scanning
+        mDiscoveryListener = new BleManager.DiscoveryListener() {
+            @Override
+            public void onEvent(DiscoveryEvent e) {
+                if (e.was(LifeCycle.DISCOVERED)) {
+                    Log.d(TAG, "Discovery Event - "+ e);
+                    if(isHeartRateCompatibleDevice(e.device())){
+                        connectDevice(e.device(), mHeartRateReadWriteListener);
                     }
-                    else if(lSource.equals(BluetoothLeService.GATT_PROFILE_CUSTOM)){
-                        float lSkinTemperature = intent.getFloatExtra(BluetoothLeService.SKIN_TEMPERATURE_DATA, 0.f);
-                        int lElectroDermalActivity = intent.getIntExtra(BluetoothLeService.ELECTRO_DERMAL_ACTIVITY_DATA, 0);
-
-                        SkinTemperatureModel lSkinTemperatureModel = new SkinTemperatureModel(lDeviceAddress, lTimestamp, lSkinTemperature);
-                        ElectroDermalActivityModel lElectroDermalActivityModel = new ElectroDermalActivityModel(lDeviceAddress, lTimestamp, 7812, lElectroDermalActivity);
-
-                        receiveData(lSkinTemperatureModel);
-                        receiveData(lElectroDermalActivityModel);
+                    else if(isGSRTemperatureCustomCompatibleDevice(e.device())){
+                        connectDevice(e.device(), mCustomMAXREFDES73ReadWriteListener);
                     }
                 }
             }
         };
 
-        mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+        mConnectedDevices = new ConcurrentHashMap<String, BleDevice>();
+    }
+
+    /**
+     * @brief method to handle device connect logic - service profile, measurement characteristic, incomming data parsing
+     *
+     * @param iDevice device to connect
+     * @param iReadWriteListener data parsing callback
+     */
+    private void connectDevice(BleDevice iDevice, final BleDevice.ReadWriteListener iReadWriteListener) {
+        iDevice.connect(new BleDevice.StateListener(){
             @Override
-            public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                Log.d(TAG, "Device " + device.getName() + " " + device.getAddress());
-                mBluetoothDeviceList.add(device);
+            public void onEvent(BleDevice.StateListener.StateEvent e) {
+
+                Log.d(TAG, "ConnectionEvent - " + e);
+
+                if(e.didEnter(BleDeviceState.INITIALIZED)){
+                    Log.d(TAG, "deviceConnected");
+                    mConnectedDevices.put(e.device().getMacAddress(), e.device());
+                    startPairing();
+
+                    e.device().enableNotify(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, iReadWriteListener);
+
+                }
+                else if (e.didEnter(BleDeviceState.DISCONNECTED)){
+
+                    Log.d(TAG, "deviceDisconnected");
+                    mConnectedDevices.remove(e.device().getMacAddress());
+
+                    if(allDevicesDisconnected()){
+                        endPairing();
+                    }
+
+                    BleManager.get(mActivity).turnOff();
+
+                }
             }
-        };
-
-        mDeviceServiceConnection = new BluetoothServiceConnection(this);
+        });
     }
 
-    public Boolean checkBluetoothIsEnabled(){
-        // Use this check to determine whether BLE is supported on the device.  Then you can
-        // selectively disable BLE-related features.
-        if (!mIsBluetoothLeFeatureSupported) {
+    /**
+     * @brief check if all devices are disconnected
+     *
+     * @return true if all devices are disconnected, false otherwise
+     */
+    private boolean allDevicesDisconnected() {
+        return mConnectedDevices.size() == 0;
+    }
+
+    /**
+     * @brief check if available bluetooth devices are compatibles with Aura prototype
+     *
+     * @param device available bluetooth device
+     *
+     * @return true if device is compatible, false otherwise
+     */
+    private boolean isCompatibleDevice(BleDevice device) {
+
+        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) ){
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @brief check if available bluetooth devices are compatibles for heart rate data streaming with Aura prototype
+     *
+     * @param device available bluetooth device
+     *
+     * @return true if device is compatible, false otherwise
+     */
+    private boolean isHeartRateCompatibleDevice(BleDevice device) {
+
+        String lDeviceName = device.getName_native();
+
+        if(lDeviceName != null) {
+            String lDeviceUpperName = lDeviceName.toUpperCase();
+
+            if ((lDeviceUpperName.contains("RHYTHM") || lDeviceUpperName.contains("POLAR") || lDeviceUpperName.contains("MIO"))) {
+                return true;
+            }
+
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * @brief check if available bluetooth devices are compatibles for temperature and electro dermal activity
+     * data streaming with Aura prototype
+     *
+     * @param device available bluetooth device
+     *
+     * @return true if device is compatible, false otherwise
+     */
+    private boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
+        String lDeviceName = device.getName_native();
+
+        if(lDeviceName != null) {
+            String lDeviceUpperName = lDeviceName.toUpperCase();
+
+            if( lDeviceUpperName.contains("MAXREFDES73")) {
+                return true;
+            }
             return false;
         }
 
-        // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
-        // BluetoothAdapter through BluetoothManager.
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
-
-        // Checks if Bluetooth is supported on the device.
-        if (mBluetoothAdapter == null) {
-            return false;
-        }
-
-        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-        return mBluetoothAdapter.isEnabled();
-
+        return false;
     }
 
-    public void automaticPairing(){
+    /**
+     * @brief start automatic pairing
+     *
+     * @param iActivity activity context, mandatory since Marshmallow
+     */
+    public void automaticPairing(Activity iActivity){
+
         super.automaticPairing();
+        mActivity = iActivity;
 
+        mConnectedDevices.clear();
         mScanningHandler = new Handler();
 
-        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-        if (!checkBluetoothIsEnabled()) {
-            endPairing();
-            return;
-        }
-        else{
-            scanLeDevices();
-        }
+        BluetoothEnabler.start(iActivity, new BluetoothEnabler.DefaultBluetoothEnablerFilter()
+        {
+            @Override public Please onEvent(BluetoothEnablerEvent e)
+            {
+                Log.d(TAG, "Bluetooth Enabler Event - " + e);
+                if( e.isDone() )
+                {
+                    final BluetoothEnablerEvent eFinal = e;
+                    mScanningHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            eFinal.bleManager().stopScan();
+                            if(mConnectedDevices.size() < 1){
+                                endPairing();
+                            }
+                        }
+                    }, SCAN_PERIOD);
+
+                    eFinal.bleManager().startScan(mDiscoveryListener);
+                }
+                else if( e.status().isCancelled() ){
+                    endPairing();
+                }
+
+                return super.onEvent(e);
+            }
+        });
     }
 
     public void startPairing(){
@@ -175,45 +287,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     }
 
-
-    private void scanLeDevices() {
-
-        mBluetoothDeviceList.clear();
-
-        // Stops scanning after a pre-defined scan period.
-        mScanningHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScanning = false;
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-
-
-                LinkedList<BluetoothDevice> lDeviceList = new LinkedList<BluetoothDevice>();
-                BluetoothDevice lDevice =  null;
-
-                for(int i = 0;i < mBluetoothDeviceList.size(); i++){
-                    if(mBluetoothDeviceList.get(i).getName() != null && (mBluetoothDeviceList.get(i).getName().contains("RHYTHM") || mBluetoothDeviceList.get(i).getName().contains("Polar") || mBluetoothDeviceList.get(i).getName().contains("MAXREFDES73") || mBluetoothDeviceList.get(i).getName().toUpperCase().contains("MIO")) ){
-                        lDeviceList.add(mBluetoothDeviceList.get(i));
-                    }
-                }
-
-                if(lDeviceList.size() == 0){
-                    endPairing();
-                    return;
-                }
-
-                mDeviceServiceConnection.setDeviceList(lDeviceList);
-                mContext.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-                Intent gattServiceIntent = new Intent(mContext, BluetoothLeService.class);
-                mContext.bindService(gattServiceIntent, mDeviceServiceConnection, Context.BIND_AUTO_CREATE);
-
-            }
-        }, SCAN_PERIOD);
-
-        mScanning = true;
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
-    }
-
+    /**
+     * @brief receive a physiological data sample and filter corrupted values
+     *
+     * @param iPhysioSignal input physiological data sample
+     */
     private void receiveData(PhysioSignalModel iPhysioSignal){
         // filter corrupted cardiac R-R intervals
         if( iPhysioSignal.getType().equals(RRIntervalModel.RR_INTERVAL_TYPE) ){
@@ -228,14 +306,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         this.notifyObservers(new DevicePairingReceivedDataNotification(iPhysioSignal));
     }
 
-    private static IntentFilter makeGattUpdateIntentFilter() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_START_PAIRING);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_END_PAIRING);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        return intentFilter;
-    }
-
     /**
      * @brief get connected devices though Bluetooth LE
      *
@@ -245,9 +315,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     public LinkedList<DeviceInfo> getDeviceList(){
         LinkedList<DeviceInfo> oDeviceList = new LinkedList<>();
 
-        ConcurrentHashMap<String, BluetoothDevice> lDeviceList = mDeviceServiceConnection.getBluetoothLeService().getDeviceList();
-        for ( Map.Entry<String, BluetoothDevice> lEntry : lDeviceList.entrySet() ) {
-            oDeviceList.add(new DeviceInfo(lEntry.getValue().getAddress(), lEntry.getValue().getName()));
+        for ( Map.Entry<String, BleDevice> lEntry : mConnectedDevices.entrySet() ) {
+            oDeviceList.add(new DeviceInfo(lEntry.getValue().getMacAddress(), lEntry.getValue().getName_native()));
         }
 
         return oDeviceList;
@@ -258,9 +327,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     @Override
     public void close(){
-        if(mDeviceServiceConnection != null && mDeviceServiceConnection.getBluetoothLeService() != null) {
-            mDeviceServiceConnection.getBluetoothLeService().close();
-        }
+        BleManager.get(mActivity).turnOff();
         super.close();
     }
 

@@ -57,12 +57,10 @@ public class AuraApplication extends MultiDexApplication {
         super.onCreate();
 
         Context lApplicationContext = getApplicationContext();
-        boolean lIsBluetoothLeFeatureSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
-        BluetoothManager lBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
         mAuthentificationHelper.init(lApplicationContext);
 
-        mDevicePairingService = new BluetoothDevicePairingService(lIsBluetoothLeFeatureSupported, lBluetoothManager, lApplicationContext);
+        mDevicePairingService = new BluetoothDevicePairingService( lApplicationContext);
         mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
         mRemoteDataTimeSeriesRepository = new RemoteDataInfluxDBRepository();

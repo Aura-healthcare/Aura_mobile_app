@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="sweetblue-javadoc">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/libs/sweetblue-javadoc.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

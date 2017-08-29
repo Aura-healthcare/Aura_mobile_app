@@ -6,5 +6,6 @@ package com.wearablesensor.aura.device_pairing.notifications;
 public enum DevicePairingStatus{
     CONNECTED,
     DISCONNECTED,
+    IN_PROGRESS,
     RECEIVED_DATA
 }
