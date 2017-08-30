@@ -34,7 +34,7 @@ package com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
-import com.wearablesensor.aura.device_pairing.bluetooth.BluetoothLeConstant;
+import com.idevicesinc.sweetblue.utils.Uuids;
 
 public class GattCustomGSRTemperatureCharacteristicReader implements GattCharacteristicReader {
 
@@ -69,7 +69,7 @@ public class GattCustomGSRTemperatureCharacteristicReader implements GattCharact
             return false;
         }
 
-        if (!BluetoothLeConstant.UUID_HEART_RATE_MEASUREMENT.equals(iGattCharacteristic.getUuid())) {
+        if (!Uuids.HEART_RATE_MEASUREMENT.equals(iGattCharacteristic.getUuid())) {
             mHasBeenRead = true;
             return false;
         }
