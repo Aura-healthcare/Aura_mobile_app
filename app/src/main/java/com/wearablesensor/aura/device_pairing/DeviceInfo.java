@@ -29,13 +29,24 @@
 
 package com.wearablesensor.aura.device_pairing;
 
+import com.wearablesensor.aura.device_pairing_details.BatteryLevel;
+
 public class DeviceInfo {
     private String mId;
     private String mName;
 
+    private BatteryLevel mBatteryLevel;
+
     public DeviceInfo(String iId, String iName){
         mId = iId;
         mName = iName;
+        mBatteryLevel = BatteryLevel.UNKNOWN;
+    }
+
+    public DeviceInfo(String iId, String iName, int iBatteryLevelPercentage){
+        mId = iId;
+        mName = iName;
+        setBatteryLevel(iBatteryLevelPercentage);
     }
 
     public String getId(){
@@ -44,5 +55,42 @@ public class DeviceInfo {
 
     public String getName(){
         return mName;
+    }
+
+    /**
+     * @brief convert battery level percentage to battery level and set it to device
+     *
+     * @param iBatteryLevelPercentage input battery level percentage
+     */
+    public void setBatteryLevel(int iBatteryLevelPercentage) {
+        if (iBatteryLevelPercentage <= 100 && iBatteryLevelPercentage > 70) {
+            mBatteryLevel = BatteryLevel.HIGH;
+        } else if (iBatteryLevelPercentage <= 70 && iBatteryLevelPercentage > 30) {
+            mBatteryLevel = BatteryLevel.MEDIUM;
+        } else if (iBatteryLevelPercentage <= 30 && iBatteryLevelPercentage > 10) {
+            mBatteryLevel = BatteryLevel.LOW;
+        } else if (iBatteryLevelPercentage <= 10) {
+            mBatteryLevel = BatteryLevel.VERY_LOW;
+        } else {
+            mBatteryLevel = BatteryLevel.UNKNOWN;
+        }
+    }
+
+    /**
+     * @brief getter
+     *
+     * @return battery level
+     */
+    public BatteryLevel getBatteryLevel(){
+        return mBatteryLevel;
+    }
+
+    /**
+     * @brief setter
+     *
+     * @param iBatteryLevel input battery level
+     */
+    public void setBatteryLevel(BatteryLevel iBatteryLevel) {
+        mBatteryLevel = iBatteryLevel;
     }
 }

@@ -181,6 +181,18 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     }
 
     @Override
+    public void refreshDeviceBatteryLevel(DeviceInfo iDeviceInfo) {
+        for(int i=0 ; i<mDeviceListAdapter.getCount() ; i++){
+            DeviceInfo lDevice = mDeviceListAdapter.getItem(i);
+            if( lDevice.getId().equals(iDeviceInfo.getId()) ){
+                lDevice.setBatteryLevel(iDeviceInfo.getBatteryLevel());
+            }
+        }
+
+        mDeviceListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
     public void progressPairing(){
         mPropressBar.setVisibility(View.VISIBLE);
 

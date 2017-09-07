@@ -27,6 +27,7 @@ import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
 import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
+import com.idevicesinc.sweetblue.utils.Interval;
 import com.idevicesinc.sweetblue.utils.Uuids;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
@@ -35,6 +36,7 @@ import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 
 
@@ -58,6 +60,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     //Bluetooth data streaming callbacks
     private BleDevice.ReadWriteListener mHeartRateReadWriteListener;
     private BleDevice.ReadWriteListener mCustomMAXREFDES73ReadWriteListener;
+
+    private BleDevice.ReadWriteListener mBatteryReadWriteListener;
 
     private ConcurrentHashMap<String, BleDevice> mConnectedDevices; // hashmap storing the currently connected devices list
 
@@ -109,6 +113,18 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
 
+        mBatteryReadWriteListener = new BleDevice.ReadWriteListener() {
+            @Override
+            public void onEvent(ReadWriteEvent e) {
+                if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
+                   int lBatteryPercentage = e.data_byte();
+                    Log.d(TAG, "Battery  Event"  + e.data_byte() + " "+ e.data().length);
+                    DeviceInfo lDeviceInfo = new DeviceInfo(e.device().getMacAddress(), e.device().getName_native(), lBatteryPercentage);
+                    receiveBatteryLevel(lDeviceInfo);
+                }
+            }
+        };
+
         //Callback use to handle Bluetooth scanning
         mDiscoveryListener = new BleManager.DiscoveryListener() {
             @Override
@@ -147,7 +163,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     startPairing();
 
                     e.device().enableNotify(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, iReadWriteListener);
-
+                    e.device().enableNotify(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener);
                 }
                 else if (e.didEnter(BleDeviceState.DISCONNECTED)){
 
@@ -157,8 +173,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     if(allDevicesDisconnected()){
                         endPairing();
                     }
+                    else{
+                        startPairing();
+                    }
 
-                    BleManager.get(mActivity).turnOff();
+                    //BleManager.get(mActivity).turnOff();
 
                 }
             }
@@ -257,7 +276,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 if( e.isDone() )
                 {
                     final BluetoothEnablerEvent eFinal = e;
-                    mScanningHandler.postDelayed(new Runnable() {
+                    /*mScanningHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             eFinal.bleManager().stopScan();
@@ -265,9 +284,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                                 endPairing();
                             }
                         }
-                    }, SCAN_PERIOD);
+                    }, SCAN_PERIOD);*/
 
-                    eFinal.bleManager().startScan(mDiscoveryListener);
+                    eFinal.bleManager().startPeriodicScan(Interval.TEN_SECS, Interval.mins(2), mDiscoveryListener);
                 }
                 else if( e.status().isCancelled() ){
                     endPairing();
@@ -284,7 +303,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     public void endPairing(){
         super.endPairing();
-
     }
 
     /**
@@ -306,6 +324,15 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         this.notifyObservers(new DevicePairingReceivedDataNotification(iPhysioSignal));
     }
 
+    /**
+     * @brief receive Battery level update for a single device
+     *
+     * @param iDeviceInfo input updated device info
+     */
+    private void receiveBatteryLevel(DeviceInfo iDeviceInfo) {
+        this.setChanged();
+        this.notifyObservers(new DevicePairingBatteryLevelNotification(iDeviceInfo));
+    }
     /**
      * @brief get connected devices though Bluetooth LE
      *

@@ -13,6 +13,7 @@
         android:id="@+id/device_pairing_image"
         android:layout_width="0dp"
         android:layout_height="100dp"
+        android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"

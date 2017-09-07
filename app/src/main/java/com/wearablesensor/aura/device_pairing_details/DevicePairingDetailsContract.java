@@ -34,6 +34,8 @@ public class DevicePairingDetailsContract {
 
         void failParing();
 
+        void refreshDeviceBatteryLevel(DeviceInfo iDeviceInfo);
+
         void setPresenter(Presenter iPresenter);
     }
 

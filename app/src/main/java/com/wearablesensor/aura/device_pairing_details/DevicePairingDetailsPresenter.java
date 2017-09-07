@@ -21,6 +21,7 @@ package com.wearablesensor.aura.device_pairing_details;
 import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
@@ -82,6 +83,10 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
         }
         else if(lStatus == DevicePairingStatus.IN_PROGRESS){
             mView.progressPairing();
+        }
+        else if(lStatus == DevicePairingStatus.RECEIVED_BATTERY_LEVEL){
+            DevicePairingBatteryLevelNotification lDevicePairingNotification = (DevicePairingBatteryLevelNotification) iDevicePairingNotification;
+            mView.refreshDeviceBatteryLevel(lDevicePairingNotification.getDeviceInfo());
         }
     }
 }

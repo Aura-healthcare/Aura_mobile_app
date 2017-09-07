@@ -29,10 +29,13 @@
 package com.wearablesensor.aura.device_pairing_details;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
@@ -54,10 +57,30 @@ public class DeviceInfoListAdapter extends ArrayAdapter<DeviceInfo>{
         // Lookup view for data population
         TextView lDeviceNameText = (TextView) convertView.findViewById(R.id.device_pairing_name);
         TextView lDeviceAdressText = (TextView) convertView.findViewById(R.id.device_pairing_adress);
+        ImageView lDeviceBatteryLevelImage = (ImageView) convertView.findViewById(R.id.device_battery_level);
         // Populate the data into the template view using the data object
         lDeviceNameText.setText(lDeviceInfo.getName());
         lDeviceAdressText.setText(lDeviceInfo.getId());
+        lDeviceBatteryLevelImage.setImageResource(getBatteryLevelImage(lDeviceInfo.getBatteryLevel()));
+
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    private int getBatteryLevelImage(BatteryLevel iBatteryLevel){
+        switch (iBatteryLevel){
+            case UNKNOWN:
+                return R.drawable.battery_unknown;
+            case VERY_LOW:
+                return R.drawable.battery_very_low;
+            case LOW:
+                return R.drawable.battery_low;
+            case MEDIUM:
+                return R.drawable.battery_medium;
+            case HIGH:
+                return R.drawable.battery_high;
+        }
+
+        return 0;
     }
 }

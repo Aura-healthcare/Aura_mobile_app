@@ -7,5 +7,6 @@ public enum DevicePairingStatus{
     CONNECTED,
     DISCONNECTED,
     IN_PROGRESS,
-    RECEIVED_DATA
+    RECEIVED_DATA,
+    RECEIVED_BATTERY_LEVEL
 }
