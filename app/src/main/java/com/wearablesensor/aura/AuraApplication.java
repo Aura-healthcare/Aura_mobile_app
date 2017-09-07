@@ -18,9 +18,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
+import com.crashlytics.android.Crashlytics;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
@@ -36,6 +36,8 @@ import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import io.fabric.sdk.android.Fabric;
 
 public class AuraApplication extends MultiDexApplication {
     private DevicePairingService mDevicePairingService;
@@ -55,6 +57,7 @@ public class AuraApplication extends MultiDexApplication {
     public void onCreate() {
         Log.d("AuraApplication", "Init");
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         Context lApplicationContext = getApplicationContext();
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();

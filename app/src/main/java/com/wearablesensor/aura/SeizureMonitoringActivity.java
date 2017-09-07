@@ -35,6 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
@@ -102,6 +103,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             Log.d(TAG, "Fail initialization InfluxDB");
             e.printStackTrace();
         }
+
+        Crashlytics.setUserIdentifier(((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
 
         mDevicePairingFragment = new DevicePairingDetailsFragment();
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);

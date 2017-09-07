@@ -34,10 +34,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".device_pairing.bluetooth.BluetoothLeService"
-            android:enabled="true" />
-
         <activity
             android:name="com.wearablesensor.aura.SignInActivity"
             android:screenOrientation="portrait"
@@ -58,6 +54,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name="com.wearablesensor.aura.SeizureReportActivity"></activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="c9f78e96e63e090eb9187e28dcec186342b4a8d8" />
     </application>
 
 
