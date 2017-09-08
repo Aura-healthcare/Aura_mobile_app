@@ -31,10 +31,10 @@ package com.wearablesensor.aura.data_sync;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
-//import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
@@ -280,6 +280,8 @@ public class DataSyncService extends Observable{
         private Date mCurrentSync;
         private Date mFinalSync;
 
+        private PowerManager.WakeLock mWakeLock;
+
         /**
          * @brief get time window end
          *
@@ -303,6 +305,11 @@ public class DataSyncService extends Observable{
 
         }
         protected void onPreExecute() {
+            PowerManager powerManager = (PowerManager) mApplicationContext.getSystemService(mApplicationContext.POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
+                    "DataSyncWakelockTag");
+            mWakeLock.acquire();
+
             Calendar c = Calendar.getInstance();
             mFinalSync = c.getTime();
 
@@ -352,6 +359,7 @@ public class DataSyncService extends Observable{
             }
 
             setDataSyncIsInProgress(false);
+            mWakeLock.release();
 
         }
 
