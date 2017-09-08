@@ -173,11 +173,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     if(allDevicesDisconnected()){
                         endPairing();
                     }
-                    else{
-                        startPairing();
-                    }
 
-                    //BleManager.get(mActivity).turnOff();
+                    BleManager.get(mActivity).turnOff();
 
                 }
             }
@@ -276,7 +273,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 if( e.isDone() )
                 {
                     final BluetoothEnablerEvent eFinal = e;
-                    /*mScanningHandler.postDelayed(new Runnable() {
+                    mScanningHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             eFinal.bleManager().stopScan();
@@ -284,9 +281,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                                 endPairing();
                             }
                         }
-                    }, SCAN_PERIOD);*/
+                    }, SCAN_PERIOD);
 
-                    eFinal.bleManager().startPeriodicScan(Interval.TEN_SECS, Interval.mins(2), mDiscoveryListener);
+                    //eFinal.bleManager().startPeriodicScan(Interval.TEN_SECS, Interval.mins(2), mDiscoveryListener);
                 }
                 else if( e.status().isCancelled() ){
                     endPairing();
