@@ -166,16 +166,16 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     e.device().enableNotify(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener);
                 }
                 else if (e.didEnter(BleDeviceState.DISCONNECTED)){
-
                     Log.d(TAG, "deviceDisconnected");
                     mConnectedDevices.remove(e.device().getMacAddress());
+                    e.device().undiscover();
 
                     if(allDevicesDisconnected()){
                         endPairing();
                     }
-
-                    BleManager.get(mActivity).turnOff();
-
+                    else {
+                        BleManager.get(mActivity).disconnectAll();
+                    }
                 }
             }
         });
@@ -283,7 +283,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                         }
                     }, SCAN_PERIOD);
 
-                    //eFinal.bleManager().startPeriodicScan(Interval.TEN_SECS, Interval.mins(2), mDiscoveryListener);
+                    eFinal.bleManager().startScan(mDiscoveryListener);
                 }
                 else if( e.status().isCancelled() ){
                     endPairing();
