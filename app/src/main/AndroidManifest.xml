@@ -57,7 +57,8 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="c9f78e96e63e090eb9187e28dcec186342b4a8d8" />
+        <service android:name=".DataCollectorService" >
+        </service>
     </application>
-
 
 </manifest>

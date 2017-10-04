@@ -18,17 +18,17 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.device_pairing;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
-import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
-import com.idevicesinc.sweetblue.utils.Interval;
 import com.idevicesinc.sweetblue.utils.Uuids;
+import com.wearablesensor.aura.DataCollectorServiceConstants;
+import com.wearablesensor.aura.DataCollectorService;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
@@ -37,8 +37,11 @@ import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -64,8 +67,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private BleDevice.ReadWriteListener mBatteryReadWriteListener;
 
     private ConcurrentHashMap<String, BleDevice> mConnectedDevices; // hashmap storing the currently connected devices list
-
-    private Activity mActivity;
 
     public BluetoothDevicePairingService(Context iContext){
         super(iContext);
@@ -174,7 +175,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                         endPairing();
                     }
                     else {
-                        BleManager.get(mActivity).disconnectAll();
+                        BleManager.get(mContext).disconnectAll();
                     }
                 }
             }
@@ -255,43 +256,26 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     /**
      * @brief start automatic pairing
      *
-     * @param iActivity activity context, mandatory since Marshmallow
+     * @param iContext application context
      */
-    public void automaticPairing(Activity iActivity){
+    public void automaticPairing(final Context iContext){
 
-        super.automaticPairing();
-        mActivity = iActivity;
+        super.automaticPairing(iContext);
 
         mConnectedDevices.clear();
         mScanningHandler = new Handler();
 
-        BluetoothEnabler.start(iActivity, new BluetoothEnabler.DefaultBluetoothEnablerFilter()
-        {
-            @Override public Please onEvent(BluetoothEnablerEvent e)
-            {
-                Log.d(TAG, "Bluetooth Enabler Event - " + e);
-                if( e.isDone() )
-                {
-                    final BluetoothEnablerEvent eFinal = e;
-                    mScanningHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            eFinal.bleManager().stopScan();
-                            if(mConnectedDevices.size() < 1){
-                                endPairing();
-                            }
-                        }
-                    }, SCAN_PERIOD);
-
-                    eFinal.bleManager().startScan(mDiscoveryListener);
-                }
-                else if( e.status().isCancelled() ){
+        mScanningHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                BleManager.get(iContext).stopScan();
+                if(mConnectedDevices.size() < 1){
                     endPairing();
                 }
-
-                return super.onEvent(e);
             }
-        });
+        }, SCAN_PERIOD);
+
+        BleManager.get(iContext).startScan(mDiscoveryListener);
     }
 
     public void startPairing(){
@@ -300,6 +284,12 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     public void endPairing(){
         super.endPairing();
+        Intent stopIntent = new Intent(mContext, DataCollectorService.class);
+        stopIntent.setAction(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION);
+        mContext.startService(stopIntent);
+
+        EventBus.getDefault().post(new DevicePairingDisconnectedNotification());
+
     }
 
     /**
@@ -317,8 +307,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         }
 
-        this.setChanged();
-        this.notifyObservers(new DevicePairingReceivedDataNotification(iPhysioSignal));
+        EventBus.getDefault().post(new DevicePairingReceivedDataNotification(iPhysioSignal));
     }
 
     /**
@@ -327,8 +316,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @param iDeviceInfo input updated device info
      */
     private void receiveBatteryLevel(DeviceInfo iDeviceInfo) {
-        this.setChanged();
-        this.notifyObservers(new DevicePairingBatteryLevelNotification(iDeviceInfo));
+        EventBus.getDefault().post(new DevicePairingBatteryLevelNotification(iDeviceInfo));
     }
     /**
      * @brief get connected devices though Bluetooth LE
@@ -351,7 +339,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     @Override
     public void close(){
-        BleManager.get(mActivity).turnOff();
+        BleManager.get(mContext).turnOff();
         super.close();
     }
 

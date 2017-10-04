@@ -22,54 +22,34 @@ import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
-import com.wearablesensor.aura.user_session.UserSessionService;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 
-public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
+public class RealTimeDataProcessorService{
 
     private final String TAG = this.getClass().getSimpleName();
 
     private DevicePairingService mDevicePairingService;
-    private UserSessionService mUserSessionService;
+    private String mUserUUID;
 
     private LocalDataRepository mLocalDataRepository;
 
     public RealTimeDataProcessorService(DevicePairingService iBluetoothDevicePairingService,
                                         LocalDataRepository iLocalDataRepository,
-                                        UserSessionService iUserSessionService){
+                                        String iUserUUID){
         mDevicePairingService = iBluetoothDevicePairingService;
         mLocalDataRepository = iLocalDataRepository;
 
-        mUserSessionService = iUserSessionService;
-    }
+        mUserUUID = iUserUUID;
 
-    public void init(){
-        mDevicePairingService.addObserver(this);
-    }
-
-    @Override
-    public void onDevicePairingServiceNotification(DevicePairingNotification iDevicePairingNotification) {
-        DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
-
-        if(lStatus == DevicePairingStatus.RECEIVED_DATA){
-            DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
-
-            Log.d(TAG, "User Session info "+ mUserSessionService + " " + mUserSessionService.getUser().getUuid());
-            // no user registered yet
-            if(mUserSessionService == null || mUserSessionService.getUser() == null){
-                return;
-            }
-
-            PhysioSignalModel lPhysioSignal = lDevicePairingNotification.getPhysioSignal();
-            lPhysioSignal.setUser(mUserSessionService.getUser().getUuid());
-            putSampleInCache(lPhysioSignal);
-        }
+        EventBus.getDefault().register(this);
     }
 
     private void putSampleInCache(PhysioSignalModel iPhysioSignal){
@@ -81,4 +61,33 @@ public class RealTimeDataProcessorService extends DevicePairingServiceObserver{
         }
     }
 
+
+    /**
+     * @brief method executed by observer class when receiving a device pairing notification event
+     *
+     * @param iDevicePairingNotification notification to be processed by observer class
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDevicePairingEvent(DevicePairingNotification iDevicePairingNotification){
+        DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
+
+        if(lStatus == DevicePairingStatus.RECEIVED_DATA){
+            DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
+
+            Log.d(TAG, "User Session info "+ mUserUUID);
+            // no user registered yet
+            if(mUserUUID == null || mUserUUID.isEmpty()){
+                return;
+            }
+
+            PhysioSignalModel lPhysioSignal = lDevicePairingNotification.getPhysioSignal();
+            lPhysioSignal.setUser(mUserUUID);
+            putSampleInCache(lPhysioSignal);
+        }
+    }
+
+    @Override
+    public void finalize(){
+        EventBus.getDefault().unregister(this);
+    }
 }

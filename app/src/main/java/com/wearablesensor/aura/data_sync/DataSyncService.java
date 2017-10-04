@@ -50,6 +50,8 @@ import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotifi
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,7 +62,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class DataSyncService extends Observable{
+public class DataSyncService{
     private final String TAG = this.getClass().getSimpleName();
 
     private Context mApplicationContext;
@@ -113,8 +115,8 @@ public class DataSyncService extends Observable{
                                                             if(wifiState.equals(WifiState.DISABLED)){
                                                                 Log.d(TAG, "Wifi Disable");
                                                                 mIsWifiEnabled = false;
-                                                                setChanged();
-                                                                notifyObservers(new DataSyncNoSignalNotification());
+
+                                                                EventBus.getDefault().post(new DataSyncNoSignalNotification());
 
                                                                 stopDataSync();
                                                             }
@@ -140,8 +142,7 @@ public class DataSyncService extends Observable{
                                                                  if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR){
                                                                      stopDataSync();
 
-                                                                     setChanged();
-                                                                     notifyObservers(new DataSyncLowSignalNotification());
+                                                                     EventBus.getDefault().post(new DataSyncLowSignalNotification());
                                                                  }
                                                                  else{
                                                                     startDataSync();
@@ -173,12 +174,11 @@ public class DataSyncService extends Observable{
     public void setDataSyncIsInProgress(Boolean iStatus){
         mIsDataSyncInProgress = iStatus;
 
-        this.setChanged();
         if(iStatus == true){
-            this.notifyObservers( new DataSyncStartNotification() );
+            EventBus.getDefault().post(new DataSyncStartNotification());
         }
         else {
-            this.notifyObservers(new DataSyncEndNotification());
+            EventBus.getDefault().post(new DataSyncEndNotification());
         }
     }
 
@@ -336,8 +336,7 @@ public class DataSyncService extends Observable{
 
                     mCurrentSync = lWindowEnd;
 
-                    setChanged();
-                    notifyObservers(new DataSyncUpdateStateNotification(mCurrentSync));
+                    EventBus.getDefault().post(new DataSyncUpdateStateNotification(mCurrentSync));
 
                 } catch (Exception e) {
                     Log.d(TAG, "Fail to save data packet");

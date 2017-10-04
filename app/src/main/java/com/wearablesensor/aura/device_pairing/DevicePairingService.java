@@ -30,7 +30,9 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnect
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingInProgressNotification;
 
-public class DevicePairingService extends Observable{
+import org.greenrobot.eventbus.EventBus;
+
+public class DevicePairingService{
     private final String TAG = this.getClass().getSimpleName();
 
     private final static int PHONE_VIBRATION_DURATION = 1500; // in milliseconds
@@ -47,12 +49,11 @@ public class DevicePairingService extends Observable{
         mIsPairing = false;
     }
 
-    public void automaticPairing(){
+    public void automaticPairing(Context applicationContext){
         Log.d(TAG, "Start automatic Pairing");
         mIsPairing = true;
 
-        this.setChanged();
-        this.notifyObservers( new DevicePairingInProgressNotification() );
+        EventBus.getDefault().post(new DevicePairingInProgressNotification());
     }
 
     public void startPairing(){
@@ -61,8 +62,7 @@ public class DevicePairingService extends Observable{
         mPaired = true;
         mIsPairing = false;
 
-        this.setChanged();
-        this.notifyObservers( new DevicePairingConnectedNotification() );
+        EventBus.getDefault().post(new DevicePairingConnectedNotification());
 
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(PHONE_VIBRATION_DURATION);
@@ -76,8 +76,7 @@ public class DevicePairingService extends Observable{
         mPaired = false;
         mIsPairing = false;
 
-        this.setChanged();
-        this.notifyObservers(new DevicePairingDisconnectedNotification());
+        EventBus.getDefault().post(new DevicePairingDisconnectedNotification());
 
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(PHONE_VIBRATION_DURATION);

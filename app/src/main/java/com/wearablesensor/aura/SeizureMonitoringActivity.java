@@ -18,11 +18,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
-import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -36,6 +40,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
@@ -60,9 +65,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @BindView(R.id.left_drawer) ListView mDrawerList;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
-    private BluetoothDevicePairingService mDevicePairingService;
-
-
     private DevicePairingDetailsPresenter mDevicePairingDetailsPresenter;
     private DevicePairingDetailsFragment mDevicePairingFragment;
 
@@ -80,6 +82,37 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     private static final int REQUEST_ENABLE_BT = 1;
 
+    private DataCollectorService mDataCollectorService;
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mDataCollectorService = ((DataCollectorService.LocalBinder)service).getService();
+            mDevicePairingDetailsPresenter.setDevicePairingService(mDataCollectorService.getDevicePairingService());
+            mDevicePairingDetailsPresenter.start();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            mDataCollectorService = null;
+        }
+    };
+    private Boolean mIsDataCollectorBound = false;
+
+    void doBindService() {
+
+        bindService(new Intent(getApplicationContext(), DataCollectorService.class),
+                mConnection,
+                Context.BIND_AUTO_CREATE);
+        mIsDataCollectorBound = true;
+    }
+
+    void doUnbindService() {
+        if (mIsDataCollectorBound) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsDataCollectorBound = false;
+        }
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
@@ -96,7 +129,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_seizure_monitoring);
-        mDevicePairingService =  (BluetoothDevicePairingService) ((AuraApplication) getApplication()).getDevicePairingService();
         try{
             ((AuraApplication) getApplication()).getRemoteDataTimeSeriesRepository().connect("lecoued", "lecoued");
         }catch(Exception e){
@@ -107,13 +139,13 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         Crashlytics.setUserIdentifier(((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
 
         mDevicePairingFragment = new DevicePairingDetailsFragment();
-        mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(mDevicePairingService, mDevicePairingFragment);
+        mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(( (mDataCollectorService != null) ? mDataCollectorService.getDevicePairingService():null), mDevicePairingFragment);
 
         mDataSyncFragment = new DataSyncFragment();
         mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
 
         mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
-        mDataVisualisationPresenter = new DataVisualisationPresenter(mDevicePairingService, mPhysioSignalVisualisationFragment);
+        mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);
 
         mSeizureReportFragment = new SeizureReportFragment();
         mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
@@ -133,7 +165,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onStart();
 
         //wait the fragment to be fully displayed before starting automatic pairing
-        startAutomaticPairing();
+       startAutomaticPairing();
 
         ((AuraApplication) getApplication()).getDataSyncService().initialize();
     }
@@ -190,9 +222,62 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
 
     private void startAutomaticPairing(){
-         if(!mDevicePairingService.isPairing() && !mDevicePairingService.isPaired()) {
-            mDevicePairingService.automaticPairing(this);
+        // no running Aura Data Collector service
+        if(!isMyServiceRunning(DataCollectorService.class)){
+            BluetoothEnabler.start(this, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
+                @Override
+                public Please onEvent(BluetoothEnablerEvent e) {
+                    Log.d(TAG, "Bluetooth Enabler Event - " + e);
+                    if (e.isDone()) {
+                        Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
+                        startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
+                        startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
+                        startService(startIntent);
+
+                        doBindService();
+                    } else if (e.status().isCancelled()) {
+
+                    }
+
+                    return super.onEvent(e);
+                }
+            });
         }
+        // running Aura Data Collector service but not binded to Activity
+        else if(isMyServiceRunning(DataCollectorService.class) && mDataCollectorService == null){
+            doBindService();
+        }
+        // binded Aura Data Collector service but not paired with device -> restart service
+        else if(mDataCollectorService != null && !mDataCollectorService.getDevicePairingService().isPairing() && !mDataCollectorService.getDevicePairingService().isPaired() ) {
+            BluetoothEnabler.start(this, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
+                @Override
+                public Please onEvent(BluetoothEnablerEvent e) {
+                    Log.d(TAG, "Bluetooth Enabler Event - " + e);
+                    if (e.isDone()) {
+                        Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
+                        startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
+                        startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
+                        startService(startIntent);
+
+                        doBindService();
+                    } else if (e.status().isCancelled()) {
+
+                    }
+
+                    return super.onEvent(e);
+                }
+            });
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> iServiceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (iServiceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void displayFragments(){
@@ -257,6 +342,12 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @Override
     public void onSeizureReportFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onDestroy(){
+        doUnbindService();
+        super.onDestroy();
     }
 
 }

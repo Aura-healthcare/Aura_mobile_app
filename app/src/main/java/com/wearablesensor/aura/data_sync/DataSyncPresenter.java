@@ -37,6 +37,10 @@ import com.wearablesensor.aura.data_sync.notifications.DataSyncServiceObserver;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStatus;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.Date;
 
 public class DataSyncPresenter extends DataSyncServiceObserver implements DataSyncContract.Presenter {
@@ -53,11 +57,12 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
      */
     public DataSyncPresenter(DataSyncService iDataSyncService, DataSyncContract.View iView) {
         mDataSyncService = iDataSyncService;
-        mDataSyncService.addObserver(this);
 
         mView = iView;
 
         mView.setPresenter(this);
+
+        EventBus.getDefault().register(this);
     }
 
     /**
@@ -81,8 +86,8 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
      *
      * @param iDataSyncNotification notification to be processed by observer class
      */
-    @Override
-    public void onDataSyncServiceNotification(DataSyncNotification iDataSyncNotification){
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDataSyncServiceEvent(DataSyncNotification iDataSyncNotification){
         Log.d(TAG, "DataSyncNotification " + iDataSyncNotification.getStatus());
         if(iDataSyncNotification.getStatus() == DataSyncStatus.START_SYNC){
             mView.startPushDataOnCloud();
@@ -100,6 +105,10 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
             DataSyncUpdateStateNotification lDataSyncUpdateStateNotification = (DataSyncUpdateStateNotification) iDataSyncNotification;
             mView.refreshLastSync(lDataSyncUpdateStateNotification.getLastSync());
         }
+    }
+    @Override
+    public void finalize(){
+        EventBus.getDefault().unregister(this);
     }
 
 }

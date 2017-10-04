@@ -23,21 +23,24 @@ import android.util.Log;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.ThreadMode;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.LinkedList;
 
 /**
  * Created by lecoucl on 07/04/17.
  */
-public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver implements DevicePairingDetailsContract.Presenter {
+public class DevicePairingDetailsPresenter implements DevicePairingDetailsContract.Presenter {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private final BluetoothDevicePairingService mBluetoothDevicePairingService;
+    private BluetoothDevicePairingService mBluetoothDevicePairingService;
 
     private final DevicePairingDetailsContract.View mView;
 
@@ -47,11 +50,18 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
 
         mView.setPresenter(this);
 
-        listenDevicePairingService();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void start() {
+
+        // no service binded to the SeizureMonitoringActivity
+        if(mBluetoothDevicePairingService == null){
+            mView.failParing();
+            return;
+        }
+
         if(mBluetoothDevicePairingService.isPairing()){
             mView.progressPairing();
         }
@@ -64,13 +74,14 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
         }
     }
 
-    @Override
-    public void listenDevicePairingService() {
-        mBluetoothDevicePairingService.addObserver(this);
-    }
 
-    @Override
-    public void onDevicePairingServiceNotification(DevicePairingNotification iDevicePairingNotification) {
+    /**
+     * @brief method executed by observer class when receiving a device pairing notification event
+     *
+     * @param iDevicePairingNotification notification to be processed by observer class
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDevicePairingEvent(DevicePairingNotification iDevicePairingNotification) {
         DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
         Log.d(TAG, "DevicePairing onNotificationReceived " + lStatus);
 
@@ -88,5 +99,14 @@ public class DevicePairingDetailsPresenter extends DevicePairingServiceObserver 
             DevicePairingBatteryLevelNotification lDevicePairingNotification = (DevicePairingBatteryLevelNotification) iDevicePairingNotification;
             mView.refreshDeviceBatteryLevel(lDevicePairingNotification.getDeviceInfo());
         }
+    }
+
+    @Override
+    public void finalize(){
+        EventBus.getDefault().unregister(this);
+    }
+
+    public void setDevicePairingService(BluetoothDevicePairingService iDevicePairingService) {
+        mBluetoothDevicePairingService = iDevicePairingService;
     }
 }

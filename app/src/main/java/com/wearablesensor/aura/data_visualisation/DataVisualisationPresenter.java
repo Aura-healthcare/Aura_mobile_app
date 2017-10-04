@@ -29,33 +29,28 @@
 
 package com.wearablesensor.aura.data_visualisation;
 
+import com.couchbase.lite.util.Log;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingServiceObserver;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
-import java.util.Calendar;
-import java.util.Date;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-
-public class DataVisualisationPresenter extends DevicePairingServiceObserver implements DataVisualisationContract.Presenter {
+public class DataVisualisationPresenter implements DataVisualisationContract.Presenter {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private final DevicePairingService mDevicePairingService;
     private final DataVisualisationContract.View mView;
 
-    public DataVisualisationPresenter(DevicePairingService iDevicePairingService,
-                                      DataVisualisationContract.View iView){
-        mDevicePairingService = iDevicePairingService;
-
+    public DataVisualisationPresenter(DataVisualisationContract.View iView){
         mView = iView;
         mView.setPresenter(this);
 
-        listenDevicePairingObserver();
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -73,15 +68,14 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
         mView.refreshPhysioSignalVisualisation(iPhysioSignal);
     }
 
-    /**
-     * @brief connect observer to DevicePairingService
-     */
-    private void listenDevicePairingObserver(){
-        mDevicePairingService.addObserver(this);
-    }
 
-    @Override
-    public void onDevicePairingServiceNotification(DevicePairingNotification iDevicePairingNotification) {
+    /**
+     * @brief method executed by observer class when receiving a device pairing notification event
+     *
+     * @param iDevicePairingNotification notification to be processed by observer class
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDevicePairingEvent(DevicePairingNotification iDevicePairingNotification){
         DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
 
         if(lStatus == DevicePairingStatus.CONNECTED){
@@ -92,7 +86,12 @@ public class DataVisualisationPresenter extends DevicePairingServiceObserver imp
         }
         if(lStatus == DevicePairingStatus.RECEIVED_DATA){
             DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
-                receiveNewPhysioSample(lDevicePairingNotification.getPhysioSignal());
-        }
+            Log.d(TAG, "ReceivedData" + lDevicePairingNotification.getPhysioSignal().toString());
+            receiveNewPhysioSample(lDevicePairingNotification.getPhysioSignal());
+        }    }
+
+    @Override
+    public void finalize(){
+        EventBus.getDefault().unregister(this);
     }
 }

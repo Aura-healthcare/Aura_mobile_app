@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura;
 
 import com.crashlytics.android.Crashlytics;
-import android.bluetooth.BluetoothManager;
+
 import android.content.Context;
 
 import android.support.multidex.MultiDexApplication;
@@ -32,22 +32,17 @@ import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_sync.DataSyncService;
-import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
-import com.wearablesensor.aura.device_pairing.DevicePairingService;
-import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
 import io.fabric.sdk.android.Fabric;
 
+
 public class AuraApplication extends MultiDexApplication {
-    private DevicePairingService mDevicePairingService;
 
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository.Session mRemoteDataSessionRepository;
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
     private DataSyncService mDataSyncService;
-
-    private RealTimeDataProcessorService mRealTimeDataProcessorService;
 
     private UserSessionService mUserSessionService;
 
@@ -63,7 +58,6 @@ public class AuraApplication extends MultiDexApplication {
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
         mAuthentificationHelper.init(lApplicationContext);
 
-        mDevicePairingService = new BluetoothDevicePairingService( lApplicationContext);
         mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
         mRemoteDataTimeSeriesRepository = new RemoteDataInfluxDBRepository();
@@ -75,13 +69,20 @@ public class AuraApplication extends MultiDexApplication {
                                                mRemoteDataTimeSeriesRepository,
                                                lApplicationContext,
                                                mUserSessionService);
-
-        mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, mUserSessionService);
-        mRealTimeDataProcessorService.init();
     }
 
-    public DevicePairingService getDevicePairingService() {
-        return mDevicePairingService;
+    @Override
+    public void onLowMemory(){
+        super.onLowMemory();
+        Log.d("AURA APP", "LOW MEMORY ");
+        Crashlytics.getInstance().logException(new Exception("LowMemory"));
+    }
+
+    @Override
+    public void onTrimMemory(int level){
+        super.onTrimMemory(level);
+        Log.d("AURA APP", "TRIM MEMORY " + level);
+        Crashlytics.getInstance().logException(new Exception("TrimMemory - "+level));
     }
 
     public LocalDataRepository getLocalDataRepository() {
@@ -103,5 +104,4 @@ public class AuraApplication extends MultiDexApplication {
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
 
     public UserSessionService getUserSessionService(){return mUserSessionService;}
-
 }
