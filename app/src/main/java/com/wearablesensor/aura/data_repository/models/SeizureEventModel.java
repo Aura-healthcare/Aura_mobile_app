@@ -113,4 +113,8 @@ public class SeizureEventModel {
     public void setType(String iType){
         mType = iType;
     }
+
+    public String toString(){
+        return mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mComments;
+    }
 }

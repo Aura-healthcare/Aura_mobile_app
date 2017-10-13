@@ -38,24 +38,26 @@ import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
+import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
-import com.wearablesensor.aura.data_sync.notifications.DataSyncLowSignalNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncNoSignalNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
+import com.wearablesensor.aura.utils.Timer;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Observable;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -139,14 +141,7 @@ public class DataSyncService{
                                                                 }
 
                                                                  Log.d(TAG, "Wifi Signal Level - " + signalLevel);
-                                                                 if(signalLevel == WifiSignalLevel.NO_SIGNAL || signalLevel == WifiSignalLevel.POOR){
-                                                                     stopDataSync();
-
-                                                                     EventBus.getDefault().post(new DataSyncLowSignalNotification());
-                                                                 }
-                                                                 else{
-                                                                    startDataSync();
-                                                                 }
+                                                                 startDataSync();
                                                             }
                                                         });
     }
@@ -231,112 +226,80 @@ public class DataSyncService{
         mIsDataSyncEnabled = false;
     }
 
-
-    /**
-     * @brief update last sync attribute from user preferences
-     *
-     * @param iLastSync last sync value to apply
-     * @throws Exception
-     */
-
-    private void saveLastSync(Date iLastSync) throws Exception {
-        try {
-            UserPreferencesModel lFormerUserPrefs = mUserSessionService.getUserPreferences();
-            final UserPreferencesModel lNewUserPrefs= new UserPreferencesModel(lFormerUserPrefs.getUserId(), DateIso8601Mapper.getString(iLastSync) );
-            mUserSessionService.setUserPreferences(lNewUserPrefs);
-            Thread t1 = new Thread(new Runnable() {
-                public void run()
-                {
-                    try {
-                        mRemoteDataSessionRepository.saveUserPreferences(lNewUserPrefs);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }});
-
-            t1.start();
-
-        }catch(Exception e){
-            throw e;
-        }
-    }
-
-    /**
-     * @brief get last sync value from user preferences
-     *
-     * @return last sync date if exists, otherwise null
-     */
-    public Date getLastSync(){
-        String lLastSync = mUserSessionService.getUserPreferences().getLastSync();
-        return DateIso8601Mapper.getDate(lLastSync);
-    }
-
     /**
      * @brief asynchronous task that handles the data packets push on a background thread
      */
     // TODO: we should implement a Loader and cache/remote data sync logic
     class PushDataPacketsOnRemoteAsync extends AsyncTask<Void, Integer, Boolean> {
         final private String TAG = PushDataPacketsOnRemoteAsync.class.getSimpleName();
-        private Date mCurrentSync;
-        private Date mFinalSync;
 
         private PowerManager.WakeLock mWakeLock;
+        private String[] mPackets;
 
-        /**
-         * @brief get time window end
-         *
-         * @param iWindowStart time window start
-         * @param iFinalSync current time equivalent to last window end to be updated
-         * @return time window end
-         */
-        private Date getDateEndWindow(Date iWindowStart, Date iFinalSync){
-            Date oWindowEnd;
-            Calendar c = Calendar.getInstance();
-            c.setTime(iWindowStart);
-            c.add(Calendar.HOUR, 1);
 
-            oWindowEnd = c.getTime();
-            if(oWindowEnd.after(iFinalSync)){
-                return iFinalSync;
+        public String[] getPackets(){
+            String lPath = mApplicationContext.getFilesDir().getPath();
+            File lDirectory = new File(lPath);
+            File[] lFiles = lDirectory.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    if(pathname.toString().contains(LocalDataFileRepository.CACHE_FILENAME)){
+                        return true;
+                    }
+
+                    return false;
+                }
+            });
+
+            if(lFiles == null || lFiles.length == 0){
+                return null;
             }
-            else{
-                return oWindowEnd;
+            String[] oFileNames = new String[lFiles.length];
+            for (int i = 0; i < lFiles.length; i++)
+            {
+                oFileNames[i] = lFiles[i].getName();
             }
 
+            Log.d(TAG, "File number " + oFileNames.length);
+            return oFileNames;
         }
+
         protected void onPreExecute() {
             PowerManager powerManager = (PowerManager) mApplicationContext.getSystemService(mApplicationContext.POWER_SERVICE);
             mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                     "DataSyncWakelockTag");
             mWakeLock.acquire();
 
-            Calendar c = Calendar.getInstance();
-            mFinalSync = c.getTime();
-
-            mCurrentSync = getLastSync();
-            Log.d(TAG, "New data sync - interval time " + mCurrentSync + " - " + mFinalSync);
-
+            mPackets = getPackets();
         }
 
         protected Boolean doInBackground(Void... arg0) {
             Log.d(TAG, "doInBackground");
 
-            while(!mCurrentSync.equals(mFinalSync) && mIsDataSyncEnabled) {
+            while(mPackets != null && mPackets.length > 0 && mIsDataSyncEnabled) {
+
+                String lPacket = mPackets[0];
                 try {
-                    Date lWindowStart = mCurrentSync;
-                    Date lWindowEnd = getDateEndWindow(lWindowStart, mFinalSync);
-                    Log.d(TAG, "data packet - time window " + lWindowStart + " - " + lWindowEnd);
+                    Timer.init("start transfer");
+                    Timer.logResult("start data package transfer "+ lPacket);
 
-                    final ArrayList<PhysioSignalModel> lPhysioSignalSamples = mLocalDataRepository.queryPhysioSignalSamples(lWindowStart, lWindowEnd);
-                    mRemoteDataTimeSeriesRepository.savePhysioSignalSamples(lPhysioSignalSamples);
-                    mLocalDataRepository.removePhysioSignalSamples(lPhysioSignalSamples);
+                    if(lPacket.contains(LocalDataFileRepository.PHYSIO_SIGNAL_SUFFIX)) {
+                        final ArrayList<PhysioSignalModel> lPhysioSignalSamples = mLocalDataRepository.queryPhysioSignalSamples(lPacket);
+                        Timer.logResult("query data  " + lPacket);
+                        mRemoteDataTimeSeriesRepository.savePhysioSignalSamples(lPhysioSignalSamples);
+                        Timer.logResult("save data " + lPacket);
+                    }
+                    else if(lPacket.contains(LocalDataFileRepository.SENSITIVE_EVENT_SUFFIX)) {
+                        final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lPacket);
+                        Timer.logResult("query data  " + lPacket);
+                        mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);
+                        Timer.logResult("save data " + lPacket);
+                    }
 
-                    final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lWindowStart, lWindowEnd);
-                    mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);
+                    mLocalDataRepository.removePhysioSignalSamples(lPacket);
 
-                    mCurrentSync = lWindowEnd;
-
-                    EventBus.getDefault().post(new DataSyncUpdateStateNotification(mCurrentSync));
+                    mPackets = getPackets();
+                    EventBus.getDefault().post(new DataSyncUpdateStateNotification());
 
                 } catch (Exception e) {
                     Log.d(TAG, "Fail to save data packet");
@@ -349,17 +312,10 @@ public class DataSyncService{
         }
 
         protected void onPostExecute(Boolean iSuccess) {
-            Log.d(TAG, "End data sync - interval time " + mCurrentSync + " - " + mFinalSync);
-
-            try{
-                saveLastSync(mCurrentSync);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            Timer.logResult("end transfer");
 
             setDataSyncIsInProgress(false);
             mWakeLock.release();
-
         }
 
     }

@@ -30,14 +30,9 @@ package com.wearablesensor.aura.data_sync.notifications;
 import java.util.Date;
 
 public class DataSyncUpdateStateNotification extends DataSyncNotification{
-    private Date mLastSync;
 
-    public DataSyncUpdateStateNotification(Date iLastSync) {
+    public DataSyncUpdateStateNotification() {
         super(DataSyncStatus.UPDATE_SYNC_STATE);
-        mLastSync = iLastSync;
-    }
 
-    public Date getLastSync(){
-        return mLastSync;
     }
 }

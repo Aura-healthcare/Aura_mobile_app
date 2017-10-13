@@ -53,11 +53,11 @@ public class DataSyncContract {
         void endPushDataOnCloud();
 
         /**
-         * @brief refresh last syncing date display
+         * @brief refresh remaining packet number to transfer to Cloud
          *
-         * @param iLastSync last time data has been push on Cloud
+         * @param iDataPacketNumber remaining packet number to transfer
          */
-        void refreshLastSync(Date iLastSync);
+        void refreshDataPackerNumber(Integer iDataPacketNumber);
 
         /**
          * @brief display an error popup with corresponding message to user
@@ -83,6 +83,7 @@ public class DataSyncContract {
          * @brief display no wifi signal state
          */
         void displayNoSignalState();
+
     }
 
     interface Presenter extends BasePresenter{

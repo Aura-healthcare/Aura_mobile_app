@@ -51,4 +51,9 @@ public class SkinTemperatureModel extends PhysioSignalModel {
     public void setTemperature(float iTemperature) {
         mTemperature = iTemperature;
     }
+
+    @Override
+    public String toString(){
+        return super.toString() + " " +String.valueOf(mTemperature);
+    }
 }

@@ -26,7 +26,7 @@ import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
-import com.wearablesensor.aura.data_repository.LocalDataCouchbaseRepository;
+import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
@@ -58,7 +58,7 @@ public class AuraApplication extends MultiDexApplication {
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
         mAuthentificationHelper.init(lApplicationContext);
 
-        mLocalDataRepository = new LocalDataCouchbaseRepository(lApplicationContext);
+        mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
         mRemoteDataTimeSeriesRepository = new RemoteDataInfluxDBRepository();
 

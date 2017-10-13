@@ -95,4 +95,9 @@ public class PhysioSignalModel {
     public void setType(String iType){
         mType = iType;
     }
+
+    @Override
+    public String toString(){
+        return mUuid + " " + mType + " " + mTimestamp + " " + mUser + " " + mDeviceAdress;
+    }
 }

@@ -41,17 +41,16 @@ import java.util.Date;
 
 public interface LocalDataRepository {
     /**
-     * @brief query a list of physiological data samples in a time range [iStartDate, iEndDate]
+     * @brief query a list of physiological data samples from a cache file
      *
-     * @param iStartDate collected data samples timestamps are newer than iStartData
-     * @param iEndDate collected data samples timestamp is older than iEndData
+     * @param iFilename cache file storing the physio signal samples
      *
      * @return a list of physiological data samples
      *
      * @throws Exception
      */
 
-    public ArrayList<PhysioSignalModel> queryPhysioSignalSamples(Date iStartDate, Date iEndDate) throws Exception;
+    public ArrayList<PhysioSignalModel> queryPhysioSignalSamples(String iFilename) throws Exception;
 
     /**
      * @brief save a batch of physiological signal sample in the local storage
@@ -65,11 +64,11 @@ public interface LocalDataRepository {
     /**
      * @brief remove a batch of physiological signal samples from the local storage
      *
-     * @param iPhysioSignalSamples physiological data list to be removed
+     * @param iFilename physiological data list to be removed
      *
      * @throws Exception
      */
-    public void removePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
+    public void removePhysioSignalSamples(String iFilename) throws Exception;
 
     /**
      * @brief cache a physiological data sample in the heap and periodically clear cache and save data to local
@@ -79,17 +78,18 @@ public interface LocalDataRepository {
      */
     void cachePhysioSignalSample(PhysioSignalModel iPhysioSignal) throws Exception;
 
+
     /**
-     * @brief query a list of seizure events in a time range [iStartDate, iEndDate]
+     * @brief query a list of  sensitive events
      *
-     * @param iStartDate collected data sample timestamps are newer than iStartData
-     * @param iEndDate collected data samples timestamp is older than iEndData
+     * @param iFilename cache file storing the physio signal samples
      *
-     * @return a list of seizure events
+     * @return a list of physiological data samples
      *
      * @throws Exception
      */
-    ArrayList<SeizureEventModel> querySeizures(Date iStartDate, Date iEndDate) throws Exception;
+
+    public ArrayList<SeizureEventModel> querySeizures(String iFilename) throws Exception;
 
     /**
      * @brief save a seizure event
@@ -105,9 +105,4 @@ public interface LocalDataRepository {
      *
      */
     void clearCache() throws Exception;
-
-    /**
-     * @brief clear entirely the local data storage
-     */
-    void clear();
 }

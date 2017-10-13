@@ -64,4 +64,9 @@ public class ElectroDermalActivityModel extends PhysioSignalModel{
     public void setElectroDermalActivity(int iElectroDermalActivity){
         mElectroDermalActivity = iElectroDermalActivity;
     }
+
+    @Override
+    public String toString(){
+        return super.toString() + " " +String.valueOf(mElectroDermalActivity) + " " + String.valueOf(mSensorOutputFrequency);
+    }
 }

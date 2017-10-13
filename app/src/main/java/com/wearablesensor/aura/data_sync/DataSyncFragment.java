@@ -60,7 +60,7 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
 
     @BindView(R.id.data_sync_progress_bar) ProgressBar mProgressBar; /** data push progress bar */
     @BindView(R.id.data_sync_image_view) ImageView mImageView; /** data push image state */
-    @BindView(R.id.data_sync_last_sync) TextView mLastSyncView; /** text view displaying last sync date */
+    @BindView(R.id.data_sync_status) TextView mSyncStatusView; /** text view displaying last sync date */
     @BindView(R.id.data_sync_comment) TextView mDataSyncComment;
 
     private OnFragmentInteractionListener mListener;
@@ -154,49 +154,37 @@ public class DataSyncFragment extends Fragment implements DataSyncContract.View 
         mDataSyncComment.setVisibility(View.VISIBLE);
     }
 
+
     /**
-     * @brief  refresh last syncing date display
+     * @brief refresh remaining packet number to transfer to Cloud
      *
-     * @param iLastSync last time data has been push on Cloud
+     * @param iDataPacketNumber remaining packet number to transfer
      */
     @Override
-    public void refreshLastSync(final Date iLastSync) {
-        Log.d(TAG, "refreshLastSync" + iLastSync);
+    public void refreshDataPackerNumber(final Integer iDataPacketNumber) {
+        Log.d(TAG, "refreshDataPacketNumber " + iDataPacketNumber);
 
         // Current Thread is Main Thread.
         if(Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            refreshLastSyncOnThread(iLastSync);
+            refreshDataPackerNumberOnThread(iDataPacketNumber);
         }
         else {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshLastSyncOnThread(iLastSync);
+                refreshDataPackerNumberOnThread(iDataPacketNumber);
                 }
             });
         }
     }
 
     /**
-     * @brief internal method used to update last sync text view on a specific thread
+     * @brief refresh data packet number on UI Thread
      *
-     * @param iLastSync last time data has been push on Cloud
+     * @param iDataPacketNumber
      */
-    private void refreshLastSyncOnThread(final Date iLastSync){
-        long iCurrentTimeInMs = Calendar.getInstance().getTimeInMillis();
-
-        Calendar lFormerDate = Calendar.getInstance();
-        lFormerDate.setTime(iLastSync);
-        long msDiff = iCurrentTimeInMs - lFormerDate.getTimeInMillis();
-        long daysDiff = TimeUnit.MILLISECONDS.toDays(msDiff);
-        long hoursDiff = TimeUnit.MILLISECONDS.toHours(msDiff);
-
-        if(daysDiff < 1){
-            mLastSyncView.setText(getString(R.string.last_sync) + hoursDiff + " hours ago");
-        }
-        else{
-            mLastSyncView.setText(getString(R.string.last_sync) + daysDiff + " days ago");
-        }
+    private void refreshDataPackerNumberOnThread(final Integer iDataPacketNumber) {
+        mSyncStatusView.setText(getString(R.string.remaining_packet_sync) + " " + iDataPacketNumber.toString());
     }
 
     /**

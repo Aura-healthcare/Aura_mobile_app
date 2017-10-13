@@ -142,7 +142,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(( (mDataCollectorService != null) ? mDataCollectorService.getDevicePairingService():null), mDevicePairingFragment);
 
         mDataSyncFragment = new DataSyncFragment();
-        mDataSyncPresenter = new DataSyncPresenter( ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
+        mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(), ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
 
         mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
         mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);

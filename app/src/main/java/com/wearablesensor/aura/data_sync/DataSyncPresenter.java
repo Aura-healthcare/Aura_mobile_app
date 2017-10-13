@@ -31,7 +31,10 @@
 
 package com.wearablesensor.aura.data_sync;
 
+import android.content.Context;
 import android.util.Log;
+
+import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncServiceObserver;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStatus;
@@ -41,6 +44,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.Date;
 
 public class DataSyncPresenter extends DataSyncServiceObserver implements DataSyncContract.Presenter {
@@ -49,18 +54,22 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
     private DataSyncService mDataSyncService;
     private DataSyncContract.View mView;
 
+    private Context mApplicationContext;
+
     /**
      * @brief constructor
      *
      * @param iDataSyncService data sync service
      * @param iView view to be updated as it is done in MVP architecture
      */
-    public DataSyncPresenter(DataSyncService iDataSyncService, DataSyncContract.View iView) {
+    public DataSyncPresenter(Context iApplicationContext, DataSyncService iDataSyncService, DataSyncContract.View iView) {
         mDataSyncService = iDataSyncService;
 
         mView = iView;
 
         mView.setPresenter(this);
+
+        mApplicationContext = iApplicationContext;
 
         EventBus.getDefault().register(this);
     }
@@ -70,8 +79,8 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
      */
     @Override
     public void start() {
-        Date lLastSync = mDataSyncService.getLastSync();
-        mView.refreshLastSync(lLastSync);
+        Integer lDataPacketNumber = getDataPacketsNumber();
+        mView.refreshDataPackerNumber(lDataPacketNumber);
 
         if(mDataSyncService.isDataSyncInProgress()){
             mView.startPushDataOnCloud();
@@ -103,7 +112,7 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         }
         else if(iDataSyncNotification.getStatus() == DataSyncStatus.UPDATE_SYNC_STATE){
             DataSyncUpdateStateNotification lDataSyncUpdateStateNotification = (DataSyncUpdateStateNotification) iDataSyncNotification;
-            mView.refreshLastSync(lDataSyncUpdateStateNotification.getLastSync());
+            mView.refreshDataPackerNumber(getDataPacketsNumber());
         }
     }
     @Override
@@ -111,4 +120,20 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         EventBus.getDefault().unregister(this);
     }
 
+    private Integer getDataPacketsNumber() {
+        String path = mApplicationContext.getFilesDir().getPath();
+        File directory = new File(path);
+        File[] files = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                if (pathname.toString().contains(LocalDataFileRepository.CACHE_FILENAME)) {
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        return files.length;
+    }
 }

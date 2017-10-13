@@ -50,4 +50,8 @@ public class RRIntervalModel extends PhysioSignalModel {
     public void setRrInterval(int iRrInterval) {
         mRrInterval = iRrInterval;
     }
+
+    public String toString(){
+        return super.toString() + " " + String.valueOf(mRrInterval);
+    }
 }

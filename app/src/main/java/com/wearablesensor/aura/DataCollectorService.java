@@ -39,14 +39,14 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
-import com.wearablesensor.aura.data_repository.LocalDataCouchbaseRepository;
+import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
 
 public class DataCollectorService extends Service {
     private static final String TAG = DataCollectorService.class.getSimpleName();
 
-    private LocalDataCouchbaseRepository mLocalDataRepository;
+    private LocalDataFileRepository mLocalDataRepository;
     private BluetoothDevicePairingService mDevicePairingService;
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
 
@@ -62,7 +62,7 @@ public class DataCollectorService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mLocalDataRepository = new LocalDataCouchbaseRepository(getApplicationContext());
+        mLocalDataRepository = new LocalDataFileRepository(getApplicationContext());
         mDevicePairingService = new BluetoothDevicePairingService( getApplicationContext());
     }
 
