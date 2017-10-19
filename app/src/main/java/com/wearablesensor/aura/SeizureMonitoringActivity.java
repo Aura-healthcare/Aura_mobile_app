@@ -242,18 +242,32 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         // no running Aura Data Collector service
         if(!isMyServiceRunning(DataCollectorService.class)){
             BluetoothEnabler.start(this, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
+
+                private Boolean mHasBeenCanceled = false;
+
                 @Override
                 public Please onEvent(BluetoothEnablerEvent e) {
                     Log.d(TAG, "Bluetooth Enabler Event - " + e);
+
+                    if(e.status().isCancelled()){
+                        mDevicePairingDetailsPresenter.onDevicePairingEvent(new DevicePairingDisconnectedNotification());
+                        mHasBeenCanceled = true;
+                    }
                     if (e.isDone()) {
-                        Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
-                        startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
-                        startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
-                        startService(startIntent);
 
-                        doBindService();
-                    } else if (e.status().isCancelled()) {
+                        if(mHasBeenCanceled){
+                            mHasBeenCanceled = false;
+                        }
+                        else{
+                            Log.d(TAG, "Bluetooth Enabler Event - " + e.status());
 
+                            Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
+                            startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
+                            startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
+                            startService(startIntent);
+
+                            doBindService();
+                        }
                     }
 
                     return super.onEvent(e);
