@@ -18,9 +18,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -28,8 +33,18 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = new Intent(this, SignInActivity.class);
-        startActivity(intent);
+        SharedPreferences lSharedPref = getSharedPreferences(UserSessionService.SHARED_PREFS_FILE, Context.MODE_PRIVATE);
+        String lUserUUID = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_UUID, null);
+
+        if(lUserUUID != null){
+            Intent intent = new Intent(this, SeizureMonitoringActivity.class);
+            startActivity(intent);
+        }
+        else {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+        }
+
         this.finish();
     }
 }

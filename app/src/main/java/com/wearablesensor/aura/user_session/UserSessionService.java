@@ -37,6 +37,7 @@ package com.wearablesensor.aura.user_session;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -51,6 +52,7 @@ import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 
 import java.util.Date;
+import java.util.Set;
 
 public class UserSessionService {
 
@@ -67,6 +69,10 @@ public class UserSessionService {
     private String mAuthToken; /** authentification token */
     private Boolean mIsFirstSignIn; /** first time sign-in flag */
 
+    public final static String SHARED_PREFS_FILE = "UserSession";
+    public final static String SHARED_PREFS_USER_UUID = "UUID";
+    public final static String SHARED_PREFS_USER_AMAZON_ID = "AmazonId";
+    public final static String SHARED_PREFS_USER_ALIAS = "Alias";
     /**
      * @brief constructor
      *
@@ -129,6 +135,15 @@ public class UserSessionService {
     }
 
     public void startSession(Activity iActivity){
+
+        SharedPreferences lSharedPref = mActivity.getSharedPreferences(UserSessionService.SHARED_PREFS_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor lEditor = lSharedPref.edit();
+        lEditor.putString(UserSessionService.SHARED_PREFS_USER_UUID, getUser().getUuid());
+        lEditor.putString(UserSessionService.SHARED_PREFS_USER_AMAZON_ID, getUser().getAmazonId());
+        lEditor.putString(UserSessionService.SHARED_PREFS_USER_ALIAS, getUser().getAlias());
+        lEditor.commit();
+
+        Log.d(TAG, "USER RECORD" + getUser().getUuid() + " " + getUser().getAmazonId());
         Intent intent = new Intent(mApplicationContext, SeizureMonitoringActivity.class);
         iActivity.startActivity(intent);
         iActivity.finish();

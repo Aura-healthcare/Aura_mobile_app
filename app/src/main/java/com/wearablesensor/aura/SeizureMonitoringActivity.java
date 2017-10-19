@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,12 +47,15 @@ import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureStatusFragment;
 import com.wearablesensor.aura.seizure_report.SeizureStatusPresenter;
+import com.wearablesensor.aura.user_session.UserModel;
+import com.wearablesensor.aura.user_session.UserSessionService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -136,6 +140,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             e.printStackTrace();
         }
 
+        loadUser();
+
         Crashlytics.setUserIdentifier(((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
 
         mDevicePairingFragment = new DevicePairingDetailsFragment();
@@ -158,6 +164,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         ButterKnife.bind(this);
 
         setupDrawer();
+    }
+
+    private void loadUser() {
+        SharedPreferences lSharedPref = getSharedPreferences(UserSessionService.SHARED_PREFS_FILE, Context.MODE_PRIVATE);
+        String lUserUUID = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_UUID, null);
+        String lUserAmazonId = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_AMAZON_ID, "");
+        String lUserAlias = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_ALIAS,"");
+
+        if(lUserUUID != null) {
+            ((AuraApplication) getApplication()).getUserSessionService().setUser(new UserModel(lUserUUID, lUserAmazonId, lUserAlias));
+        }
     }
 
     @Override
