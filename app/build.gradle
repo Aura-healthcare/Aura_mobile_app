@@ -37,6 +37,8 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
+    compile 'com.github.florent37:singledateandtimepicker:1.2.2'
+    compile 'lib.kingja.switchbutton:switchbutton:1.1.3'
     testCompile 'junit:junit:4.12'
 }
 

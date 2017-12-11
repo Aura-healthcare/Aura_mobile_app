@@ -38,26 +38,26 @@ public class SeizureEventModel {
     private String mUser; // user concerned by sensitive event
     private String mTimestamp; // sample collected timestamp
     private String mSensitiveEventTimestamp; // sample sensitive event timestamp
-    private String mComments; // sensitive event comments
+    private String mIntensity; // sensitive event comments
 
     private String mType; // sample data type
 
-    public SeizureEventModel(String iUuid, String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iComments){
+    public SeizureEventModel(String iUuid, String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity){
         mUuid = iUuid;
         mUser = iUser;
         mTimestamp = iTimestamp;
         mSensitiveEventTimestamp = iSensitiveEventTimestamp;
-        mComments = iComments;
+        mIntensity = iIntensity;
 
         mType = SENSITIVE_EVENT_TYPE;
     }
 
-    public SeizureEventModel(String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iComments){
+    public SeizureEventModel(String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity){
         mUuid = UUID.randomUUID().toString();
         mUser = iUser;
         mTimestamp = iTimestamp;
         mSensitiveEventTimestamp = iSensitiveEventTimestamp;
-        mComments = iComments;
+        mIntensity = iIntensity;
 
         mType = SENSITIVE_EVENT_TYPE;
     }
@@ -67,7 +67,7 @@ public class SeizureEventModel {
         mUser = "";
         mTimestamp = "";
         mSensitiveEventTimestamp = "";
-        mComments = "";
+        mIntensity = "";
 
         mType = SENSITIVE_EVENT_TYPE;
     }
@@ -100,11 +100,11 @@ public class SeizureEventModel {
         mSensitiveEventTimestamp = iSensitiveTimestamp;
     }
 
-    public String getComments(){
-        return mComments;
+    public String getIntensity(){
+        return mIntensity;
     }
-    public void setComments(String iComments){
-        mComments = iComments;
+    public void setIntensity(String iIntensity){
+        mIntensity = iIntensity;
     }
 
     public String getType(){
@@ -115,6 +115,6 @@ public class SeizureEventModel {
     }
 
     public String toString(){
-        return mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mComments;
+        return mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mIntensity;
     }
 }

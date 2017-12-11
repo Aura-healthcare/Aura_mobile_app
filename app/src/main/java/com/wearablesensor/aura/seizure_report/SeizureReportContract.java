@@ -36,7 +36,11 @@ public class SeizureReportContract {
     public interface Presenter extends BasePresenter {
         void cancelReportSeizureDetails();
 
-        void reportSeizure(Date iDate, String iComment);
+        void reportSeizure();
+
+        void setCurrentDate(Date iDate);
+
+        void setCurrentIntensity(String iIntensity);
     }
 }
 

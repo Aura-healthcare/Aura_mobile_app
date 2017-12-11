@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <TextView
@@ -12,52 +13,27 @@
         android:id="@+id/seizure_report_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker
+        android:id="@+id/single_time_date_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="230dp"
+        app:picker_curved="true"
+        app:picker_visibleItemCount="7"
+        app:picker_selectorColor="@color/app_primary_dark"
+        />
+
+    <lib.kingja.switchbutton.SwitchMultiButton
+        android:id="@+id/switch_button_seizure_impact"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="0dp"
-        android:weightSum="1"
-        android:layout_margin="10dp">
-
-        <DatePicker
-            android:layout_width="184dp"
-            android:layout_height="176dp"
-            android:id="@+id/seizure_report_date_picker"
-            android:headerBackground="@color/app_primary"
-            style="@android:style/Widget.DatePicker"
-            android:animationCache="false"
-            android:elevation="0dp"
-            android:paddingTop="@dimen/activity_horizontal_margin" />
-
-        <TimePicker
-            android:layout_width="wrap_content"
-            android:layout_height="176dp"
-            android:id="@+id/seizure_report_time_picker"
-            android:headerBackground="@color/app_primary"
-            android:numbersSelectorColor="@color/app_primary_dark"
-            android:elevation="0dp"
-            android:paddingTop="@dimen/activity_horizontal_margin" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="1"
-        android:layout_margin="10dp">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
-            android:hint="Comments"
-            android:ems="10"
-            android:id="@+id/seizure_report_comments"
-            android:layout_weight="2" />
-
-    </LinearLayout>
+        android:layout_gravity="center"
+        android:padding="8dp"
+        app:strokeRadius="5dp"
+        app:strokeWidth="1dp"
+        app:selectedTab="0"
+        android:layout_margin="15dp"
+        app:selectedColor="@color/app_primary_dark"
+        app:textSize="18sp" />
 
     <LinearLayout
         android:orientation="horizontal"

@@ -38,17 +38,17 @@ import android.support.v7.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.TimePicker;
 
+import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 import com.wearablesensor.aura.R;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lib.kingja.switchbutton.SwitchMultiButton;
 
 /**
  * Created by lecoucl on 09/08/17.
@@ -60,15 +60,12 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
 
     private OnFragmentInteractionListener mListener;
 
-
     @BindView(R.id.seizure_report_confirm_button)
     AppCompatButton mConfirmButton; /** confirm button */
     @OnClick(R.id.seizure_report_confirm_button)
     public void confirmCallback(View v) {
 
-        Date lSeizureDate = new Date(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-        String lComments = mSeizureReportComments.getText().toString();
-        mPresenter.reportSeizure(lSeizureDate, lComments);
+        mPresenter.reportSeizure();
     }
 
     @BindView(R.id.seizure_report_cancel_button) AppCompatButton mCancelButton;   /** cancel button  */
@@ -77,14 +74,9 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
         mPresenter.cancelReportSeizureDetails();
     }
 
-    @BindView(R.id.seizure_report_date_picker) DatePicker mDatePicker;
-    @BindView(R.id.seizure_report_time_picker) TimePicker mTimePicker;
+    @BindView(R.id.single_time_date_picker) SingleDateAndTimePicker mSingleDateAndTimePicker;
+    @BindView(R.id.switch_button_seizure_impact) SwitchMultiButton mSwitchMultiButton;
 
-    @BindView(R.id.seizure_report_comments) EditText mSeizureReportComments;
-
-    public SeizureReportFragment() {
-        // Required empty public constructor
-    }
 
     public static SeizureReportFragment newInstance() {
         SeizureReportFragment fragment = new SeizureReportFragment();
@@ -106,6 +98,20 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
         View view = inflater.inflate(R.layout.fragment_seizure_report, container, false);
         ButterKnife.bind(this, view);
 
+        mSwitchMultiButton.setText("Small", "Medium", "Big");
+        mSwitchMultiButton.setOnSwitchListener(new SwitchMultiButton.OnSwitchListener() {
+            @Override
+            public void onSwitch(int position, String tabText) {
+                mPresenter.setCurrentIntensity(tabText);
+            }
+        });
+
+        mSingleDateAndTimePicker.setListener(new SingleDateAndTimePicker.Listener() {
+            @Override
+            public void onDateChanged(String displayed, Date date) {
+                mPresenter.setCurrentDate(date);
+            }
+        });
         return view;
     }
 
@@ -118,6 +124,7 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {

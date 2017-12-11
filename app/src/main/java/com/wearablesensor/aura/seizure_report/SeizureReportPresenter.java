@@ -30,12 +30,17 @@
  */
 package com.wearablesensor.aura.seizure_report;
 
-import android.support.v4.app.FragmentTransaction;
+import android.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 
+import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
+import com.wearablesensor.aura.data_sync.DataSyncFragment;
+import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
+import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
 import java.util.Date;
@@ -47,12 +52,18 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     private LocalDataRepository mLocalDataRepository;
     private UserSessionService mUserSessionService;
 
+    private Date mCurrentDate;
+    private String mCurrentIntensity;
+
     public SeizureReportPresenter(SeizureReportContract.View iView, FragmentActivity iActivity, LocalDataRepository iLocalDataRepository, UserSessionService iUserSessionService){
         mActivity = iActivity;
         mView = iView;
         mView.setPresenter(this);
         mLocalDataRepository = iLocalDataRepository;
         mUserSessionService = iUserSessionService;
+
+        mCurrentDate = new Date();
+        mCurrentIntensity = "";
     }
 
     @Override
@@ -60,8 +71,33 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
     }
 
+    @Override
+    public void setCurrentDate(Date iDate){
+        mCurrentDate = iDate;
+    }
+
+    @Override
+    public void setCurrentIntensity(String iIntensity){
+        mCurrentIntensity = iIntensity;
+    }
+
     public void endReportSeizureDetails(){
-        mActivity.getSupportFragmentManager().popBackStackImmediate();
+        //mActivity.getSupportFragmentManager().popBackStack();
+
+
+        FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
+
+        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(SeizureReportFragment.class.getSimpleName()));
+
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
+
+        lTransaction.addToBackStack(null);
+
+        // Commit the transaction
+        lTransaction.commit();
     }
 
     @Override
@@ -70,8 +106,8 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     }
 
     @Override
-    public void reportSeizure(Date iDate, String iComments) {
-        SeizureEventModel lNewSeizureEvent = new SeizureEventModel(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(iDate), iComments);
+    public void reportSeizure() {
+        SeizureEventModel lNewSeizureEvent = new SeizureEventModel(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(mCurrentDate), mCurrentIntensity);
         try {
             mLocalDataRepository.saveSeizure(lNewSeizureEvent);
         }

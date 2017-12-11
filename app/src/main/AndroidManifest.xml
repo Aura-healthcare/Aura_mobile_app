@@ -53,7 +53,7 @@
             android:name="com.wearablesensor.aura.SeizureMonitoringActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-        <activity android:name="com.wearablesensor.aura.SeizureReportActivity"></activity>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="c9f78e96e63e090eb9187e28dcec186342b4a8d8" />

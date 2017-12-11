@@ -68,7 +68,7 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_UUID_TAG = "uuid";
     private final static String DB_TYPE_TAG = "type";
     private final static String DB_DEVICE_ADDRESS_TAG = "device_address";
-    private final static String DB_COMMENTS_TAG = "comments";
+    private final static String DB_INTENSITY_TAG = "intensity";
     private final static String DB_RR_INTERVAL_TAG = "rr_interval";
     private final static String DB_SKIN_TEMPERATURE = "skin_temperature";
     private final static String DB_SENSOR_OUTPUT_FREQUENCY = "dsensor_output_frequency";
@@ -140,7 +140,7 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
                     .tag(DB_UUID_TAG, lSeizureEvent.getUuid())
                     .tag(DB_USER_TAG, lSeizureEvent.getUser())
                     .tag(DB_TYPE_TAG, lSeizureEvent.getType())
-                    .addField(DB_COMMENTS_TAG, lSeizureEvent.getComments())
+                    .addField(DB_INTENSITY_TAG, lSeizureEvent.getIntensity())
                     .addField(DB_SENSITIVE_EVENT_TIMESTAMP_TAG, DateIso8601Mapper.getDate(lSeizureEvent.getSensitiveEventTimestamp()).getTime())
                     .build();
 
@@ -227,6 +227,4 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
         return lPoint;
     }
-
-
 }
