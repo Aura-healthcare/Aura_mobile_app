@@ -26,16 +26,21 @@ import android.util.Log;
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
+import com.idevicesinc.sweetblue.BleServer;
 import com.idevicesinc.sweetblue.utils.Uuids;
 import com.wearablesensor.aura.DataCollectorServiceConstants;
 import com.wearablesensor.aura.DataCollectorService;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
+import com.wearablesensor.aura.data_repository.models.MotionGyroscopeModel;
+import com.wearablesensor.aura.data_repository.models.MotionMagnetometerModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
+import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattMovementCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
@@ -43,9 +48,11 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceive
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -60,9 +67,53 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private Handler mScanningHandler;
     private BleManager.DiscoveryListener mDiscoveryListener;
 
+    // a enum to describe action types that can be applied to a specific GATT characteristic
+    public enum StateListenerAction{
+        READ,
+        WRITE,
+        ENABLE_NOTIFICATION
+    }
+
+    /**
+     * @class an inner class used to described actions to realise on GATT channel (read/write/notification) and
+     * associated callbacks
+     *
+     */
+    class StateListenerConfig
+    {
+        private UUID mGattService; // selected GATT service
+        private UUID mGattCharacteristic; // selected GATT characteristic
+        private BleDevice.ReadWriteListener mReadWriteListener; // action callback
+        private StateListenerAction mAction; // action type
+
+        StateListenerConfig(UUID iGattService, UUID iGattCharacteristic, BleDevice.ReadWriteListener  iReadWriteListener, StateListenerAction iAction) {
+            mGattService = iGattService;
+            mGattCharacteristic = iGattCharacteristic;
+            mReadWriteListener = iReadWriteListener;
+            mAction = iAction;
+        }
+
+        public UUID getGattService(){
+            return mGattService;
+        }
+
+        public UUID getGattCharacteristic(){
+            return mGattCharacteristic;
+        }
+
+        public BleDevice.ReadWriteListener getReadWriteListener(){
+            return mReadWriteListener;
+        }
+
+        public StateListenerAction getAction(){
+            return mAction;
+        }
+    }
+
     //Bluetooth data streaming callbacks
     private BleDevice.ReadWriteListener mHeartRateReadWriteListener;
     private BleDevice.ReadWriteListener mCustomMAXREFDES73ReadWriteListener;
+    private BleDevice.ReadWriteListener mMotionReadWriteListener;
 
     private BleDevice.ReadWriteListener mBatteryReadWriteListener;
 
@@ -126,6 +177,29 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
 
+        mMotionReadWriteListener = new BleDevice.ReadWriteListener() {
+            @Override
+            public void onEvent(ReadWriteEvent e) {
+                if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
+                    Log.d(TAG, "Motion Event" + e.data_byte() +" " + e.data().length);
+                    GattMovementCharacteristicReader lGattMovementCharacteristic = new GattMovementCharacteristicReader();
+                    lGattMovementCharacteristic.read(e.characteristic());
+
+                    Calendar c = Calendar.getInstance();
+                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
+                    String lDeviceAddress = e.device().getMacAddress();
+
+                    MotionAccelerometerModel lAccelerometerModel = new MotionAccelerometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getAccelerometer(), "2G");
+                    MotionGyroscopeModel lGyroscopeModel = new MotionGyroscopeModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getGyroscope());
+                    MotionMagnetometerModel lMagnetometer = new MotionMagnetometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getMagnetometer());
+
+                    receiveData(lAccelerometerModel);
+                    receiveData(lGyroscopeModel);
+                    receiveData(lMagnetometer);
+                }
+            }
+        };
+
         //Callback use to handle Bluetooth scanning
         mDiscoveryListener = new BleManager.DiscoveryListener() {
             @Override
@@ -133,10 +207,23 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 if (e.was(LifeCycle.DISCOVERED)) {
                     Log.d(TAG, "Discovery Event - "+ e);
                     if(isHeartRateCompatibleDevice(e.device())){
-                        connectDevice(e.device(), mHeartRateReadWriteListener);
+                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        connectDevice(e.device(), lStateListeners);
                     }
                     else if(isGSRTemperatureCustomCompatibleDevice(e.device())){
-                        connectDevice(e.device(), mCustomMAXREFDES73ReadWriteListener);
+                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mCustomMAXREFDES73ReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        connectDevice(e.device(), lStateListeners);
+                    }
+                    else if(isMotionCompatibleDevice(e.device())){
+                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+                        lStateListeners.add(new StateListenerConfig(Uuids.MOTION_SERVICE_UUID, Uuids.CHARACTERISTIC_MOTION_CONFIG, null, StateListenerAction.WRITE));
+                        lStateListeners.add(new StateListenerConfig(Uuids.MOTION_SERVICE_UUID, Uuids.CHARACTERISTIC_MOTION_DATA, mMotionReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        connectDevice(e.device(), lStateListeners);
                     }
                 }
             }
@@ -149,9 +236,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @brief method to handle device connect logic - service profile, measurement characteristic, incomming data parsing
      *
      * @param iDevice device to connect
-     * @param iReadWriteListener data parsing callback
+     * @param iStateListeners
      */
-    private void connectDevice(BleDevice iDevice, final BleDevice.ReadWriteListener iReadWriteListener) {
+    private void connectDevice(BleDevice iDevice, final ArrayList<StateListenerConfig> iStateListeners) {
         iDevice.connect(new BleDevice.StateListener(){
             @Override
             public void onEvent(BleDevice.StateListener.StateEvent e) {
@@ -163,8 +250,17 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     mConnectedDevices.put(e.device().getMacAddress(), e.device());
                     startPairing();
 
-                    e.device().enableNotify(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, iReadWriteListener);
-                    e.device().enableNotify(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener);
+                    for(StateListenerConfig iStateListener : iStateListeners) {
+                        if(iStateListener.getAction() == StateListenerAction.ENABLE_NOTIFICATION){
+                            e.device().enableNotify(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), iStateListener.getReadWriteListener());
+                        }
+                        else if(iStateListener.getAction() == StateListenerAction.WRITE){
+                            byte[] valid = new byte[2];
+                            valid[0] = Byte.MAX_VALUE;
+                            valid[1] = Byte.MAX_VALUE;
+                            e.device().write(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), valid);
+                        }
+                    }
                 }
                 else if (e.didEnter(BleDeviceState.DISCONNECTED)){
                     Log.d(TAG, "deviceDisconnected");
@@ -200,7 +296,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     private boolean isCompatibleDevice(BleDevice device) {
 
-        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) ){
+        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionCompatibleDevice(device) ){
             return true;
         }
 
@@ -253,6 +349,27 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         return false;
     }
 
+    /**
+     * @brief check if available bluetooth devices are compatibles for motion 
+     * data streaming with Aura prototype
+     *
+     * @param device available bluetooth device
+     *
+     * @return true if device is compatible, false otherwise
+     */
+    private boolean isMotionCompatibleDevice(BleDevice device){
+        String lDeviceName = device.getName_native();
+        if(lDeviceName != null) {
+            String lDeviceUpperName = lDeviceName.toUpperCase();
+
+            if( lDeviceUpperName.contains("SENSORTAG")) {
+                return true;
+            }
+            return false;
+        }
+
+        return false;
+    }
     /**
      * @brief start automatic pairing
      *

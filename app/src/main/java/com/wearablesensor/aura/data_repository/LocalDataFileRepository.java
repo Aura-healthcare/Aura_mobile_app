@@ -37,31 +37,19 @@ package com.wearablesensor.aura.data_repository;
 import android.content.Context;
 import android.util.Log;
 
-import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.ModelSerializer;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
-import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.StandardSocketOptions;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 
 public class LocalDataFileRepository implements LocalDataRepository {
@@ -114,24 +102,11 @@ public class LocalDataFileRepository implements LocalDataRepository {
 
                 String lLine = lBuffreader.readLine();
 
-                // read every line of the file into the line-variable, on line at the time
-                // TODO: implement a builder
-
                 while(lLine != null) {
-                    String[] lArgs = lLine.split(" ");
-                    if(lArgs[1].equals(RRIntervalModel.RR_INTERVAL_TYPE)){
-                        RRIntervalModel lRrIntervalModel = new RRIntervalModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2], Integer.parseInt(lArgs[5]));
-                        lPhysioSignalSamples.add( lRrIntervalModel );
+                    PhysioSignalModel lPhysioSignalSample = ModelSerializer.deserialize(lLine);
+                    if(lPhysioSignalSample != null){
+                        lPhysioSignalSamples.add(lPhysioSignalSample);
                     }
-                    else if( lArgs[1].equals(SkinTemperatureModel.SKIN_TEMPERATURE_TYPE) ){
-                        SkinTemperatureModel lSkinTemperature = new SkinTemperatureModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2],  Float.parseFloat(lArgs[5])  );
-                        lPhysioSignalSamples.add( lSkinTemperature );
-                    }
-                    else if(lArgs[1].equals(ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY)){
-                        ElectroDermalActivityModel lElectroDermalActivity = new ElectroDermalActivityModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2], Integer.parseInt(lArgs[6]), Integer.parseInt(lArgs[5]));
-                        lPhysioSignalSamples.add( lElectroDermalActivity );
-                    }
-
                     lLine = lBuffreader.readLine();
                 }
 
@@ -169,7 +144,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
             lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
             String lData = "";
             for(int i = 0; i < iPhysioSignalSamples.size(); i++){
-                lData += iPhysioSignalSamples.get(i).toString() + "\n";
+                lData += ModelSerializer.serialize(iPhysioSignalSamples.get(i)) + "\n";
             }
 
             lOutputStream.write(lData.getBytes());

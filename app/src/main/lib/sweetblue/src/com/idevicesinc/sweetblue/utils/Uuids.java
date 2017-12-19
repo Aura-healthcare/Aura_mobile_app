@@ -25,7 +25,7 @@ public final class Uuids
 	 * This is used to generate some of the other static {@link UUID} instances in this class using {@link #fromShort(String, String)}.
 	 */
 	public static final String STANDARD_UUID_TEMPLATE								= "00000000-0000-1000-8000-00805f9b34fb";
-
+    public static final String STANDARD_UUID_TEMPLATE_2                                 = "f0000000-0451-4000-b000-000000000000";
 
 	// Bluetooth spec Service UUIDs
 
@@ -65,7 +65,7 @@ public final class Uuids
 	public static final UUID TRANSPORT_DISCOVERY_SERVICE_UUID						= fromShort("1824");
 	public static final UUID OBJECT_TRANSFER_SERVICE_UUID							= fromShort("1825");
 	public static final UUID FITNESS_MACHINE_SERVICE_UUID							= fromShort("1826");
-
+	public static final UUID MOTION_SERVICE_UUID 									= fromShort("aa80", STANDARD_UUID_TEMPLATE_2);;
 
 
 	// Bluetooth spec characteristic UUIDs
@@ -265,7 +265,8 @@ public final class Uuids
 	public static final UUID SUPPORTED_POWER_RANGE									= fromShort("2ad8");
 	public static final UUID FITNESS_MACHINE_CONTROL_POINT							= fromShort("2ad9");
 	public static final UUID FITNESS_MACHINE_STATUS									= fromShort("2ada");
-
+public static final UUID CHARACTERISTIC_MOTION_CONFIG                               = fromShort("aa82", STANDARD_UUID_TEMPLATE_2);
+	public static final UUID CHARACTERISTIC_MOTION_DATA 							= fromShort("aa81", STANDARD_UUID_TEMPLATE_2);
 
 
 	// Bluetooth spec descriptor UUIDs

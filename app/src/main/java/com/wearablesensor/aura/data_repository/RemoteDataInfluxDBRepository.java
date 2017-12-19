@@ -36,6 +36,9 @@ package com.wearablesensor.aura.data_repository;
 
 
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
+import com.wearablesensor.aura.data_repository.models.MotionGyroscopeModel;
+import com.wearablesensor.aura.data_repository.models.MotionMagnetometerModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
@@ -61,6 +64,10 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_HEART_MEASUREMENT = "heart";
     private final static String DB_TEMPERATURE_MEASUREMENT = "temperature";
     private final static String DB_ELECTRO_DERMAL_ACTIVITY_MEASUREMENT = "electro_dermal_activity";
+    private final static String DB_ACCELEROMETER_MEASUREMENT = "accelerometer";
+    private final static String DB_GYROSCOPE_MEASUREMENT = "gyroscope";
+    private final static String DB_MAGNETOMETER_MEASUREMENT = "magnetometer";
+
 
     private final static String DB_USER_EVENT_MEASUREMENT = "user_event";
 
@@ -74,6 +81,9 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_SENSOR_OUTPUT_FREQUENCY = "dsensor_output_frequency";
     private final static String DB_ELECTRO_DERMAL_ACTIVITY = "electro_dermal_activity";
     private final static String DB_SENSITIVE_EVENT_TIMESTAMP_TAG = "sensitive_event_timestamp";
+    private final static String DB_X_TAG = "x";
+    private final static String DB_Y_TAG = "y";
+    private final static String DB_Z_TAG = "z";
 
     private InfluxDB mInfluxDB;
 
@@ -166,6 +176,15 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
         else if(iPhysioSignalModel.getType() == ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY){
             return buildElectroDermalActivityPoint((ElectroDermalActivityModel) iPhysioSignalModel);
         }
+        else if(iPhysioSignalModel.getType() == MotionAccelerometerModel.MOTION_ACCELEROMETER_MODEL){
+            return buildMotionAccelerometerModel((MotionAccelerometerModel) iPhysioSignalModel);
+        }
+        else if(iPhysioSignalModel.getType() == MotionGyroscopeModel.MOTION_GYROSCOPE_MODEL){
+            return buildMotionGyroscopeModel((MotionGyroscopeModel) iPhysioSignalModel);
+        }
+        else if(iPhysioSignalModel.getType() == MotionMagnetometerModel.MOTION_MAGNETOMETER_MODEL){
+            return buildMotionMagnetometerModel((MotionMagnetometerModel) iPhysioSignalModel);
+        }
 
         return null;
     }
@@ -223,6 +242,72 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
                 .tag(DB_TYPE_TAG, iElectroDermalActivityModel.getType())
                 .addField(DB_SENSOR_OUTPUT_FREQUENCY, iElectroDermalActivityModel.getSensorOutputFrequency())
                 .addField(DB_ELECTRO_DERMAL_ACTIVITY, iElectroDermalActivityModel.getElectroDermalActivity())
+                .build();
+
+        return lPoint;
+    }
+
+    /**
+     * @brief map a motion accelerometer model to an influxDB point
+     *
+     * @param iMotionAccelerometerModel input motion accelerometer model
+     * @return mapped influxDB point
+     */
+    private Point buildMotionAccelerometerModel(MotionAccelerometerModel iMotionAccelerometerModel) {
+        float[] lAccelerometer = iMotionAccelerometerModel.getAccelerometer();
+        Point lPoint = Point.measurement(DB_ACCELEROMETER_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iMotionAccelerometerModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iMotionAccelerometerModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iMotionAccelerometerModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iMotionAccelerometerModel.getUuid())
+                .tag(DB_TYPE_TAG, iMotionAccelerometerModel.getType())
+                .addField(DB_X_TAG, lAccelerometer[0])
+                .addField(DB_Y_TAG, lAccelerometer[1])
+                .addField(DB_Z_TAG, lAccelerometer[2])
+                .build();
+
+        return lPoint;
+    }
+
+    /**
+     * @brief map a motion gyroscope model to an influxDB point
+     *
+     * @param iMotionGyroscopeModel input motion gyroscope model
+     * @return mapped influxDB point
+     */
+    private Point buildMotionGyroscopeModel(MotionGyroscopeModel iMotionGyroscopeModel) {
+        float[] lGyroscope = iMotionGyroscopeModel.getGyroscope();
+        Point lPoint = Point.measurement(DB_GYROSCOPE_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iMotionGyroscopeModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iMotionGyroscopeModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iMotionGyroscopeModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iMotionGyroscopeModel.getUuid())
+                .tag(DB_TYPE_TAG, iMotionGyroscopeModel.getType())
+                .addField(DB_X_TAG, lGyroscope[0])
+                .addField(DB_Y_TAG, lGyroscope[1])
+                .addField(DB_Z_TAG, lGyroscope[2])
+                .build();
+
+        return lPoint;
+    }
+
+    /**
+     * @brief map a motion magnetometer model to an influxDB point
+     *
+     * @param iMotionMagnetometerModel input motion magnetometer model
+     * @return mapped influxDB point
+     */
+    private Point buildMotionMagnetometerModel(MotionMagnetometerModel iMotionMagnetometerModel) {
+        float[] lMagnetometer = iMotionMagnetometerModel.getMagnetometer();
+        Point lPoint = Point.measurement(DB_GYROSCOPE_MEASUREMENT)
+                .time(DateIso8601Mapper.getDate(iMotionMagnetometerModel.getTimestamp()).getTime(), TimeUnit.MILLISECONDS)
+                .tag(DB_USER_TAG, iMotionMagnetometerModel.getUser())
+                .tag(DB_DEVICE_ADDRESS_TAG, iMotionMagnetometerModel.getDeviceAdress())
+                .tag(DB_UUID_TAG, iMotionMagnetometerModel.getUuid())
+                .tag(DB_TYPE_TAG, iMotionMagnetometerModel.getType())
+                .addField(DB_X_TAG, lMagnetometer[0])
+                .addField(DB_Y_TAG, lMagnetometer[1])
+                .addField(DB_Z_TAG, lMagnetometer[2])
                 .build();
 
         return lPoint;
