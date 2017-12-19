@@ -30,7 +30,6 @@
  */
 package com.wearablesensor.aura.seizure_report;
 
-import android.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
@@ -82,7 +81,6 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     }
 
     public void endReportSeizureDetails(){
-        //mActivity.getSupportFragmentManager().popBackStack();
 
 
         FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
@@ -91,8 +89,8 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
 
         lTransaction.addToBackStack(null);
 

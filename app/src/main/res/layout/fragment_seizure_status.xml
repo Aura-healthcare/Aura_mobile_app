@@ -15,12 +15,11 @@
 
         <Button
             android:id="@+id/report_seizure_button"
-            android:drawableBottom="@drawable/action_report_seizure"
-            android:layout_weight="1"
-            android:layout_width="0dp"
+            android:drawableBottom="@drawable/seizure_report_icon"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:text="Report a Seizure"/>
 
     </LinearLayout>

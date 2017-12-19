@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="60dp"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
     tools:context="com.wearablesensor.aura.data_sync.DataSyncFragment"
@@ -14,8 +14,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:src="@drawable/icon_cloud_sync"
@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
-            android:layout_marginLeft="6dp"
+            android:layout_marginLeft="2dp"
             android:text="@string/remaining_packet_sync"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -41,6 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_marginLeft="2dp"
+            android:layout_marginBottom="2dp"
             android:text="@string/data_sync_no_signal"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
@@ -51,8 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
             android:layout_weight="1"
             android:visibility="gone"/>
 

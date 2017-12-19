@@ -1,17 +1,18 @@
 ## Headline
-The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice 
+The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice
 
 ## Pre-requisites
 1. Android Sdk version 25.0
 2. Connected device transfering HRV data through Heart Rate bluetooth profile
 3. Connected device - MaximIntegrated - MAXREFDES73# - Skin temperature / Electro dermal activity
+4. Connected device - Motion sensor armwrist
 
 ## References
 
 Android Architecture Blueprints
 [link](https://github.com/googlesamples/android-architecture)
 
-iDevicesInc - SweetBlue - support multi Bluetooth connection on most Android platforms and devices 
+iDevicesInc - SweetBlue - support multi Bluetooth connection on most Android platforms and devices
 [link](https://github.com/iDevicesInc/SweetBlue)
 
 ## How to contribute
@@ -21,7 +22,7 @@ We references all in-progress or future developpements on cards in [Github Proje
 
 ## User Experience
 
-<img src="documentation/splash-screen.png" width="230">  <img src="documentation/login-screen.png" width="230">  <img src="documentation/monitoring-screen.png" width="230">
+<img src="documentation/splash-screen.png" width="230">  <img src="documentation/login-screen.png" width="230">  <img src="documentation/monitoring-screen.png" width="230"> <img src="documentation/seizure-report-screen.png" width="230">
 
 
 ## App Architecture
@@ -39,6 +40,6 @@ The "Aura project" mobile application:
 
 # Generate Documentation #
 ```
-cd rootProjectDir/documentation 
-doxygen Doxyfile 
+cd rootProjectDir/documentation
+doxygen Doxyfile
 ```
