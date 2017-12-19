@@ -350,7 +350,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     }
 
     /**
-     * @brief check if available bluetooth devices are compatibles for motion 
+     * @brief check if available bluetooth devices are compatibles for motion
      * data streaming with Aura prototype
      *
      * @param device available bluetooth device
