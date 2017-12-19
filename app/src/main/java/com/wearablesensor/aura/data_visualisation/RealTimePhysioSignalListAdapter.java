@@ -40,6 +40,9 @@ import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
+import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
+import com.wearablesensor.aura.data_repository.models.MotionGyroscopeModel;
+import com.wearablesensor.aura.data_repository.models.MotionMagnetometerModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
@@ -89,6 +92,33 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
             lImageView.setImageBitmap(lElectroDermalActivityBitmap);
             lValueView.setText(String.valueOf((float) (lElectroDermalActivityModel.getElectroDermalActivity() * 1.0/ 1000)) + " kOhm" );
             lDeviceAdressView.setText(lElectroDermalActivityModel.getDeviceAdress());
+        }
+        else if(lPhysioSignal.getType().equals(MotionAccelerometerModel.MOTION_ACCELEROMETER_MODEL)){
+            MotionAccelerometerModel lMotionAccelerometerModel = ((MotionAccelerometerModel) lPhysioSignal);
+
+            Bitmap lMotionAccelerometerBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.accelerometer_picture);
+            lImageView.setImageBitmap(lMotionAccelerometerBitmap);
+            float[] lAccelerometerValues = lMotionAccelerometerModel.getAccelerometer();
+            lValueView.setText(String.format("%.2f", lAccelerometerValues[0]) + " " + String.format("%.2f", lAccelerometerValues[1]) + " " + String.format("%.2f", lAccelerometerValues[2]));
+            lDeviceAdressView.setText(lMotionAccelerometerModel.getDeviceAdress());
+        }
+        else if(lPhysioSignal.getType().equals(MotionGyroscopeModel.MOTION_GYROSCOPE_MODEL)){
+            MotionGyroscopeModel lMotionGyroscopeModel = ((MotionGyroscopeModel) lPhysioSignal);
+
+            Bitmap lMotionGyroscopeBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.gyroscope_picture);
+            lImageView.setImageBitmap(lMotionGyroscopeBitmap);
+            float[] lGyroscopeValues = lMotionGyroscopeModel.getGyroscope();
+            lValueView.setText(String.format("%.2f", lGyroscopeValues[0]) + " " + String.format("%.2f", lGyroscopeValues[1]) + " " + String.format("%.2f", lGyroscopeValues[2]));
+            lDeviceAdressView.setText(lMotionGyroscopeModel.getDeviceAdress());
+        }
+        else if(lPhysioSignal.getType().equals(MotionMagnetometerModel.MOTION_MAGNETOMETER_MODEL)){
+            MotionMagnetometerModel lMotionMagnetometerModel = ((MotionMagnetometerModel) lPhysioSignal);
+
+            Bitmap lMotionMagnetometerBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.magnetometer_picture);
+            lImageView.setImageBitmap(lMotionMagnetometerBitmap);
+            float[] lMagnetometerValues = lMotionMagnetometerModel.getMagnetometer();
+            lValueView.setText(String.format("%.2f", lMagnetometerValues[0]/1000000) + " " + String.format("%.2f", lMagnetometerValues[1]/1000000) + " " + String.format("%.2f", lMagnetometerValues[2]/1000000));
+            lDeviceAdressView.setText(lMotionMagnetometerModel.getDeviceAdress());
         }
         // Return the completed view to render on screen
         return convertView;

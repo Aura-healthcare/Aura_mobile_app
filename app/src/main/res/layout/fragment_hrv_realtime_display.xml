@@ -3,18 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
     android:background="@drawable/border_set"
     tools:context="com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment"
     android:orientation="vertical">
 
-    <ListView
+    <GridView
         android:id="@+id/realtime_physio_signal_list_view"
+        android:numColumns="3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:divider="#CCCCCC"
-        android:dividerHeight="1dp">
-    </ListView>
+        android:dividerHeight="1dp"
+        >
+    </GridView>
 
 </LinearLayout>
