@@ -31,18 +31,18 @@ package com.wearablesensor.aura.data_repository.models;
 public class ElectroDermalActivityModel extends PhysioSignalModel{
 
     private int mSensorOutputFrequency; // sensor output frenquency in Hz
-    private int mElectroDermalActivity; // electro dermal activity aka skin conductance aka galvanic skin response in Ohm
+    private double mElectroDermalActivity; // electro dermal activity aka skin conductance aka galvanic skin response in microSiemens
 
     public static final String ELECTRO_DERMAL_ACTIVITY = "ElectroDermalActivity";
 
-    public ElectroDermalActivityModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, int iSeonsorOutputFrequency, int iElectroDermalActivity){
+    public ElectroDermalActivityModel(String iUuid, String iDeviceAdress, String iUser, String iTimestamp, int iSeonsorOutputFrequency, double iElectroDermalActivity){
         super(iUuid, iDeviceAdress, iUser, iTimestamp, ELECTRO_DERMAL_ACTIVITY);
 
         mSensorOutputFrequency = iSeonsorOutputFrequency;
         mElectroDermalActivity = iElectroDermalActivity;
     }
 
-    public ElectroDermalActivityModel(String iDeviceAdress, String iTimestamp, int iSensorOutputFrequency, int iElectroDermalActivity){
+    public ElectroDermalActivityModel(String iDeviceAdress, String iTimestamp, int iSensorOutputFrequency, double iElectroDermalActivity){
         super(iDeviceAdress, iTimestamp, ELECTRO_DERMAL_ACTIVITY);
 
         mSensorOutputFrequency = iSensorOutputFrequency;
@@ -57,11 +57,11 @@ public class ElectroDermalActivityModel extends PhysioSignalModel{
         mSensorOutputFrequency = iSensorOutputFrequency;
     }
 
-    public int getElectroDermalActivity(){
+    public double getElectroDermalActivity(){
         return mElectroDermalActivity;
     }
 
-    public void setElectroDermalActivity(int iElectroDermalActivity){
+    public void setElectroDermalActivity(double iElectroDermalActivity){
         mElectroDermalActivity = iElectroDermalActivity;
     }
 

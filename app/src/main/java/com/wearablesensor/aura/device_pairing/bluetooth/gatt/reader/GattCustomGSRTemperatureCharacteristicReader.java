@@ -41,7 +41,7 @@ public class GattCustomGSRTemperatureCharacteristicReader implements GattCharact
     private final String TAG = this.getClass().getSimpleName();
 
     private short mFrameNumber;
-    private int mElectroDermalActivity; // galvanic skin response or electro dermal activity in Ohm
+    private double mElectroDermalActivity; // galvanic skin response or electro dermal activity in microSiemens
     private float mTemperature; // temperature in degree celsius with a precision 0.01
 
     private Boolean mHasBeenRead;
@@ -96,7 +96,7 @@ public class GattCustomGSRTemperatureCharacteristicReader implements GattCharact
         lEDABytes[1] = lData[7];
         lEDABytes[2] = lData[8];
         lEDABytes[3] = lData[9];
-        mElectroDermalActivity = java.nio.ByteBuffer.wrap(lEDABytes).getInt();
+        mElectroDermalActivity = 1000000 * 1.0 / java.nio.ByteBuffer.wrap(lEDABytes).getInt();
 
         Log.d(TAG, "Parse custom characteristic " + mFrameNumber + " " + mTemperature + " " + mElectroDermalActivity);
         mHasBeenRead = true;
@@ -115,9 +115,9 @@ public class GattCustomGSRTemperatureCharacteristicReader implements GattCharact
     /**
      * @brief getter
      *
-     * @return electro dermal activity in Ohm
+     * @return electro dermal activity in microSiemens
      */
-    public int getElectroDermalActivity(){
+    public double getElectroDermalActivity(){
         return mElectroDermalActivity;
     }
 }

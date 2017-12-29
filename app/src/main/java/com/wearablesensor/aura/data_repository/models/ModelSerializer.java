@@ -55,7 +55,7 @@ public class ModelSerializer{
             return new SkinTemperatureModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2],  Float.parseFloat(lArgs[5])  );
         }
         else if(lArgs[1].equals(ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY)){
-            return new ElectroDermalActivityModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2], Integer.parseInt(lArgs[6]), Integer.parseInt(lArgs[5]));
+            return new ElectroDermalActivityModel(lArgs[0], lArgs[4], lArgs[3], lArgs[2], Integer.parseInt(lArgs[6]), Double.parseDouble(lArgs[5]));
         }
         else if(lArgs[1].equals(MotionAccelerometerModel.MOTION_ACCELEROMETER_MODEL)){
             float[] lValues = new float[3];

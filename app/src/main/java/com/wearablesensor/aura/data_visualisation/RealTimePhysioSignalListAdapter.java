@@ -90,7 +90,7 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
 
             Bitmap lElectroDermalActivityBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.electro_dermal_activity_picture);
             lImageView.setImageBitmap(lElectroDermalActivityBitmap);
-            lValueView.setText(String.valueOf((float) (lElectroDermalActivityModel.getElectroDermalActivity() * 1.0/ 1000)) + " kOhm" );
+            lValueView.setText(String.format("%.2f", lElectroDermalActivityModel.getElectroDermalActivity()) + " microSiemens" );
             lDeviceAdressView.setText(lElectroDermalActivityModel.getDeviceAdress());
         }
         else if(lPhysioSignal.getType().equals(MotionAccelerometerModel.MOTION_ACCELEROMETER_MODEL)){
