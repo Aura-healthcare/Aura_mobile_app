@@ -43,6 +43,8 @@ public class DataVisualisationContract {
          * @param iPhysioSignal physiological data sample
          */
         void refreshPhysioSignalVisualisation(PhysioSignalModel iPhysioSignal);
+
+        void updateDataSeriesStatus(String type, Boolean dataSerieValidate);
     }
 
     interface Presenter extends BasePresenter{
@@ -52,5 +54,7 @@ public class DataVisualisationContract {
          * @param iPhysioSignal physiological data sample
          */
         void receiveNewPhysioSample(PhysioSignalModel iPhysioSignal);
+
+        void clearCache();
     }
 }

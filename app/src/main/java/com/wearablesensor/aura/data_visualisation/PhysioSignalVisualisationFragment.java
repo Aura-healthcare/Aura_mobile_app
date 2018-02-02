@@ -38,7 +38,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.ListView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
@@ -53,6 +52,7 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
     private final String TAG = this.getClass().getSimpleName();
 
     @BindView(R.id.realtime_physio_signal_list_view) GridView mRealtimePhysioSignalListView;
+
     private RealTimePhysioSignalListAdapter mPhysioSignalListAdapter;
 
     private HashMap<String, PhysioSignalModel> mCurrentRRIntervals;
@@ -82,6 +82,8 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {}
+
+
     }
 
     @Override
@@ -167,6 +169,11 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
 
         mPhysioSignalListAdapter.notifyDataSetChanged();
         Log.d(TAG, "DataRefreshed" + iPhysioSignal);
+    }
+
+    @Override
+    public void updateDataSeriesStatus(String type, Boolean dataSerieValidate) {
+
     }
 
     @Override

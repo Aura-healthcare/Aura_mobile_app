@@ -45,6 +45,7 @@ import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
+import com.wearablesensor.aura.data_visualisation.PhysioSignalGraphVisualisationFragment;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
@@ -61,7 +62,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, PhysioSignalVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener{
+public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, PhysioSignalVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener, PhysioSignalGraphVisualisationFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
@@ -76,7 +77,10 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private DataSyncFragment mDataSyncFragment;
 
     private DataVisualisationPresenter mDataVisualisationPresenter;
+    private DataVisualisationPresenter mDataGraphVisualisationPresenter;
     private PhysioSignalVisualisationFragment mPhysioSignalVisualisationFragment;
+    private PhysioSignalGraphVisualisationFragment mPhysioSignalGraphVisualisationFragment;
+
 
     private SeizureStatusFragment mSeizureStatusFragment;
     private SeizureStatusPresenter mSeizureStatusPresenter;
@@ -124,7 +128,29 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         }
 
         private void selectItem(int position) {
-            Toast.makeText(getApplicationContext(), "Youhou"+position, Toast.LENGTH_SHORT).show();
+            if(position == 0){
+                FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+                lTransaction.remove(mPhysioSignalGraphVisualisationFragment);
+                lTransaction.add(R.id.content_frame, mDevicePairingFragment);
+                lTransaction.add(R.id.content_frame, mDataSyncFragment);
+                lTransaction.add(R.id.content_frame, mSeizureStatusFragment);
+                lTransaction.add(R.id.content_frame, mPhysioSignalVisualisationFragment);
+                lTransaction.addToBackStack(null);
+                lTransaction.commit();
+            }
+            else if(position == 1){
+                FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+                lTransaction.remove(mDevicePairingFragment);
+                lTransaction.remove(mDataSyncFragment);
+                lTransaction.remove(mSeizureStatusFragment);
+                lTransaction.remove(mPhysioSignalVisualisationFragment);
+                lTransaction.add(R.id.content_frame, mPhysioSignalGraphVisualisationFragment);
+                lTransaction.addToBackStack(null);
+                lTransaction.commit();
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Youhou" + position, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -151,7 +177,9 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(), ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
 
         mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
+        mPhysioSignalGraphVisualisationFragment = new PhysioSignalGraphVisualisationFragment();
         mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);
+        mDataGraphVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalGraphVisualisationFragment);
 
         mSeizureReportFragment = new SeizureReportFragment();
         mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());

@@ -6,10 +6,8 @@
     <string name="facebook_app_id">1924581031107980</string>
 
     <string-array name="drawer_array">
-        <item>Pairing Device</item>
-        <item>Seizure Notfication</item>
-        <item>RR History</item>
-        <item>Help</item>
+        <item>Principal Interface</item>
+        <item>Data Visualisation</item>
     </string-array>
 
 </resources>
