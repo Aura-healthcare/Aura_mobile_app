@@ -113,7 +113,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     //Bluetooth data streaming callbacks
     private BleDevice.ReadWriteListener mHeartRateReadWriteListener;
     private BleDevice.ReadWriteListener mCustomMAXREFDES73ReadWriteListener;
-    private BleDevice.ReadWriteListener mMotionReadWriteListener;
+    private BleDevice.ReadWriteListener mMotionMovuinoReadWriteListener;
 
     private BleDevice.ReadWriteListener mBatteryReadWriteListener;
 
@@ -177,25 +177,27 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
 
-        mMotionReadWriteListener = new BleDevice.ReadWriteListener() {
+        mMotionMovuinoReadWriteListener = new BleDevice.ReadWriteListener(){
+
             @Override
             public void onEvent(ReadWriteEvent e) {
+                Log.d(TAG, e.toString());
                 if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
-                    Log.d(TAG, "Motion Event" + e.data_byte() +" " + e.data().length);
+                    Log.d(TAG, "Motion Movuino Event" + e.data_utf8() +" " + e.data().length);
                     GattMovementCharacteristicReader lGattMovementCharacteristic = new GattMovementCharacteristicReader();
-                    lGattMovementCharacteristic.read(e.characteristic());
+                    Boolean lStatus = lGattMovementCharacteristic.read(e.characteristic());
 
-                    Calendar c = Calendar.getInstance();
-                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
-                    String lDeviceAddress = e.device().getMacAddress();
+                    if(lStatus) {
+                        Calendar c = Calendar.getInstance();
+                        String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
+                        String lDeviceAddress = e.device().getMacAddress();
 
-                    MotionAccelerometerModel lAccelerometerModel = new MotionAccelerometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getAccelerometer(), "2G");
-                    MotionGyroscopeModel lGyroscopeModel = new MotionGyroscopeModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getGyroscope());
-                    MotionMagnetometerModel lMagnetometer = new MotionMagnetometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getMagnetometer());
+                        MotionAccelerometerModel lAccelerometerModel = new MotionAccelerometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getAccelerometer(), "2G");
+                        MotionGyroscopeModel lGyroscopeModel = new MotionGyroscopeModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getGyroscope());
 
-                    receiveData(lAccelerometerModel);
-                    receiveData(lGyroscopeModel);
-                    receiveData(lMagnetometer);
+                        receiveData(lAccelerometerModel);
+                        receiveData(lGyroscopeModel);
+                    }
                 }
             }
         };
@@ -205,7 +207,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             @Override
             public void onEvent(DiscoveryEvent e) {
                 if (e.was(LifeCycle.DISCOVERED)) {
-                    Log.d(TAG, "Discovery Event - "+ e);
+                    Log.d(TAG, "Discovery Event - "+ e.device().getName_native());
                     if(isHeartRateCompatibleDevice(e.device())){
                         ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
                         lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
@@ -218,11 +220,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                         lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
                         connectDevice(e.device(), lStateListeners);
                     }
-                    else if(isMotionCompatibleDevice(e.device())){
+                    else if(isMotionMovuinoCompatibleDevice(e.device())){
                         ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-                        lStateListeners.add(new StateListenerConfig(Uuids.MOTION_SERVICE_UUID, Uuids.CHARACTERISTIC_MOTION_CONFIG, null, StateListenerAction.WRITE));
-                        lStateListeners.add(new StateListenerConfig(Uuids.MOTION_SERVICE_UUID, Uuids.CHARACTERISTIC_MOTION_DATA, mMotionReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+
+                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.RX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
+                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.TX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
                         connectDevice(e.device(), lStateListeners);
                     }
                 }
@@ -296,7 +298,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     private boolean isCompatibleDevice(BleDevice device) {
 
-        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionCompatibleDevice(device) ){
+        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionMovuinoCompatibleDevice(device)){
             return true;
         }
 
@@ -349,20 +351,12 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         return false;
     }
 
-    /**
-     * @brief check if available bluetooth devices are compatibles for motion
-     * data streaming with Aura prototype
-     *
-     * @param device available bluetooth device
-     *
-     * @return true if device is compatible, false otherwise
-     */
-    private boolean isMotionCompatibleDevice(BleDevice device){
+    public boolean isMotionMovuinoCompatibleDevice(BleDevice device){
         String lDeviceName = device.getName_native();
-        if(lDeviceName != null) {
+        if(lDeviceName != null){
             String lDeviceUpperName = lDeviceName.toUpperCase();
 
-            if( lDeviceUpperName.contains("SENSORTAG")) {
+            if( lDeviceUpperName.contains("MOVUINO")){
                 return true;
             }
             return false;

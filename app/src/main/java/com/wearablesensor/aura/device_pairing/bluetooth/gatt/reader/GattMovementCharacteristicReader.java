@@ -39,7 +39,7 @@ public class GattMovementCharacteristicReader implements GattCharacteristicReade
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private static int FRAME_SIZE = 18; // in bits
+    private static int FRAME_SIZE = 13; // in bits
 
     private float[] mGyroscope; // get the gyroscope values in the three axis (x, y, z) in deg/s
     private float[] mAccelerometer; // get the accelerometer values in the three axis (x, y, z) in -2G -> 2G scale
@@ -68,43 +68,31 @@ public class GattMovementCharacteristicReader implements GattCharacteristicReade
             return false;
         }
 
-        if (!Uuids.CHARACTERISTIC_MOTION_DATA.equals(iGattCharacteristic.getUuid())) {
-            mHasBeenRead = true;
-            return false;
-        }
-
         byte[] lData = iGattCharacteristic.getValue();
 
-        if (lData.length < FRAME_SIZE) {
+        if (lData.length != FRAME_SIZE || lData[0] !='L') {
             mHasBeenRead = true;
             return false;
-        }
-
-        for (int i = 0; i < mGyroscope.length; i++) {
-            byte[] lGyroBytes = new byte[2];
-            lGyroBytes[0] = lData[2 * i];
-            lGyroBytes[1] = lData[2 * i + 1];
-            short lGyroShort = java.nio.ByteBuffer.wrap(lGyroBytes).getShort();
-            mGyroscope[i] = (float) (lGyroShort * 1.0) / (65536 / 500);
         }
 
         for (int i = 0; i < mAccelerometer.length; i++) {
             byte[] lAccBytes = new byte[2];
-            lAccBytes[0] = lData[2 * i + 6];
-            lAccBytes[1] = lData[2 * i + 1 + 6];
+
+            lAccBytes[0] = lData[2 * i + 1];
+            lAccBytes[1] = lData[2 * i + 2];
             short lAccShort = java.nio.ByteBuffer.wrap(lAccBytes).getShort();
             mAccelerometer[i] = (float) ((lAccShort * 1.0) / (32768 / 2));
         }
 
-        for (int i = 0; i < mMagnetometer.length; i++) {
-            byte[] lMagnetoBytes = new byte[2];
-            lMagnetoBytes[0] = lData[2 * i + 12];
-            lMagnetoBytes[1] = lData[2 * i + 1 + 12];
-            short lMagnetoShort = java.nio.ByteBuffer.wrap(lMagnetoBytes).getShort();
-            mMagnetometer[i] = (float) (1.0 * lMagnetoShort);
+        for (int i = 0; i < mGyroscope.length; i++) {
+            byte[] lGyroBytes = new byte[2];
+            lGyroBytes[0] = lData[2 * i + 7];
+            lGyroBytes[1] = lData[2 * i + 1 + 7];
+            short lGyroShort = java.nio.ByteBuffer.wrap(lGyroBytes).getShort();
+            mGyroscope[i] = (float) (lGyroShort * 1.0) / (65536 / 500);
         }
 
-        Log.d(TAG, "Parse custom characteristic " + mGyroscope[0] + " " + mGyroscope[1] + " " + mGyroscope[2] + " \n" + mAccelerometer[0] + " " + mAccelerometer[1] + " " + mAccelerometer[2] + " \n" + mMagnetometer[0] + " " + mMagnetometer[1] + " " + mMagnetometer[2]);
+        Log.d(TAG, "Parse custom characteristic " + mGyroscope[0] + " " + mGyroscope[1] + " " + mGyroscope[2] + " \n" + mAccelerometer[0] + " " + mAccelerometer[1] + " " + mAccelerometer[2] + " \n" );
         mHasBeenRead = true;
         return true;
     }

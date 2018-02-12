@@ -66,6 +66,10 @@ public final class Uuids
 	public static final UUID OBJECT_TRANSFER_SERVICE_UUID							= fromShort("1825");
 	public static final UUID FITNESS_MACHINE_SERVICE_UUID							= fromShort("1826");
 	public static final UUID MOTION_SERVICE_UUID 									= fromShort("aa80", STANDARD_UUID_TEMPLATE_2);;
+	public static final UUID MOTION_MOVUINO_SERVICE_UUID 							= UUID.fromString("0bd51666-e7cb-469b-8e4d-2742f1ba89aa");
+	public static final UUID RX_SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+	public static final UUID RX_CHAR_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+	public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
 
 	// Bluetooth spec characteristic UUIDs
@@ -267,6 +271,7 @@ public final class Uuids
 	public static final UUID FITNESS_MACHINE_STATUS									= fromShort("2ada");
 public static final UUID CHARACTERISTIC_MOTION_CONFIG                               = fromShort("aa82", STANDARD_UUID_TEMPLATE_2);
 	public static final UUID CHARACTERISTIC_MOTION_DATA 							= fromShort("aa81", STANDARD_UUID_TEMPLATE_2);
+    public static final UUID CHARACTERISTIC_MOTION_MOVUINO_DATA                     = UUID.fromString("e7add780-b042-4876-aae1-112855353cc1");
 
 
 	// Bluetooth spec descriptor UUIDs
