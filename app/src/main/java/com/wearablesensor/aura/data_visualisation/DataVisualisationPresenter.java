@@ -60,14 +60,16 @@ public class DataVisualisationPresenter implements DataVisualisationContract.Pre
         mView = iView;
         mView.setPresenter(this);
 
+        mTemperatureDataSeries = new LinkedList<>();
+        mEDADataSeries = new LinkedList<>();
+        mRRIntervalDataSeries = new LinkedList<>();
+
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void start() {
-        mTemperatureDataSeries = new LinkedList<>();
-        mEDADataSeries = new LinkedList<>();
-        mRRIntervalDataSeries = new LinkedList<>();
+
     }
 
     public void cachePhysioSignal(PhysioSignalModel iPhysioSignal){
