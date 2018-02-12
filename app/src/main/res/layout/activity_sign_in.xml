@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:hint="User name" />
+                android:hint="@string/prompt_user_name" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -41,7 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="Password"/>
+                android:hint="@string/prompt_password"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
@@ -51,7 +51,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="6dp"
             android:padding="12dp"
-            android:text="Login"/>
+            android:text="@string/action_sign_in"/>
 
     </LinearLayout>
 </ScrollView>

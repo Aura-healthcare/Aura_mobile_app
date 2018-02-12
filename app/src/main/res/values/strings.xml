@@ -37,9 +37,11 @@
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
+    <string name="prompt_user_name">User name</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
+    <string name="action_continue">Continue</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
@@ -89,6 +91,10 @@
 
     <!-- Strings related to seizure report panel -->
     <string name="title_seizure_report">Seizure Report</string>
+    <string name="seizure_intensity_small">Small</string>
+    <string name="seizure_intensity_medium">Medium</string>
+    <string name="seizure_intensity_big">Big</string>
+
     <string name="seizure_reports_comments">Comments</string>
     <string name="cancel_button">Cancel</string>
     <string name="confirm_button">Confirm</string>

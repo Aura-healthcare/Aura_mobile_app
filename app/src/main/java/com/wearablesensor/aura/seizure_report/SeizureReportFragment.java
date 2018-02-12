@@ -98,7 +98,7 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
         View view = inflater.inflate(R.layout.fragment_seizure_report, container, false);
         ButterKnife.bind(this, view);
 
-        mSwitchMultiButton.setText("Small", "Medium", "Big");
+        mSwitchMultiButton.setText(getResources().getString(R.string.seizure_intensity_small), getResources().getString(R.string.seizure_intensity_medium), getResources().getString(R.string.seizure_intensity_big));
         mSwitchMultiButton.setOnSwitchListener(new SwitchMultiButton.OnSwitchListener() {
             @Override
             public void onSwitch(int position, String tabText) {
