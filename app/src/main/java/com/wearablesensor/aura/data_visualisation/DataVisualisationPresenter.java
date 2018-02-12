@@ -29,7 +29,8 @@
 
 package com.wearablesensor.aura.data_visualisation;
 
-import com.couchbase.lite.util.Log;
+import android.util.Log;
+
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;

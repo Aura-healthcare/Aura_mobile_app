@@ -29,14 +29,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -65,9 +62,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
     private String[] mDrawerTitles;
-    private ActionBarDrawerToggle mDrawerToggle;
-    @BindView(R.id.left_drawer) ListView mDrawerList;
-    @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
     private DevicePairingDetailsPresenter mDevicePairingDetailsPresenter;
     private DevicePairingDetailsFragment mDevicePairingFragment;
@@ -162,8 +156,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         displayFragments();
 
         ButterKnife.bind(this);
-
-        setupDrawer();
     }
 
     private void loadUser() {
@@ -204,38 +196,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @Override
     public void onBackPressed() {
         //disable leaving activity on back button pressed
-    }
-
-    private void setupDrawer(){
-        mDrawerTitles = getResources().getStringArray(R.array.drawer_array);
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mDrawerTitles));
-
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
     private void startAutomaticPairing(){
@@ -325,23 +285,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
