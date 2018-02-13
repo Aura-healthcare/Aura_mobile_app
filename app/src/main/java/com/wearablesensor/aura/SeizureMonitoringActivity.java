@@ -156,6 +156,9 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         displayFragments();
 
         ButterKnife.bind(this);
+
+        //wait the fragment to be fully displayed before starting automatic pairing
+        startAutomaticPairing();
     }
 
     private void loadUser() {
@@ -172,9 +175,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @Override
     public void onStart(){
         super.onStart();
-
-        //wait the fragment to be fully displayed before starting automatic pairing
-       startAutomaticPairing();
 
         ((AuraApplication) getApplication()).getDataSyncService().initialize();
     }

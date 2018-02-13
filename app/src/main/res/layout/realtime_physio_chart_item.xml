@@ -16,14 +16,8 @@
         android:src="@drawable/hrv_picture"
         android:cropToPadding="true" />
 
-    <TextView
-        android:id="@+id/physio_signal_item_value"
-        android:layout_height="50dp"
-        android:layout_width="fill_parent"
-        android:layout_weight="2"
-        android:text="@string/default_value"
-        android:textSize="15sp"
-        android:fontFamily="monospace"
-        android:gravity="center_vertical"/>
-
+    <com.github.mikephil.charting.charts.HorizontalBarChart
+        android:id="@+id/physio_signal_chart_data"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
 </LinearLayout>
