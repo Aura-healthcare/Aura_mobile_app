@@ -16,8 +16,8 @@
 -->
 
 <resources>
-    <string name="app_name">Aura</string>
-    <string name="intro_message">
+    <string name="app_name" translatable="false">Aura</string>
+    <string name="intro_message" translatable="false">
         <![CDATA[
         
             
