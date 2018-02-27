@@ -36,20 +36,11 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.NewPasswordContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.wearablesensor.aura.FirstSignInActivity;
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.SessionSignInActivity;
 
-import java.util.Map;
 
 
 public class SignInPresenter implements SignInContract.Presenter{
@@ -63,11 +54,7 @@ public class SignInPresenter implements SignInContract.Presenter{
     private static final int FIRST_TIME_SIGN_IN = 1;
     private Boolean mIsFirstSignIn; /** first time sign in flag */
 
-    // Amazon Cognito Authentification attributes
-    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;/** Amazon authentification API */
-    private NewPasswordContinuation mNewPasswordContinuation; /** flag used to handle the new user 2-step validation */
-
-    private String mCurrentPassword; // argument exist because AmazonCognito does not take it as input
+    private AuraAuthenticationHandler authenticationHandler;
 
     /**
      * @brief constructor
@@ -87,7 +74,10 @@ public class SignInPresenter implements SignInContract.Presenter{
         mApplicationContext = iApplicationContext;
         mActivity = iActivity;
 
-        mAuthentificationHelper = iAuthentificationHelper;
+        authenticationHandler = AuraAuthenticationHandler.builder()
+                .authentificationHelper(iAuthentificationHelper)
+                .presenter(this)
+                .build();
 
         mIsFirstSignIn = false;
     }
@@ -116,10 +106,10 @@ public class SignInPresenter implements SignInContract.Presenter{
         mView.disableLoginButton();
         mView.displayAuthentificationProgressDialog();
 
-        setCurrentPassword(iPassword);
-        mAuthentificationHelper.setUser(iUsername);
+        authenticationHandler.setPassword(iPassword);
+        authenticationHandler.setUser(iUsername);
 
-        mAuthentificationHelper.getPool().getUser(iUsername).getSessionInBackground(mAuthenticationHandler);
+        authenticationHandler.performAsyncAuthentication(iUsername);
     }
 
     /**
@@ -132,7 +122,7 @@ public class SignInPresenter implements SignInContract.Presenter{
         Intent intent = new Intent(mApplicationContext, SessionSignInActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("firstSignIn", mIsFirstSignIn);
-        String lAuthToken = mAuthentificationHelper.getCurrSession().getIdToken().getJWTToken();
+        String lAuthToken = authenticationHandler.getJWTToken();
         intent.putExtra("AuthToken", lAuthToken);
         mIsFirstSignIn = false;
 
@@ -186,67 +176,13 @@ public class SignInPresenter implements SignInContract.Presenter{
      * @brief user account is validated on first sign-in
      */
     public void continueWithFirstSignIn(){
-        mNewPasswordContinuation.setPassword(mAuthentificationHelper.getPasswordForFirstTimeLogin());
-        Map<String, String> newAttributes = mAuthentificationHelper.getUserAttributesForFirstTimeLogin();
-        if (newAttributes != null) {
-            for(Map.Entry<String, String> attr: newAttributes.entrySet()) {
-                mNewPasswordContinuation.setUserAttribute(attr.getKey(), attr.getValue());
-            }
-        }
         try {
             mIsFirstSignIn = true;
-            mNewPasswordContinuation.continueTask();
+            authenticationHandler.continueWithFirstSignIn();
         } catch (Exception e) {
             signInFails(getFailExtraMessage(e));
         }
     }
-
-    /**
-     * @brief Amazon authentification callback
-     */
-    AuthenticationHandler mAuthenticationHandler = new AuthenticationHandler() {
-        @Override
-        public void onSuccess(CognitoUserSession iCognitoUserSession, CognitoDevice iDevice) {
-            Log.e(TAG, "Auth Success");
-            mAuthentificationHelper.setCurrSession(iCognitoUserSession);
-            mAuthentificationHelper.newDevice(iDevice);
-            signInSucceed();
-        }
-
-        @Override
-        public void getAuthenticationDetails(AuthenticationContinuation iAuthenticationContinuation, String iUsername) {
-            mAuthentificationHelper.setUser(iUsername);
-            AuthenticationDetails authenticationDetails = new AuthenticationDetails(iUsername, getCurrentPassword(), null);
-            iAuthenticationContinuation.setAuthenticationDetails(authenticationDetails);
-            iAuthenticationContinuation.continueTask();
-        }
-
-        @Override
-        public void getMFACode(MultiFactorAuthenticationContinuation multiFactorAuthenticationContinuation) {
-            //disable
-        }
-
-        @Override
-        public void onFailure(Exception e) {
-            Log.d(TAG, "Auth Fail " + e.toString());
-            signInFails(getFailExtraMessage(e));
-        }
-
-        @Override
-        public void authenticationChallenge(ChallengeContinuation continuation) {
-            /**
-             * For Custom authentication challenge, implement your logic to present challenge to the
-             * user and pass the user's responses to the continuation.
-             */
-            if ("NEW_PASSWORD_REQUIRED".equals(continuation.getChallengeName())) {
-                // This is the first sign-in attempt for an admin created user
-                mNewPasswordContinuation = (NewPasswordContinuation) continuation;
-                mAuthentificationHelper.setUserAttributeForDisplayFirstLogIn(mNewPasswordContinuation.getCurrentUserAttributes(),
-                        mNewPasswordContinuation.getRequiredAttributes());
-                firstSignIn();
-            }
-        }
-    };
 
     /**
      * @brief setter
@@ -254,7 +190,7 @@ public class SignInPresenter implements SignInContract.Presenter{
      * @param iCurrentPassword password to be transmitted to Amazon authentification callback
      */
     private void setCurrentPassword(String iCurrentPassword) {
-        mCurrentPassword = iCurrentPassword;
+        authenticationHandler.setPassword(iCurrentPassword);
     }
 
     /**
@@ -262,8 +198,8 @@ public class SignInPresenter implements SignInContract.Presenter{
      *
      * @return password transmitted to Amazon authentification callback
      */
-    private String getCurrentPassword(){
-        return mCurrentPassword;
+    String getCurrentPassword(){
+        return authenticationHandler.getPassword();
     }
 
     /**
@@ -273,7 +209,7 @@ public class SignInPresenter implements SignInContract.Presenter{
      *
      * @return information message to display to user
      */
-    private String getFailExtraMessage(Exception iException){
+    String getFailExtraMessage(Exception iException){
         if(iException.getClass() == AmazonClientException.class || iException.getClass() == CognitoInternalErrorException.class){
             return mApplicationContext.getResources().getString(R.string.fail_extra_message_no_internet);
         }

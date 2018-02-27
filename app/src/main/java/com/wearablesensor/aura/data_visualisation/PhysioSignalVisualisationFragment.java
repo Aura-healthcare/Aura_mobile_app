@@ -170,6 +170,16 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
     }
 
     @Override
+    public void enterHeartBeatAnomalyMode() {
+        mPhysioSignalListAdapter.enterHeartBeatAnomalyMode();
+    }
+
+    @Override
+    public void leavHeartBeatAnomalyMode() {
+        mPhysioSignalListAdapter.leavHeartBeatAnomalyMode();
+    }
+
+    @Override
     public void setPresenter(DataVisualisationContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }

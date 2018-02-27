@@ -47,25 +47,19 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserPreferencesModel;
-import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Session{
     private final String TAG = this.getClass().getSimpleName();
-
-    private static final String DYNAMO_DB_IDENTITY_POOL_ID = "eu-west-1:8dbf4eef-78e6-4ac9-9ace-fa164cd83538"; /** Amazon dynamoDB identit/y pool */
-
-    private Context mApplicationContext;
-    private AmazonDynamoDBClient mAmazonDynamoDBClient;
-    private DynamoDBMapper mDynamoDBMapper;
 
     /**
      * @brief constructor
@@ -75,7 +69,6 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
 
     public RemoteDataDynamoDBRepository(Context iApplicationContext){
         Log.d(TAG, "RemoteData DynamoDB repository init");
-        mApplicationContext = iApplicationContext;
     }
 
     /**
@@ -89,25 +82,6 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
 
         Log.d(TAG, "MyToken - " + lAuthToken);
 
-        try {
-            CognitoCachingCredentialsProvider lCredentialsProvider = new CognitoCachingCredentialsProvider(
-                    mApplicationContext,    /* get the context for the application */
-                    DYNAMO_DB_IDENTITY_POOL_ID,    /* Identity Pool ID */
-                    Regions.EU_WEST_1           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
-            );
-
-            Map<String, String> lLogins = new HashMap<String, String>();
-
-            lLogins.put("cognito-idp.eu-west-1.amazonaws.com/" + AmazonCognitoAuthentificationHelper.userPoolId, lAuthToken);
-            lCredentialsProvider.setLogins(lLogins);
-
-            mAmazonDynamoDBClient = new AmazonDynamoDBClient(lCredentialsProvider);
-            mAmazonDynamoDBClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
-            mDynamoDBMapper = new DynamoDBMapper(mAmazonDynamoDBClient);
-        } catch (Exception e) {
-            Log.d(TAG, "DynamoDB initialization fail" + e.getMessage());
-            throw e;
-        }
     }
 
     /**
@@ -121,15 +95,6 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
     public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception {
         Log.d(TAG, "save Physio Signal Samples: " + iPhysioSignalSamples.size());
 
-        try{
-            mDynamoDBMapper.batchSave(iPhysioSignalSamples);
-            Log.d(TAG, "Success RR Samples DynamoDB");
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "Error RR Samples DynamoDB" + e.getMessage());
-            throw e;
-        }
     }
     /**
      * @brief save a list of seizure event samples
@@ -143,15 +108,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
     public void saveSeizures(final ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception {
         Log.d(TAG, "save Seizure event: " + iSensitiveEvents.size());
 
-        try{
-            mDynamoDBMapper.batchSave(iSensitiveEvents);
-            Log.d(TAG, "Success save seizure event DynamoDB");
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "Error save seizure event DynamoDB" + e.getMessage());
-            throw e;
-        }
+
     }
 
     /**
@@ -166,29 +123,12 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
     @Override
     public UserModel queryUser(String iAmazonId) throws Exception{
 
-        try{
-            UserModel lUserModel = new UserModel();
-            lUserModel.setAmazonId(iAmazonId);
+        UserModel lUserModel = new UserModel();
+        lUserModel.setAlias("QQQ");
+        lUserModel.setUuid(UUID.randomUUID().toString());
+        lUserModel.setAmazonId(iAmazonId);
 
-            DynamoDBQueryExpression lQueryExpression = new DynamoDBQueryExpression()
-                    .withHashKeyValues(lUserModel)
-                    .withConsistentRead(false);
-
-            PaginatedQueryList<UserModel> lUserModelList = mDynamoDBMapper.query(UserModel.class, lQueryExpression);
-            Log.d(TAG, "Query Fetched User Number: " + lUserModelList.size() + " " + iAmazonId );
-
-            if(lUserModelList.size() == 1) {
-                return lUserModelList.get(0);
-            }
-            else{
-                throw new Exception();
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "Error Fail GetUser" + e.getMessage());
-            throw e;
-        }
+        return lUserModel;
     }
 
     /**
@@ -200,18 +140,7 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
      */
     @Override
     public void saveUser(final UserModel iUserModel) throws Exception {
-        try{
-            mDynamoDBMapper.save(iUserModel);
-            Log.d(TAG, "Success Save User");
-        }
-        catch(NotAuthorizedException e){
-            e.printStackTrace();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "Error Save User");
-            throw e;
-        }
+
     }
 
     /**
@@ -223,17 +152,10 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
      */
     @Override
     public UserPreferencesModel queryUserPreferences(String iUserId) {
-        UserPreferencesModel lUserPrefsModel = null;
-        try{
-            lUserPrefsModel = mDynamoDBMapper.load(UserPreferencesModel.class, iUserId);
-            Log.d(TAG, "Success GetUserPrefs");
-            return lUserPrefsModel;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "Error GetUserPrefs" + e.getMessage());
-            throw e;
-        }
+        UserPreferencesModel lUserPrefsModel = new UserPreferencesModel();
+        lUserPrefsModel.setUserId(iUserId);
+        lUserPrefsModel.setLastSync("tomorrow");
+        return lUserPrefsModel;
     }
 
     /**
@@ -245,13 +167,6 @@ public class RemoteDataDynamoDBRepository implements RemoteDataRepository.Sessio
      */
     @Override
     public void saveUserPreferences(final UserPreferencesModel iUserPreferencesModel) throws Exception {
-        try{
-            mDynamoDBMapper.save(iUserPreferencesModel);
-            Log.d(TAG, "Success Save UserPreferences");
-        }
-        catch(Exception e){
-            Log.d(TAG, "Error Save UserPreferences" + e.getMessage());
-            throw e;
-        }
+
     }
 }

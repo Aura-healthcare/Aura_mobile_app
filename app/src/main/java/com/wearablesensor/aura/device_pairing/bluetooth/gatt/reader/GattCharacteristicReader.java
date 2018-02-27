@@ -31,7 +31,7 @@
 
 package com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 
 public interface GattCharacteristicReader {
 
@@ -39,8 +39,8 @@ public interface GattCharacteristicReader {
      * @brief helper method use to parse a GattCharacteristic and convert it into a
      * physiological data
      *
-     * @param iGattCharacteristic gatt characteristic
+     * @param event gatt characteristic
      * @return true if read succeed, false otherwise
      */
-    Boolean read(BluetoothGattCharacteristic iGattCharacteristic);
+    Boolean read(PhysioEvent event);
 }

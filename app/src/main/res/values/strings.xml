@@ -100,5 +100,6 @@
     <string name="confirm_button">Confirm</string>
 
     <string name="default_value">---</string>
+    <string name="heartbeat_metric_anomaly">Bad heat beat detection</string>
 
 </resources>
