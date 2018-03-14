@@ -34,6 +34,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
 import com.idevicesinc.sweetblue.utils.Uuids;
+import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 
 public class GattMovementCharacteristicReader implements GattCharacteristicReader {
 
@@ -56,19 +57,19 @@ public class GattMovementCharacteristicReader implements GattCharacteristicReade
     }
 
     /**
-     * @param iGattCharacteristic gatt characteristic
+     * @param event gatt characteristic
      * @return true if read succeed, false otherwise
      * @brief helper method use to parse a GattCharacteristic and convert it into a
      * physiological data
      */
     @Override
-    public Boolean read(BluetoothGattCharacteristic iGattCharacteristic) {
+    public Boolean read(PhysioEvent event) {
 
         if (mHasBeenRead) {
             return false;
         }
 
-        byte[] lData = iGattCharacteristic.getValue();
+        byte[] lData = event.getData();
 
         if (lData.length != FRAME_SIZE || lData[0] !='L') {
             mHasBeenRead = true;
