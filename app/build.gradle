@@ -18,6 +18,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'project-report'
+apply plugin: 'jacoco'
 
 repositories {
     jcenter()
@@ -98,9 +99,36 @@ android {
     }
     buildTypes {
     }
+
+    flavorDimensions "mode"
+
     productFlavors {
+        full{
+            dimension "mode"
+        }
+        stub{
+            dimension "mode"
+            applicationIdSuffix ".stub"
+            versionNameSuffix "-stub"
+        }
     }
     lintOptions {
         warning 'InvalidPackage' // Nasty workaround - cause is a non android package (java.lang.management) referenced by org.junit.internal.runners.statements.FailOnTimeout
     }
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: 'testFullDebugUnitTest') {
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories = files([mainSrc])
+    classDirectories = files([debugTree])
+    executionData = files("${buildDir}/jacoco/testFullDebugUnitTest.exec")
 }

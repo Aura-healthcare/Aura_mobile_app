@@ -21,51 +21,45 @@ package com.wearablesensor.aura.device_pairing;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.UiThread;
 import android.util.Log;
 
 import com.idevicesinc.sweetblue.BleDevice;
-import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
-import com.idevicesinc.sweetblue.BleServer;
 import com.idevicesinc.sweetblue.utils.Uuids;
-import com.wearablesensor.aura.DataCollectorServiceConstants;
 import com.wearablesensor.aura.DataCollectorService;
+import com.wearablesensor.aura.DataCollectorServiceConstants;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
 import com.wearablesensor.aura.data_repository.models.MotionGyroscopeModel;
-import com.wearablesensor.aura.data_repository.models.MotionMagnetometerModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattCustomGSRTemperatureCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRateCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattMovementCharacteristicReader;
+import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
-
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
     private final String TAG = this.getClass().getSimpleName();
 
-    // Stops scanning after 20 seconds.
-    private static final long SCAN_PERIOD = 20000;
 
-    // Bluetooth scanning members
-    private Handler mScanningHandler;
-    private BleManager.DiscoveryListener mDiscoveryListener;
+    private Handler handler = new Handler();
+    private Runnable sendDataOnTic;
 
     // a enum to describe action types that can be applied to a specific GATT characteristic
     public enum StateListenerAction{
@@ -110,183 +104,64 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         }
     }
 
-    //Bluetooth data streaming callbacks
-    private BleDevice.ReadWriteListener mHeartRateReadWriteListener;
-    private BleDevice.ReadWriteListener mCustomMAXREFDES73ReadWriteListener;
-    private BleDevice.ReadWriteListener mMotionMovuinoReadWriteListener;
-
-    private BleDevice.ReadWriteListener mBatteryReadWriteListener;
-
-    private ConcurrentHashMap<String, BleDevice> mConnectedDevices; // hashmap storing the currently connected devices list
-
     public BluetoothDevicePairingService(Context iContext){
         super(iContext);
-
         // callback used to handle standard Heart rate profile
-        mHeartRateReadWriteListener = new BleDevice.ReadWriteListener() {
+        EventManager eventManager = new EventManager() {
             @Override
-            public void onEvent(ReadWriteEvent e) {
-                if(e.wasSuccess() && e.type() == Type.NOTIFICATION){
-                    GattHeartRateCharacteristicReader lGattCharacteristicReader = new GattHeartRateCharacteristicReader();
-                    lGattCharacteristicReader.read(e.characteristic());
+            public void processEvent(PhysioEvent event) {
 
-                    Calendar c = Calendar.getInstance();
-                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
+                Calendar c = Calendar.getInstance();
+                String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
+                String lDeviceAddress = event.getMacAddress();
 
-                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(e.device().getMacAddress(), lCurrentTimestamp, lGattCharacteristicReader.getRrInterval());
+                GattHeartRateCharacteristicReader heartRateCharacteristicReader = new GattHeartRateCharacteristicReader();
+                if(heartRateCharacteristicReader.read(event)){
+                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(event.getMacAddress(), lCurrentTimestamp, heartRateCharacteristicReader.getRrInterval());
                     Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
                     receiveData(lRrIntervalModel);
                 }
-            }
-        };
 
-        // Custom callback to handle data stream from Maxim Integrated MAXREFDES73 notifications
-        // listen to Heart Rate Measurement Caracteristic with private data format
-        mCustomMAXREFDES73ReadWriteListener = new BleDevice.ReadWriteListener(){
-            @Override
-            public void onEvent(ReadWriteEvent e) {
-                if(e.wasSuccess() && e.type() == Type.NOTIFICATION){
-                    GattCustomGSRTemperatureCharacteristicReader lGattCharacteristicReader = new GattCustomGSRTemperatureCharacteristicReader();
-                    lGattCharacteristicReader.read(e.characteristic());
-
-                    Calendar c = Calendar.getInstance();
-                    String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
-                    String lDeviceAddress = e.device().getMacAddress();
-
-                    SkinTemperatureModel lSkinTemperatureModel = new SkinTemperatureModel(lDeviceAddress, lCurrentTimestamp, lGattCharacteristicReader.getSkinTemperature());
-                    ElectroDermalActivityModel lElectroDermalActivityModel = new ElectroDermalActivityModel(lDeviceAddress, lCurrentTimestamp, 7812, lGattCharacteristicReader.getElectroDermalActivity());
+                GattCustomGSRTemperatureCharacteristicReader temperatureCharacteristicReader = new GattCustomGSRTemperatureCharacteristicReader();
+                if(temperatureCharacteristicReader.read(event)){
+                    SkinTemperatureModel lSkinTemperatureModel = new SkinTemperatureModel(lDeviceAddress, lCurrentTimestamp, temperatureCharacteristicReader.getSkinTemperature());
+                    ElectroDermalActivityModel lElectroDermalActivityModel = new ElectroDermalActivityModel(lDeviceAddress, lCurrentTimestamp, 7812, temperatureCharacteristicReader.getElectroDermalActivity());
                     Log.d(TAG, lSkinTemperatureModel.getTimestamp() + " " + lSkinTemperatureModel.getUuid() + " " + lSkinTemperatureModel.getTemperature() + " " + lSkinTemperatureModel.getUser());
                     Log.d(TAG, lElectroDermalActivityModel.getTimestamp() + " " + lElectroDermalActivityModel.getUuid() + " " + lElectroDermalActivityModel.getElectroDermalActivity() + " " + lElectroDermalActivityModel.getUser());
-
-
                     receiveData(lSkinTemperatureModel);
                     receiveData(lElectroDermalActivityModel);
                 }
-            }
-        };
 
-        mBatteryReadWriteListener = new BleDevice.ReadWriteListener() {
-            @Override
-            public void onEvent(ReadWriteEvent e) {
-                if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
-                   int lBatteryPercentage = e.data_byte();
-                    Log.d(TAG, "Battery  Event"  + e.data_byte() + " "+ e.data().length);
-                    DeviceInfo lDeviceInfo = new DeviceInfo(e.device().getMacAddress(), e.device().getName_native(), lBatteryPercentage);
-                    receiveBatteryLevel(lDeviceInfo);
+                GattMovementCharacteristicReader lGattMovementCharacteristic = new GattMovementCharacteristicReader();
+                if(lGattMovementCharacteristic.read(event)){
+                    MotionAccelerometerModel lAccelerometerModel = new MotionAccelerometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getAccelerometer(), "2G");
+                    MotionGyroscopeModel lGyroscopeModel = new MotionGyroscopeModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getGyroscope());
+                    receiveData(lAccelerometerModel);
+                    receiveData(lGyroscopeModel);
                 }
             }
         };
-
-        mMotionMovuinoReadWriteListener = new BleDevice.ReadWriteListener(){
-
-            @Override
-            public void onEvent(ReadWriteEvent e) {
-                Log.d(TAG, e.toString());
-                if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
-                    Log.d(TAG, "Motion Movuino Event" + e.data_utf8() +" " + e.data().length);
-                    GattMovementCharacteristicReader lGattMovementCharacteristic = new GattMovementCharacteristicReader();
-                    Boolean lStatus = lGattMovementCharacteristic.read(e.characteristic());
-
-                    if(lStatus) {
-                        Calendar c = Calendar.getInstance();
-                        String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
-                        String lDeviceAddress = e.device().getMacAddress();
-
-                        MotionAccelerometerModel lAccelerometerModel = new MotionAccelerometerModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getAccelerometer(), "2G");
-                        MotionGyroscopeModel lGyroscopeModel = new MotionGyroscopeModel(lDeviceAddress, lCurrentTimestamp, lGattMovementCharacteristic.getGyroscope());
-
-                        receiveData(lAccelerometerModel);
-                        receiveData(lGyroscopeModel);
-                    }
-                }
-            }
-        };
-
-        //Callback use to handle Bluetooth scanning
-        mDiscoveryListener = new BleManager.DiscoveryListener() {
-            @Override
-            public void onEvent(DiscoveryEvent e) {
-                if (e.was(LifeCycle.DISCOVERED)) {
-                    Log.d(TAG, "Discovery Event - "+ e.device().getName_native());
-                    if(isHeartRateCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                    else if(isGSRTemperatureCustomCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mCustomMAXREFDES73ReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                    else if(isMotionMovuinoCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-
-                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.RX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.TX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                }
-            }
-        };
-
-        mConnectedDevices = new ConcurrentHashMap<String, BleDevice>();
+        stubDeviceDataFlow(eventManager);
     }
 
-    /**
-     * @brief method to handle device connect logic - service profile, measurement characteristic, incomming data parsing
-     *
-     * @param iDevice device to connect
-     * @param iStateListeners
-     */
-    private void connectDevice(BleDevice iDevice, final ArrayList<StateListenerConfig> iStateListeners) {
-        iDevice.connect(new BleDevice.StateListener(){
+    @UiThread
+    private void stubDeviceDataFlow(final EventManager eventManager){
+        sendDataOnTic = new Runnable() {
             @Override
-            public void onEvent(BleDevice.StateListener.StateEvent e) {
-
-                Log.d(TAG, "ConnectionEvent - " + e);
-
-                if(e.didEnter(BleDeviceState.INITIALIZED)){
-                    Log.d(TAG, "deviceConnected");
-                    mConnectedDevices.put(e.device().getMacAddress(), e.device());
-                    startPairing();
-
-                    for(StateListenerConfig iStateListener : iStateListeners) {
-                        if(iStateListener.getAction() == StateListenerAction.ENABLE_NOTIFICATION){
-                            e.device().enableNotify(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), iStateListener.getReadWriteListener());
-                        }
-                        else if(iStateListener.getAction() == StateListenerAction.WRITE){
-                            byte[] valid = new byte[2];
-                            valid[0] = Byte.MAX_VALUE;
-                            valid[1] = Byte.MAX_VALUE;
-                            e.device().write(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), valid);
-                        }
-                    }
-                }
-                else if (e.didEnter(BleDeviceState.DISCONNECTED)){
-                    Log.d(TAG, "deviceDisconnected");
-                    mConnectedDevices.remove(e.device().getMacAddress());
-                    e.device().undiscover();
-
-                    if(allDevicesDisconnected()){
-                        endPairing();
-                    }
-                    else {
-                        BleManager.get(mContext).disconnectAll();
-                    }
-                }
+            public void run() {
+                PhysioEvent event = new PhysioEvent();
+                event.setUuid(Uuids.HEART_RATE_MEASUREMENT);
+                event.setmHeartRate(58);
+                byte[] data = new byte[]{};
+                event.setData(data);
+                Integer[] rRInterval = {1, 2, 3, 4, 5};
+                event.setmRrInterval(rRInterval);
+                event.setmRrIntervalCount(5);
+                eventManager.processEvent(event);
+                handler.postDelayed(sendDataOnTic, 1000);
             }
-        });
-    }
-
-    /**
-     * @brief check if all devices are disconnected
-     *
-     * @return true if all devices are disconnected, false otherwise
-     */
-    private boolean allDevicesDisconnected() {
-        return mConnectedDevices.size() == 0;
+        };
+        handler.postDelayed(sendDataOnTic, 1000);
     }
 
     /**
@@ -371,6 +246,12 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     public void automaticPairing(final Context iContext){
 
+        // stub
+        mPaired = true;
+        DevicePairingNotification iDevicePairingNotification = new DevicePairingConnectedNotification();
+        EventBus.getDefault().post(iDevicePairingNotification);
+
+        /*
         super.automaticPairing(iContext);
 
         mConnectedDevices.clear();
@@ -387,14 +268,25 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         }, SCAN_PERIOD);
 
         BleManager.get(iContext).startScan(mDiscoveryListener);
+        */
     }
 
     public void startPairing(){
-        super.startPairing();
+        // stub - super.startPairing();
+
+        mPaired = true;
+        mIsPairing = false;
+
+        DevicePairingNotification iDevicePairingNotification = new DevicePairingNotification(DevicePairingStatus.CONNECTED);
+        EventBus.getDefault().post(iDevicePairingNotification);
     }
 
     public void endPairing(){
-        super.endPairing();
+        // stub - super.endPairing();
+
+        mPaired = false;
+        mIsPairing = false;
+
         Intent stopIntent = new Intent(mContext, DataCollectorService.class);
         stopIntent.setAction(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION);
         mContext.startService(stopIntent);
@@ -438,9 +330,14 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     public LinkedList<DeviceInfo> getDeviceList(){
         LinkedList<DeviceInfo> oDeviceList = new LinkedList<>();
 
-        for ( Map.Entry<String, BleDevice> lEntry : mConnectedDevices.entrySet() ) {
+        DeviceInfo device1 = new DeviceInfo("02:34:56:78:31", "D1");
+        DeviceInfo device2 = new DeviceInfo("02:34:56:78:32", "D2");
+        oDeviceList.add(device1);
+        oDeviceList.add(device2);
+        // stub
+        /*for ( Map.Entry<String, BleDevice> lEntry : mConnectedDevices.entrySet() ) {
             oDeviceList.add(new DeviceInfo(lEntry.getValue().getMacAddress(), lEntry.getValue().getName_native()));
-        }
+        }*/
 
         return oDeviceList;
     }
@@ -451,8 +348,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     @Override
     public void close(){
         BleManager.get(mContext).turnOff();
+        handler.removeCallbacks(sendDataOnTic);
         super.close();
     }
-
 
 }
