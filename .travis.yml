@@ -13,7 +13,7 @@ stages:
     - build
     - coverageReport
     - name: emulatorTests
-      #if: branch = master
+      if: branch = master
 
 jobs:
   include:
@@ -79,7 +79,9 @@ jobs:
 
 
     - stage: coverageReport
-      script: ./gradlew jacocoTestReport
+      script:
+        - ./gradlew jacocoTestReport
+        - bash <(curl -s https://codecov.io/bash)
       before_script:
         # Accept licenses
         - mkdir -p $ANDROID_HOME/licenses
