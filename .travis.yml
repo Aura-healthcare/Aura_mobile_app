@@ -77,10 +77,9 @@ jobs:
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
 
-
     - stage: coverageReport
       script:
-        - ./gradlew check
+        - ./gradlew test
         - ./gradlew jacocoTestReport
       after_succes:
         - bash <(curl -s https://codecov.io/bash)
