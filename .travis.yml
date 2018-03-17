@@ -80,7 +80,9 @@ jobs:
 
     - stage: coverageReport
       script:
+        - ./gradlew check
         - ./gradlew jacocoTestReport
+      after_succes:
         - bash <(curl -s https://codecov.io/bash)
       before_script:
         # Accept licenses
