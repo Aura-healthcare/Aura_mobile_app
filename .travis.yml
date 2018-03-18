@@ -81,6 +81,7 @@ jobs:
       script:
         - ./gradlew test
         - ./gradlew jacocoTestReport
+        - ls -al ./app/build/reports/jacoco/jacocoTestReport/
         - bash <(curl -s https://codecov.io/bash)
 
       before_script:
