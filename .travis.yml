@@ -81,8 +81,8 @@ jobs:
       script:
         - ./gradlew check
         - ./gradlew jacocoTestReport
-      after_succes:
         - bash <(curl -s https://codecov.io/bash)
+
       before_script:
         # Accept licenses
         - mkdir -p $ANDROID_HOME/licenses
