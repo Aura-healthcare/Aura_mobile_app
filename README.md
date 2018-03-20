@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/Aura-healthcare/Aura_mobile_app.svg?branch=master)](https://travis-ci.org/Aura-healthcare/Aura_mobile_app)
+
 ## Headline
 The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice
 
