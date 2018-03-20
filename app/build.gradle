@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.facebook.conceal:conceal:2.0.1@aar'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.android.support:multidex:1.0.2'
     compile "com.android.support:support-v4:${androidVersion}"
