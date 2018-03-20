@@ -78,7 +78,7 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_INTENSITY_TAG = "intensity";
     private final static String DB_RR_INTERVAL_TAG = "rr_interval";
     private final static String DB_SKIN_TEMPERATURE = "skin_temperature";
-    private final static String DB_SENSOR_OUTPUT_FREQUENCY = "dsensor_output_frequency";
+    private final static String DB_SENSOR_OUTPUT_FREQUENCY = "sensor_output_frequency";
     private final static String DB_ELECTRO_DERMAL_ACTIVITY = "electro_dermal_activity";
     private final static String DB_SENSITIVE_EVENT_TIMESTAMP_TAG = "sensitive_event_timestamp";
     private final static String DB_X_TAG = "x";

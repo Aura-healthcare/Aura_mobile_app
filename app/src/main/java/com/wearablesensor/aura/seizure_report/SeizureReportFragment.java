@@ -102,9 +102,18 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
         mSwitchMultiButton.setOnSwitchListener(new SwitchMultiButton.OnSwitchListener() {
             @Override
             public void onSwitch(int position, String tabText) {
-                mPresenter.setCurrentIntensity(tabText);
+                if(position == 0){
+                    mPresenter.setCurrentIntensity("Small");
+                }
+                else if(position == 1){
+                    mPresenter.setCurrentIntensity("Medium");
+                }
+                else if(position == 2){
+                    mPresenter.setCurrentIntensity("Big");
+                }
             }
         });
+        mSwitchMultiButton.setSelectedTab(0);
 
         mSingleDateAndTimePicker.setListener(new SingleDateAndTimePicker.Listener() {
             @Override
