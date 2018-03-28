@@ -66,10 +66,12 @@ jobs:
         - emulator -avd test -no-skin -no-audio -no-window -engine classic &
         - android-wait-for-emulator
         - adb shell input keyevent 82 &
-      script: ./gradlew build connectedFullDebugAndroidTest
+      script: ./gradlew build jacocoTestReport connectedFullDebugAndroidTest
 #      before_cache:
 #        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 #        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+      after_success:
+         - bash <(curl -s https://codecov.io/bash)
       cache:
         directories:
           - $HOME/.gradle/caches/
