@@ -31,10 +31,9 @@
 
 package com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.util.Log;
 
 import com.idevicesinc.sweetblue.utils.Uuids;
+import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 
 public class GattHeartRateCharacteristicReader  implements GattCharacteristicReader{
 
@@ -60,14 +59,14 @@ public class GattHeartRateCharacteristicReader  implements GattCharacteristicRea
 
 
     /**
-     * @brief helper method use to parse a GattCharacteristic and convert it into a
+     * @brief helper method use to parse a PhysioEvents built from GattCharacteristic and convert it into a
      * physiological data
      *
-     * @param iGattCharacteristic gatt characteristic
+     * @param event gatt characteristic event
      * @return true if read succeed, false otherwise
      */
     @Override
-    public Boolean read(BluetoothGattCharacteristic iGattCharacteristic) {
+    public Boolean read(PhysioEvent event) {
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
@@ -75,54 +74,19 @@ public class GattHeartRateCharacteristicReader  implements GattCharacteristicRea
             return false;
         }
 
-        if (!Uuids.HEART_RATE_MEASUREMENT.equals(iGattCharacteristic.getUuid())) {
+        if (!Uuids.HEART_RATE_MEASUREMENT.equals(event.getUuid())) {
             mHasBeenRead = true;
             return false;
         }
 
-        if(iGattCharacteristic == null){
+        if(event == null){
             return false;
         }
 
-        int lFlag = iGattCharacteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-        int lFormat = -1;
-        int energy = -1;
-        int lOffset = 1;
-        if ((lFlag & 0x01) != 0) {
-            lFormat = BluetoothGattCharacteristic.FORMAT_UINT16;
-            lOffset = 3;
-            Log.d(TAG, "Heart rate format UINT16.");
-        } else {
-            lFormat = BluetoothGattCharacteristic.FORMAT_UINT8;
-            lOffset = 2;
-            Log.d(TAG, "Heart rate format UINT8.");
-        }
-        mHeartRate = iGattCharacteristic.getIntValue(lFormat, 1);
-        Log.d(TAG, "Received heart rate:" + mHeartRate);
-        if ((lFlag & 0x08) != 0) {
-            // calories present
-            mEnergy = iGattCharacteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, lOffset);
-            lOffset += 2;
-            Log.d(TAG, "Received energy: " + energy);
-        }
-        else{
-            mEnergy = 0;
-        }
-
-        if ((lFlag & 0x10) != 0) {
-            // RR stuff.
-            mRrIntervalCount = ((iGattCharacteristic.getValue()).length - lOffset) / 2;
-            mRrInterval = new Integer[mRrIntervalCount];
-            for (int i = 0; i < mRrIntervalCount; i++) {
-                mRrInterval[i] = iGattCharacteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, lOffset);
-                lOffset += 2;
-                Log.d(TAG, "Received RR: " + mRrInterval[i]);
-            }
-
-        }
-        else{
-            mRrIntervalCount = 0;
-        }
+        mHeartRate = event.getmHeartRate();
+        mEnergy = event.getmEnergy();
+        mRrIntervalCount = event.getmRrIntervalCount();
+        mRrInterval = event.getmRrInterval();
 
         mHasBeenRead = true;
         return true;

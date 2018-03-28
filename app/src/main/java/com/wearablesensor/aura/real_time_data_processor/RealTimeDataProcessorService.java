@@ -20,19 +20,31 @@ package com.wearablesensor.aura.real_time_data_processor;
 
 import android.util.Log;
 
+import com.wearablesensor.aura.DataCollectorService;
+import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
+import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieAnalyser;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieAnalyserObserver;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieState;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
-public class RealTimeDataProcessorService{
+
+public class RealTimeDataProcessorService implements TimeSerieAnalyserObserver {
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -40,6 +52,13 @@ public class RealTimeDataProcessorService{
     private String mUserUUID;
 
     private LocalDataRepository mLocalDataRepository;
+
+    private TimeSerieAnalyser<Integer> rrIntervalAnalyser = TimeSerieAnalyser.<Integer>builder()
+            .observationWindow(10)
+            .metricType(MetricType.HEART_BEAT)
+            .maxValue(1500) // 40 bpm
+            .minValue(300) // 200 bpm
+            .build();
 
     public RealTimeDataProcessorService(DevicePairingService iBluetoothDevicePairingService,
                                         LocalDataRepository iLocalDataRepository,
@@ -49,10 +68,12 @@ public class RealTimeDataProcessorService{
 
         mUserUUID = iUserUUID;
 
+        rrIntervalAnalyser.addObserver(this);
         EventBus.getDefault().register(this);
     }
 
     private void putSampleInCache(PhysioSignalModel iPhysioSignal){
+        //TODO: Insert TimeSerieAnalyser here
         try{
             mLocalDataRepository.cachePhysioSignalSample(iPhysioSignal);
         }
@@ -81,6 +102,10 @@ public class RealTimeDataProcessorService{
             }
 
             PhysioSignalModel lPhysioSignal = lDevicePairingNotification.getPhysioSignal();
+            if(lPhysioSignal instanceof RRIntervalModel){
+                RRIntervalModel sig = (RRIntervalModel) lPhysioSignal;
+                rrIntervalAnalyser.append(sig.getRrInterval());
+            }
             lPhysioSignal.setUser(mUserUUID);
             putSampleInCache(lPhysioSignal);
         }
@@ -89,5 +114,14 @@ public class RealTimeDataProcessorService{
     @Override
     public void finalize(){
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onNewState(MetricType metric, TimeSerieState state) {
+        EventBus.getDefault().post(TimeSerieEvent.builder().state(state).type(metric).build());
+    }
+
+    public void addMetricAnalyserObserver(DataCollectorService dataCollectorService) {
+        rrIntervalAnalyser.addObserver(dataCollectorService);
     }
 }

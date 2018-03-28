@@ -34,16 +34,23 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
+import com.wearablesensor.aura.real_time_data_processor.MetricType;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieAnalyserObserver;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieState;
 
-public class DataCollectorService extends Service {
+public class DataCollectorService extends Service implements TimeSerieAnalyserObserver {
     private static final String TAG = DataCollectorService.class.getSimpleName();
 
     private LocalDataFileRepository mLocalDataRepository;
@@ -52,6 +59,8 @@ public class DataCollectorService extends Service {
 
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new LocalBinder();
+
+
 
     public class LocalBinder extends Binder {
         DataCollectorService getService() {
@@ -79,6 +88,7 @@ public class DataCollectorService extends Service {
 
             mDevicePairingService.automaticPairing(getApplicationContext());
             mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, intent.getExtras().getString("UserUUID"));
+            mRealTimeDataProcessorService.addMetricAnalyserObserver(this);
 
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     notificationIntent, 0);
@@ -119,5 +129,45 @@ public class DataCollectorService extends Service {
     @Override
     public void onDestroy(){
     }
+
+    @Override
+    public void onNewState(MetricType metric, TimeSerieState state) {
+        if(metric!=MetricType.HEART_BEAT){
+            return;
+        }
+        if(state == TimeSerieState.ANOMALY){
+            notifyHeartBeatAnomaly();
+        } else if(state == TimeSerieState.NORMAL){
+            dropHeartBeatAnomalyNotification();
+        }
+    }
+
+    private void dropHeartBeatAnomalyNotification() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.cancel(DataCollectorServiceConstants.NOTIFICATION_ID.HEARTBEAT_NOTIFICATION_ID);
+    }
+
+    private void notifyHeartBeatAnomaly() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(DataCollectorServiceConstants.NOTIFICATION_ID.HEARTBEAT_NOTIFICATION_ID, heartBeatMetricIssueNotification());
+    }
+
+    private Notification heartBeatMetricIssueNotification(){
+        Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                R.drawable.hrv_pulse_anomaly);
+        String appName = getResources().getString(R.string.app_name);
+        String heartBeatBadPosition = getResources().getString(R.string.heartbeat_metric_anomaly);
+        return new NotificationCompat.Builder(this)
+                .setContentTitle(appName)
+                .setTicker(appName)
+                .setContentText(heartBeatBadPosition)
+                .setSmallIcon(R.drawable.hrv_pulse_anomaly)
+                .setVibrate(new long[] { 1000L, 1000L})
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setLargeIcon(
+                        Bitmap.createScaledBitmap(icon, 128, 128, false))
+                .setOngoing(true).build();
+    }
+
 }
 

@@ -36,6 +36,9 @@ import com.wearablesensor.aura.device_pairing.DevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.real_time_data_processor.MetricType;
+import com.wearablesensor.aura.real_time_data_processor.TimeSerieEvent;
+import com.wearablesensor.aura.real_time_data_processor.analyser.TimeSerieState;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -90,6 +93,15 @@ public class DataVisualisationPresenter implements DataVisualisationContract.Pre
             Log.d(TAG, "ReceivedData" + lDevicePairingNotification.getPhysioSignal().toString());
             receiveNewPhysioSample(lDevicePairingNotification.getPhysioSignal());
         }    }
+
+        @Subscribe(threadMode = ThreadMode.MAIN)
+        public void onSignalStatusChange(TimeSerieEvent event){
+            if(event.getType() == MetricType.HEART_BEAT && event.getState() == TimeSerieState.ANOMALY){
+                mView.enterHeartBeatAnomalyMode();
+            } else if(event.getType() == MetricType.HEART_BEAT) {
+                mView.leavHeartBeatAnomalyMode();
+            }
+        }
 
     @Override
     public void finalize(){
