@@ -119,4 +119,8 @@ android {
     lintOptions {
         warning 'InvalidPackage' // Nasty workaround - cause is a non android package (java.lang.management) referenced by org.junit.internal.runners.statements.FailOnTimeout
     }
+
+    jacocoAndroidUnitTestReport {
+        excludes += ['**/sweetblue/**']
+    }
 }
