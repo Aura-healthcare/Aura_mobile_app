@@ -4,6 +4,10 @@
 ## Headline
 The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice
 
+## How to contribute
+
+Please refer to [How To Contribute](https://github.com/Aura-healthcare/Aura_mobile_app/blob/master/CONTRIBUTING.md)
+
 ## Pre-requisites
 1. Android Sdk version 25.0
 2. Connected device transfering HRV data through Heart Rate bluetooth profile
@@ -17,11 +21,6 @@ Android Architecture Blueprints
 
 iDevicesInc - SweetBlue - support multi Bluetooth connection on most Android platforms and devices
 [link](https://github.com/iDevicesInc/SweetBlue)
-
-## How to contribute
-
-We references all in-progress or future developpements on cards in [Github Project](https://github.com/clecoued/Aura_mobile_app/projects/1).
-
 
 ## User Experience
 
