@@ -81,7 +81,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
      */
 
     public LocalDataFileRepository(Context iApplicationContext){
-        Log.d(TAG, "Local data CouchBase repository init");
+        Log.d(TAG, "Local data file repository init");
 
         mApplicationContext = iApplicationContext;
         mPhysioSignalCache = new ArrayList<PhysioSignalModel>();
@@ -156,7 +156,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
             return;
         }
 
-        String lFilename = CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX +iPhysioSignalSamples.get(0).getTimestamp()+".dat";
+        String lFilename = getCachePhysioFilename(iPhysioSignalSamples.get(0).getTimestamp());
         FileOutputStream lFileOutputStream = null;
 
 
@@ -271,12 +271,12 @@ public class LocalDataFileRepository implements LocalDataRepository {
     @Override
     public void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception {
 
-        String lFilename = CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".dat";
+        String lFilename = getCacheSensitiveEventFilename();
         FileOutputStream lOutputStream = null;
 
         Log.d(TAG, "Start Recording");
         try {
-            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
+            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_APPEND);
             // Creates an output stream which encrypts the data as
             // it is written to it and writes it out to the file.
             OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
@@ -314,5 +314,13 @@ public class LocalDataFileRepository implements LocalDataRepository {
     public void clearCache() throws Exception{
         savePhysioSignalSamples(mPhysioSignalCache);
         mPhysioSignalCache.clear();
+    }
+
+    public static String getCachePhysioFilename(String iTimestamp){
+        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX +iTimestamp+".dat";
+    }
+
+    public static String getCacheSensitiveEventFilename(){
+        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".dat";
     }
 }
