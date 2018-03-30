@@ -57,7 +57,7 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public final static String INFLUX_DB_URL = "http://193.251.229.249:8086";
+    public final static String INFLUX_DB_URL = "https://db.aura.healthcare";
     private final static String INFLUX_DB_PHYSIO_SIGNAL_NAME = "physio_signal";
     private final static String INFLUX_DB_NAME_SENSITIVE_EVENT_NAME = "sensitive_event";
 
