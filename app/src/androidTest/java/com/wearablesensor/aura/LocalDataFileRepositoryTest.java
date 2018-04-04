@@ -111,9 +111,9 @@ public class LocalDataFileRepositoryTest{
         final String lDeviceAdressUuid = UUID.randomUUID().toString();
         final String lUserUuid = UUID.randomUUID().toString();
 
-        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(2018, 1, 1,1,10));
-        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(2018, 1, 1,1,20));
-        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(2018, 1, 1,1,30));
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 1, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 1, 1,1,20));
+        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 1, 1,1,30));
 
         lPhysioSignalList.add(new RRIntervalModel(lPhysioUuid1, lDeviceAdressUuid, lUserUuid, lTimestamp1, 400));
         lPhysioSignalList.add(new MotionAccelerometerModel(lPhysioUuid2, lDeviceAdressUuid, lUserUuid, lTimestamp2, new float[]{0.5f, 1.0f, -0.5f}, "2G"));
@@ -162,9 +162,9 @@ public class LocalDataFileRepositoryTest{
         final String lDeviceAdressUuid = UUID.randomUUID().toString();
         final String lUserUuid = UUID.randomUUID().toString();
 
-        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(2018, 2, 1,1,10));
-        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(2018, 2, 1,1,20));
-        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(2018, 2, 1,1,30));
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,20));
+        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,30));
 
         lPhysioSignalList.add(new MotionGyroscopeModel(lPhysioUuid1, lDeviceAdressUuid, lUserUuid, lTimestamp1, new float[]{-90.f, 30.f, 255.f}));
         lPhysioSignalList.add(new ElectroDermalActivityModel(lPhysioUuid2, lDeviceAdressUuid, lUserUuid, lTimestamp2, 3000, 20.2));
@@ -180,13 +180,19 @@ public class LocalDataFileRepositoryTest{
         cleanPrivateFiles();
     }
 
-    @Ignore
+    @Test
+    public void saveSeizure_NullEntry() throws Exception{
+        mLocalDataFileRepository.saveSeizure(null);
+        assertThat("null seizure event recording failed", !isFileExistAt(LocalDataFileRepository.getCacheSensitiveEventFilename()));
+        cleanPrivateFiles();
+    }
+
     @Test
     public void saveSeizure_SingleEntry() throws Exception{
         final String lUserUuid = UUID.randomUUID().toString();
 
-        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(2018, 3, 1,1,10));
-        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(2018, 3, 1,1,20));
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */ 118, 3, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 3, 1,1,20));
 
         SeizureEventModel lSeizureEventModel = new SeizureEventModel(lUserUuid, lTimestamp1, lTimestamp2, "Big");
         mLocalDataFileRepository.saveSeizure(lSeizureEventModel);
@@ -194,21 +200,20 @@ public class LocalDataFileRepositoryTest{
         cleanPrivateFiles();
     }
 
-    @Ignore
     @Test
     public void querySeizure_MultiplesEntries() throws Exception{
         ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
 
         final String lUserUuid = UUID.randomUUID().toString();
 
-        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,5));
-        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,10));
-        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,15));
-        final String lTimestamp4 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,20));
-        final String lTimestamp5 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,25));
-        final String lTimestamp6 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,30));
-        final String lTimestamp7 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,35));
-        final String lTimestamp8 = DateIso8601Mapper.getString(new Date(2018, 4, 1,1,40));
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,5));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,10));
+        final String lTimestamp3 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,15));
+        final String lTimestamp4 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,20));
+        final String lTimestamp5 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,25));
+        final String lTimestamp6 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,30));
+        final String lTimestamp7 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,35));
+        final String lTimestamp8 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,40));
 
         mLocalDataFileRepository.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp1, lTimestamp2, "Big"));
         mLocalDataFileRepository.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp3, lTimestamp4, "Small"));
@@ -216,8 +221,61 @@ public class LocalDataFileRepositoryTest{
         mLocalDataFileRepository.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp7, lTimestamp8, "Medium"));
 
         lSeizureList = mLocalDataFileRepository.querySeizures(LocalDataFileRepository.getCacheSensitiveEventFilename());
-        Log.d("Seizure", "Seizure timestamp !!" + lSeizureList.get(0).getTimestamp());
         assertThat("Multiples seizures event query failed", (lSeizureList.size() == 4));
+        cleanPrivateFiles();
+    }
+
+    @Test
+    public void cachePhysioSignal_MultipleEntries() throws Exception{
+        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
+
+        final int NUMBER_OF_CACHE_VALUES_MULTIPLES_FILES = 230;
+
+        final String lDeviceAdressUuid = UUID.randomUUID().toString();
+        final String lUserUuid = UUID.randomUUID().toString();
+
+        for(int i = 0;i < NUMBER_OF_CACHE_VALUES_MULTIPLES_FILES; i++){
+            String lPhysioUuid = UUID.randomUUID().toString();
+            String lTimestamp = DateIso8601Mapper.getString(new Date(/*1900 + */i, 4, 1,1,5, 0));
+            mLocalDataFileRepository.cachePhysioSignalSample(new RRIntervalModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid,lTimestamp, i));
+        }
+
+        assertThat("Cache events failed - file recorded", getDataFiles().length == 2);
+        cleanPrivateFiles();
+    }
+
+    @Test
+    public void removePhysioSignal() throws Exception{
+        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
+
+        final int NUMBER_OF_CACHE_VALUES_MULTIPLES_FILES = 230;
+
+        final String lDeviceAdressUuid = UUID.randomUUID().toString();
+        final String lUserUuid = UUID.randomUUID().toString();
+
+        String lTimestamp1 = "", lTimestamp2 = "";
+
+        for(int i = 0;i < 100; i++){
+            String lPhysioUuid = UUID.randomUUID().toString();
+            String lTimestamp = DateIso8601Mapper.getString(new Date(/*1900 + */i, 1, 1,1,5, 0));
+            if(i == 0){
+                lTimestamp1 = lTimestamp;
+            }
+            mLocalDataFileRepository.cachePhysioSignalSample(new RRIntervalModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid,lTimestamp, i));
+        }
+
+        for(int i = 0;i < 100; i++){
+            String lPhysioUuid = UUID.randomUUID().toString();
+            String lTimestamp = DateIso8601Mapper.getString(new Date(/*1900 + */i, 2, 1,1,5, 0));
+            if(i == 0){
+                lTimestamp2 = lTimestamp;
+            }
+            mLocalDataFileRepository.cachePhysioSignalSample(new RRIntervalModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid,lTimestamp, i));
+        }
+
+        mLocalDataFileRepository.removePhysioSignalSamples(LocalDataFileRepository.getCachePhysioFilename(lTimestamp1));
+        mLocalDataFileRepository.removePhysioSignalSamples(LocalDataFileRepository.getCachePhysioFilename(lTimestamp2));
+        assertThat("RemovePhysioSignals failed - files not deleted", getDataFiles().length == 0);
         cleanPrivateFiles();
     }
 }

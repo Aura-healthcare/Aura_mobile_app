@@ -54,6 +54,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -274,16 +275,36 @@ public class LocalDataFileRepository implements LocalDataRepository {
         String lFilename = getCacheSensitiveEventFilename();
         FileOutputStream lOutputStream = null;
 
+        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
+        try {
+            lSeizureList = querySeizures(lFilename);
+        }
+        catch(FileNotFoundException e){
+            Log.d(TAG, "Create Seizure file");
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+
+        if(iSeizureEventModel == null){
+            return;
+        }
+
+        lSeizureList.add(iSeizureEventModel);
+
         Log.d(TAG, "Start Recording");
         try {
-            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_APPEND);
+            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
             // Creates an output stream which encrypts the data as
             // it is written to it and writes it out to the file.
             OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
                     lOutputStream,
                     Entity.create("entity_id"));
 
-            String lData = iSeizureEventModel.toString() + "\n";
+            String lData = "";
+            for(SeizureEventModel lSeizure : lSeizureList){
+                lData += lSeizureList.toString() + "\n";
+            }
 
             lCryptedStream.write(lData.getBytes());
             lCryptedStream.close();
