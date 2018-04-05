@@ -98,4 +98,10 @@
 
     <string name="default_value">---</string>
 
+    <string name="menu_monitoring">Suivi continu</string>
+    <string name="menu_mobile_app">Application mobile</string>
+    <string name="menu_contact">Contact</string>
+    <string name="menu_cgu">CGU</string>
+    <string name="menu_general_information">Informations générales</string>
+
 </resources>

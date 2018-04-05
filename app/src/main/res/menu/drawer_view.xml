@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_SuiviContinu"
+            android:icon="@drawable/ic_signal"
+            android:title="@string/menu_monitoring" />
+    </group>
+
+    <item android:title="@string/menu_general_information">
+        <menu>
+            <item
+                android:id="@+id/nav_MobileApp"
+                android:icon="@drawable/ic_app"
+                android:title="@string/menu_mobile_app" />
+
+            <item
+                android:id="@+id/nav_Contact"
+                android:icon="@drawable/ic_mail"
+                android:title="@string/menu_contact" />
+
+            <item
+                android:id="@+id/nav_CGU"
+                android:icon="@drawable/ic_cgu"
+                android:title="@string/menu_cgu" />
+        </menu>
+    </item>
+
+</menu>

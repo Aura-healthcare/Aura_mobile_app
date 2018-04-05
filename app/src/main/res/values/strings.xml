@@ -102,4 +102,9 @@
     <string name="default_value">---</string>
     <string name="heartbeat_metric_anomaly">Bad heat beat detection</string>
 
+    <string name="menu_monitoring">Monitoring</string>
+    <string name="menu_mobile_app">Mobile application</string>
+    <string name="menu_contact">Contact</string>
+    <string name="menu_cgu">Terms and conditions</string>
+    <string name="menu_general_information">General information</string>
 </resources>
