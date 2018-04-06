@@ -1,6 +1,7 @@
 
 [![Build Status](https://travis-ci.org/Aura-healthcare/Aura_mobile_app.svg?branch=master)](https://travis-ci.org/Aura-healthcare/Aura_mobile_app)
 [![codecov](https://codecov.io/gh/Aura-healthcare/Aura_mobile_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Aura-healthcare/Aura_mobile_app)
+[![sonar](https://sonarcloud.io/api/project_badges/measure?project=Aura_mobile_app%3Aapp&metric=alert_status)](https://sonarcloud.io/dashboard?id=Aura_mobile_app%3Aapp)
 ## Headline
 The "Aura Project" app will alert an user from an epilepsy seizure within few minutes notice
 

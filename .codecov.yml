@@ -1,0 +1,4 @@
+---
+
+ignore:
+  - "app/src/main/lib/.*"
