@@ -312,6 +312,10 @@ public class LocalDataFileRepository implements LocalDataRepository {
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(lOutputStream!=null){
+                lOutputStream.close();
+            }
         }
     }
 
