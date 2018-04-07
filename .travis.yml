@@ -18,7 +18,10 @@ stages:
 jobs:
   include:
     - stage: build
-      script: ./gradlew build
+      script:
+        - ./gradlew clean
+        - ./gradlew test
+        - ls app/build/
       before_script:
         # Accept licenses
         - mkdir -p $ANDROID_HOME/licenses
@@ -32,6 +35,7 @@ jobs:
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
+          - app/build/
 
     - stage: emulatorTests
       android:
@@ -79,9 +83,14 @@ jobs:
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
+          - app/build/
 
     - stage: quality
       script:
+        - ls .
+        - ls app
+        #- ls app/build/outputs/code-coverage/connected/flavors/FULL
+        - ls app/build/report/jacoco
         - ./gradlew jacocoTestReport
         - ./gradlew sonarqube -Dsonar.organization=$SONAR_ORGANISATION -Dsonar.login=$SONAR_TOKEN
       before_script:
@@ -97,5 +106,6 @@ jobs:
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
+          - app/build/
       after_success:
                - bash <(curl -s https://codecov.io/bash)
