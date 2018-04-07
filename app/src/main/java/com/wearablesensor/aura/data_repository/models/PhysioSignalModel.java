@@ -100,4 +100,30 @@ public class PhysioSignalModel {
     public String toString(){
         return mUuid + " " + mType + " " + mTimestamp + " " + mUser + " " + mDeviceAdress;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PhysioSignalModel that = (PhysioSignalModel) o;
+
+        if (mUuid != null ? !mUuid.equals(that.mUuid) : that.mUuid != null) return false;
+        if (mDeviceAdress != null ? !mDeviceAdress.equals(that.mDeviceAdress) : that.mDeviceAdress != null)
+            return false;
+        if (mUser != null ? !mUser.equals(that.mUser) : that.mUser != null) return false;
+        if (mTimestamp != null ? !mTimestamp.equals(that.mTimestamp) : that.mTimestamp != null)
+            return false;
+        return mType != null ? mType.equals(that.mType) : that.mType == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mUuid != null ? mUuid.hashCode() : 0;
+        result = 31 * result + (mDeviceAdress != null ? mDeviceAdress.hashCode() : 0);
+        result = 31 * result + (mUser != null ? mUser.hashCode() : 0);
+        result = 31 * result + (mTimestamp != null ? mTimestamp.hashCode() : 0);
+        result = 31 * result + (mType != null ? mType.hashCode() : 0);
+        return result;
+    }
 }

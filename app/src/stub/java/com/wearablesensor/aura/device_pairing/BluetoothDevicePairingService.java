@@ -146,22 +146,17 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     @UiThread
     private void stubDeviceDataFlow(final EventManager eventManager){
+        final StubEventManager manager = StubEventManager.getEventManager(StubEventManager.EventType.HEART_BEAT, mContext.getAssets());
+
         sendDataOnTic = new Runnable() {
             @Override
             public void run() {
-                PhysioEvent event = new PhysioEvent();
-                event.setUuid(Uuids.HEART_RATE_MEASUREMENT);
-                event.setmHeartRate(58);
-                byte[] data = new byte[]{};
-                event.setData(data);
-                Integer[] rRInterval = {1, 2, 3, 4, 5};
-                event.setmRrInterval(rRInterval);
-                event.setmRrIntervalCount(5);
+                PhysioEvent event = manager.getEvent();
                 eventManager.processEvent(event);
-                handler.postDelayed(sendDataOnTic, 1000);
+                handler.postDelayed(sendDataOnTic, manager.getFrequency());
             }
         };
-        handler.postDelayed(sendDataOnTic, 1000);
+        handler.postDelayed(sendDataOnTic, manager.getFrequency());
     }
 
     /**

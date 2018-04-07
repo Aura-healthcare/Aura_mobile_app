@@ -35,5 +35,6 @@ public class DataCollectorServiceConstants {
 
     public interface NOTIFICATION_ID {
         public static int FOREGROUND_SERVICE = 101;
+        public static int HEARTBEAT_NOTIFICATION_ID = 401;
     }
 }

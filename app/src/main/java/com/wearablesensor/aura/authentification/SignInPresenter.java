@@ -54,8 +54,6 @@ public class SignInPresenter implements SignInContract.Presenter{
     private static final int FIRST_TIME_SIGN_IN = 1;
     private Boolean mIsFirstSignIn; /** first time sign in flag */
 
-    private String mCurrentPassword; // argument exist because AmazonCognito does not take it as input
-
     private AuraAuthenticationHandler authenticationHandler;
 
     /**
@@ -192,7 +190,7 @@ public class SignInPresenter implements SignInContract.Presenter{
      * @param iCurrentPassword password to be transmitted to Amazon authentification callback
      */
     private void setCurrentPassword(String iCurrentPassword) {
-        mCurrentPassword = iCurrentPassword;
+        authenticationHandler.setPassword(iCurrentPassword);
     }
 
     /**
@@ -201,7 +199,7 @@ public class SignInPresenter implements SignInContract.Presenter{
      * @return password transmitted to Amazon authentification callback
      */
     String getCurrentPassword(){
-        return mCurrentPassword;
+        return authenticationHandler.getPassword();
     }
 
     /**

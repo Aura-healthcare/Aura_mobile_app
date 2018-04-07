@@ -25,6 +25,7 @@ import android.content.Context;
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
+import com.facebook.soloader.SoLoader;
 import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
@@ -53,6 +54,8 @@ public class AuraApplication extends MultiDexApplication {
         Log.d("AuraApplication", "Init");
         super.onCreate();
         Fabric.with(this, new Crashlytics());
+
+        SoLoader.init(this, false);
 
         Context lApplicationContext = getApplicationContext();
         mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();

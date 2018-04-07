@@ -37,6 +37,12 @@ package com.wearablesensor.aura.data_repository;
 import android.content.Context;
 import android.util.Log;
 
+import com.facebook.android.crypto.keychain.AndroidConceal;
+import com.facebook.android.crypto.keychain.SharedPrefsBackedKeyChain;
+import com.facebook.crypto.Crypto;
+import com.facebook.crypto.CryptoConfig;
+import com.facebook.crypto.Entity;
+import com.facebook.crypto.keychain.KeyChain;
 import com.wearablesensor.aura.data_repository.models.ModelSerializer;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
@@ -44,11 +50,15 @@ import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotifi
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 
@@ -58,6 +68,9 @@ public class LocalDataFileRepository implements LocalDataRepository {
     private Context mApplicationContext;
 
     private ArrayList<PhysioSignalModel> mPhysioSignalCache; /* temporary storage in an array to avoid call overhead to local data repository */
+
+    private KeyChain mKeyChain;
+    private Crypto mCrypto;
 
     public final static String CACHE_FILENAME = "DataFile_";
     public final static String SENSITIVE_EVENT_SUFFIX = "SensitiveEvent_";
@@ -69,10 +82,14 @@ public class LocalDataFileRepository implements LocalDataRepository {
      */
 
     public LocalDataFileRepository(Context iApplicationContext){
-        Log.d(TAG, "Local data CouchBase repository init");
+        Log.d(TAG, "Local data file repository init");
 
         mApplicationContext = iApplicationContext;
         mPhysioSignalCache = new ArrayList<PhysioSignalModel>();
+
+        // Creates a new Crypto object with default implementations of a key chain
+        mKeyChain = new SharedPrefsBackedKeyChain(mApplicationContext, CryptoConfig.KEY_256);
+        mCrypto = AndroidConceal.get().createDefaultCrypto(mKeyChain);
     }
 
     /**
@@ -91,13 +108,17 @@ public class LocalDataFileRepository implements LocalDataRepository {
         Log.d(TAG, "File Open: " + iFilename);
 
         FileInputStream lInputStream = mApplicationContext.openFileInput(iFilename);
+        InputStream lDecryptedInputStream = mCrypto.getCipherInputStream(
+                lInputStream, Entity.create("entity_id"));
         ArrayList<PhysioSignalModel> lPhysioSignalSamples = new ArrayList<PhysioSignalModel>();
 
         try{
             // if file the available for reading
             if (lInputStream != null) {
+
+
                 // prepare the file for reading
-                InputStreamReader lInputReader = new InputStreamReader(lInputStream);
+                InputStreamReader lInputReader = new InputStreamReader(lDecryptedInputStream);
                 BufferedReader lBuffreader = new BufferedReader(lInputReader);
 
                 String lLine = lBuffreader.readLine();
@@ -136,19 +157,28 @@ public class LocalDataFileRepository implements LocalDataRepository {
             return;
         }
 
-        String lFilename = CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX +iPhysioSignalSamples.get(0).getTimestamp()+".dat";
-        FileOutputStream lOutputStream = null;
+        String lFilename = getCachePhysioFilename(iPhysioSignalSamples.get(0).getTimestamp());
+        FileOutputStream lFileOutputStream = null;
+
 
         Log.d(TAG, "Start Recording");
         try {
-            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
+            lFileOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
+            OutputStream lOutputStream = new BufferedOutputStream(lFileOutputStream);
+
+            // Creates an output stream which encrypts the data as
+            // it is written to it and writes it out to the file.
+            OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
+                    lOutputStream,
+                    Entity.create("entity_id"));
+
             String lData = "";
             for(int i = 0; i < iPhysioSignalSamples.size(); i++){
                 lData += ModelSerializer.serialize(iPhysioSignalSamples.get(i)) + "\n";
             }
 
-            lOutputStream.write(lData.getBytes());
-            lOutputStream.close();
+            lCryptedStream.write(lData.getBytes());
+            lCryptedStream.close();
 
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
         } catch (Exception e) {
@@ -193,13 +223,15 @@ public class LocalDataFileRepository implements LocalDataRepository {
         Log.d(TAG, "File Open: " + iFilename);
 
         FileInputStream lInputStream = mApplicationContext.openFileInput(iFilename);
+        InputStream lDecryptedInputStream = mCrypto.getCipherInputStream(
+                lInputStream, Entity.create("entity_id"));
         ArrayList<SeizureEventModel> lSeizureEventSamples = new ArrayList<SeizureEventModel>();
 
         try{
             // if file the available for reading
-            if (lInputStream != null) {
+            if (lDecryptedInputStream != null) {
                 // prepare the file for reading
-                InputStreamReader lInputReader = new InputStreamReader(lInputStream);
+                InputStreamReader lInputReader = new InputStreamReader(lDecryptedInputStream);
                 BufferedReader lBuffreader = new BufferedReader(lInputReader);
 
                 String lLine = lBuffreader.readLine();
@@ -240,20 +272,50 @@ public class LocalDataFileRepository implements LocalDataRepository {
     @Override
     public void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception {
 
-        String lFilename = CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".dat";
+        String lFilename = getCacheSensitiveEventFilename();
         FileOutputStream lOutputStream = null;
+
+        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
+        try {
+            lSeizureList = querySeizures(lFilename);
+        }
+        catch(FileNotFoundException e){
+            Log.d(TAG, "Create Seizure file");
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+
+        if(iSeizureEventModel == null){
+            return;
+        }
+
+        lSeizureList.add(iSeizureEventModel);
 
         Log.d(TAG, "Start Recording");
         try {
             lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
-            String lData = iSeizureEventModel.toString() + "\n";
+            // Creates an output stream which encrypts the data as
+            // it is written to it and writes it out to the file.
+            OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
+                    lOutputStream,
+                    Entity.create("entity_id"));
 
-            lOutputStream.write(lData.getBytes());
-            lOutputStream.close();
+            String lData = "";
+            for(SeizureEventModel lSeizure : lSeizureList){
+                lData += lSeizureList.toString() + "\n";
+            }
+
+            lCryptedStream.write(lData.getBytes());
+            lCryptedStream.close();
 
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(lOutputStream!=null){
+                lOutputStream.close();
+            }
         }
     }
 
@@ -277,5 +339,13 @@ public class LocalDataFileRepository implements LocalDataRepository {
     public void clearCache() throws Exception{
         savePhysioSignalSamples(mPhysioSignalCache);
         mPhysioSignalCache.clear();
+    }
+
+    public static String getCachePhysioFilename(String iTimestamp){
+        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX +iTimestamp+".dat";
+    }
+
+    public static String getCacheSensitiveEventFilename(){
+        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".dat";
     }
 }

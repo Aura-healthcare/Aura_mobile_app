@@ -62,6 +62,8 @@ import java.util.ArrayList;
 
 public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalModel> {
 
+    private Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+
     public RealTimePhysioSignalListAdapter(Context context, int resource) {
         super(context, resource);
     }
@@ -89,7 +91,7 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
         if(lPhysioSignal.getType().equals(RRIntervalModel.RR_INTERVAL_TYPE)) {
             RRIntervalModel lRrInterval = ((RRIntervalModel) lPhysioSignal);
 
-            Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+            //Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
             lImageView.setImageBitmap(lHrvBitmap);
             lValueView.setText(String.valueOf(Math.round(60000.0 / lRrInterval.getRrInterval() * 1.0)) + " bpm");
         }
@@ -220,4 +222,12 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
            iChart.setData(lData);
        }
    }
+
+    public void enterHeartBeatAnomalyMode() {
+        lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_pulse_anomaly);
+    }
+
+    public void leavHeartBeatAnomalyMode() {
+        lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+    }
 }

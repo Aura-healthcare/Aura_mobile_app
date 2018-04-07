@@ -18,10 +18,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.real_time_data_processor.analyser;
 
+import com.wearablesensor.aura.real_time_data_processor.MetricType;
 import com.wearablesensor.aura.utils.TimeSerie;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import lombok.Builder;
 
@@ -36,21 +39,49 @@ public class TimeSerieAnalyser<T extends Comparable<T>> implements SimpleTimeSer
 
     private boolean isValid = true;
 
+    private MetricType metricType;
+    private TimeSerieState previousState;
+    private List<TimeSerieAnalyserObserver> observers = new ArrayList<>();
+
     @Builder
-    public TimeSerieAnalyser(T maxValue, T minValue, int observationWindow){
+    public TimeSerieAnalyser(T maxValue, T minValue, int observationWindow, MetricType metricType){
         this.maxValue = maxValue;
         this.minValue = minValue;
         this.observationWindow = observationWindow;
-
+        this.metricType = metricType;
     }
 
     @Override
-    public void append(LocalDate date, T observation) {
+    public void append(T observation) {
         serie.addLast(observation);
         while(serie.size()>observationWindow){
             serie.removeFirst();
         }
         isValid = checkValidity();
+        if(serie.size()<observationWindow){
+            return;
+        }
+        if(isValid){
+            checkState(TimeSerieState.NORMAL);
+        } else {
+            checkState(TimeSerieState.ANOMALY);
+        }
+    }
+
+    private void checkState(TimeSerieState state){
+        if(state == previousState){
+            return;
+        }
+        previousState = state;
+        notifyObservers(state);
+    }
+
+    private void notifyObservers(TimeSerieState state) {
+        if(serie.size()<observationWindow)
+            return;
+        for(TimeSerieAnalyserObserver obs : observers){
+            obs.onNewState(metricType, state);
+        }
     }
 
     private boolean checkValidity() {
@@ -58,11 +89,21 @@ public class TimeSerieAnalyser<T extends Comparable<T>> implements SimpleTimeSer
             return true;
         }
         for(T item : serie){
-            if(item.compareTo(minValue) < 0  || item.compareTo(maxValue) > 0){
+            if(isOutOfBounds(item)){
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isOutOfBounds(T item){
+        if(minValue != null && item.compareTo(minValue) < 0){
+            return true;
+        }
+        if(maxValue != null && item.compareTo(maxValue) > 0){
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -73,6 +114,21 @@ public class TimeSerieAnalyser<T extends Comparable<T>> implements SimpleTimeSer
     @Override
     public boolean isValid() {
         return isValid;
+    }
+
+    @Override
+    public void addObserver(TimeSerieAnalyserObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(TimeSerieAnalyserObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void clearObservers() {
+        observers.clear();
     }
 
     @Override
@@ -99,5 +155,6 @@ public class TimeSerieAnalyser<T extends Comparable<T>> implements SimpleTimeSer
     public double standardDeviation() {
         return 0;
     }
+
 
 }

@@ -43,6 +43,9 @@ public class DataVisualisationContract {
          * @param iPhysioSignal physiological data sample
          */
         void refreshPhysioSignalVisualisation(PhysioSignalModel iPhysioSignal);
+
+        void enterHeartBeatAnomalyMode();
+        void leavHeartBeatAnomalyMode();
     }
 
     interface Presenter extends BasePresenter{

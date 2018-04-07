@@ -67,6 +67,7 @@ public class AuraAuthenticationHandler implements AuthenticationHandler, Authent
          */
         if ("NEW_PASSWORD_REQUIRED".equals(continuation.getChallengeName())) {
             // This is the first sign-in attempt for an admin created user
+            newPasswordContinuation = (NewPasswordContinuation) continuation;
             authentificationHelper.setUserAttributeForDisplayFirstLogIn(newPasswordContinuation.getCurrentUserAttributes(),
                     newPasswordContinuation.getRequiredAttributes());
             signInPresenter.firstSignIn();

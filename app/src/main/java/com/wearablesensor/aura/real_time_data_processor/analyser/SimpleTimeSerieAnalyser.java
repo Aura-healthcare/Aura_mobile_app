@@ -18,13 +18,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura.real_time_data_processor.analyser;
 
-import java.time.LocalDate;
 
 public interface SimpleTimeSerieAnalyser<T> {
 
-    void append(LocalDate date, T observation);
+    void append(T observation);
 
     Iterable<T> observations();
 
     boolean isValid();
+
+    void addObserver(TimeSerieAnalyserObserver observer);
+    void removeObserver(TimeSerieAnalyserObserver observer);
+    void clearObservers();
 }

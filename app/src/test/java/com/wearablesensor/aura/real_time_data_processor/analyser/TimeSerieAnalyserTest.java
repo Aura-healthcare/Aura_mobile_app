@@ -3,14 +3,15 @@ package com.wearablesensor.aura.real_time_data_processor.analyser;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import static junit.framework.Assert.assertFalse;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertFalse;
 
 
 /**
@@ -19,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 public class TimeSerieAnalyserTest {
 
     private TimeSerieAnalyser<Double> analyser;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     private static final int observationWindow = 3;
 
@@ -38,7 +38,7 @@ public class TimeSerieAnalyserTest {
         int initialCount = analyser.observationCount();
 
         // When
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
+        analyser.append(1d);
         int newCount = analyser.observationCount();
 
         // Then
@@ -51,21 +51,21 @@ public class TimeSerieAnalyserTest {
         int initialCount = analyser.observationCount();
 
         // When
-        analyser.append(LocalDate.parse("2018-02-02T01:58:40.013", formatter), 2d);
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:00.013", formatter), 5d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:10.013", formatter), 3d);
+        analyser.append(2d);
+        analyser.append(1d);
+        analyser.append(5d);
+        analyser.append(3d);
         int newCount = analyser.observationCount();
 
         // Then
         assertThat(newCount, is(observationWindow));
-        assertThat(analyser.observations(), not(contains(2d)));
+        assertThat(analyser.observations().iterator().next(), is(equalTo(1d)));
     }
 
     @Test
     public void isValid_shouldBeTrueIfTimeWindowIsNotCompltete() throws Exception {
         // Given
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
+        analyser.append(1d);
 
         // When
         boolean isValid = analyser.isValid();
@@ -77,9 +77,9 @@ public class TimeSerieAnalyserTest {
     @Test
     public void isValid_shouldBeTrueIfAllValuesAreInDefinedRange() throws Exception {
         // Given
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:00.013", formatter), 5d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:10.013", formatter), 3d);
+        analyser.append(1d);
+        analyser.append(5d);
+        analyser.append(3d);
 
         // When
         boolean isValid = analyser.isValid();
@@ -91,9 +91,9 @@ public class TimeSerieAnalyserTest {
     @Test
     public void isValid_shouldBeFalseIfValuesAreOutOfDefinedRange() throws Exception {
         // Given
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:00.013", formatter), 42d);
-        analyser.append(LocalDate.parse("2018-02-02T02:00:10.013", formatter), 3d);
+        analyser.append(1d);
+        analyser.append(42d);
+        analyser.append(3d);
 
         // When
         boolean isValid = analyser.isValid();
@@ -105,15 +105,15 @@ public class TimeSerieAnalyserTest {
     @Test
     public void isValid_shouldBeTrueIfIrregularityPopsOutOfTimeWindow() throws Exception {
         // Given
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 1d);
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 42d);
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 3d);
+        analyser.append(1d);
+        analyser.append(42d);
+        analyser.append(3d);
         boolean initialValidity = analyser.isValid();
 
 
         // When
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), 7d);
-        analyser.append(LocalDate.parse("2018-02-02T01:58:50.013", formatter), -2d);
+        analyser.append(7d);
+        analyser.append(-2d);
         boolean newValidity = analyser.isValid();
 
         // Then
