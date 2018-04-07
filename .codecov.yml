@@ -1,4 +1,4 @@
 ---
 
 ignore:
-  - "app/src/main/lib/.*"
+  - "**/coverage/**/*"
