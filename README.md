@@ -45,3 +45,26 @@ The "Aura project" mobile application:
 cd rootProjectDir/documentation
 doxygen Doxyfile
 ```
+
+# How to run performances tests
+In order to ensure best user experience, we implement few instrumented tests that will check that the big volume of data are saved and uploaded in a reasonable time.
+
+## Prerequisites
+
+ * Install a local **InfluxDB** server and
+ * start the local **InfluxDB** server
+   * create a *physio_signal* database
+   * create a *test* user with *test* password
+   * grant all acces to *test* user on *physio_signal* database
+
+
+ * In DataPipelinePerfsInstrumentedTest file, set the proper end point for your *InfluxDB* database  
+   * private String TEST_INFLUX_DB = "http://XXX.XXX.X.XX:8086";
+
+
+## Tests execution
+  * Remove the *@Ignore* flag from the tests you want to execute
+
+  * Select the smartphone you want the tests to be executed on
+
+  * run the DataPipelinePerfsInstrumentedTest
