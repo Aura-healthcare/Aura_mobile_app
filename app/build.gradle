@@ -160,7 +160,8 @@ android {
     }
 
 
-    task jacocoTestReport(type: JacocoReport, dependsOn: ['testFullDebugUnitTest', 'createFullDebugCoverageReport']) {
+    task jacocoTestReport(type: JacocoReport, dependsOn: ['testFullDebugUnitTest']) {
+        shouldRunAfter = ['createFullDebugCoverageReport']
 
         reports {
             xml.enabled = true
