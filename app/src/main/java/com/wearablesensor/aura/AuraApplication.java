@@ -68,10 +68,8 @@ public class AuraApplication extends MultiDexApplication {
         mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
 
         mDataSyncService = new DataSyncService(mLocalDataRepository,
-                                               mRemoteDataSessionRepository,
                                                mRemoteDataTimeSeriesRepository,
-                                               lApplicationContext,
-                                               mUserSessionService);
+                                               lApplicationContext);
     }
 
     @Override

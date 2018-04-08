@@ -92,7 +92,7 @@ public interface RemoteDataRepository {
          *
          * @throws Exception
          */
-        void connect(String iUser, String iPassword) throws Exception;
+        void connect(String iDatabaseURL, String iUser, String iPassword) throws Exception;
 
         /**
          * @param iPhysioSignalSamples list of physiological signal samples to be saved

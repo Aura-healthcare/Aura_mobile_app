@@ -70,9 +70,7 @@ public class DataSyncService{
     private Context mApplicationContext;
 
     private LocalDataRepository mLocalDataRepository;
-    private RemoteDataRepository.Session mRemoteDataSessionRepository;
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
-    private UserSessionService mUserSessionService;
 
     private Boolean mIsWifiEnabled;
     private Boolean mIsDataSyncEnabled;
@@ -85,18 +83,14 @@ public class DataSyncService{
      * @brief constructor
      *
      * @param iLocalDataRepository local data repository
-     * @param iRemoteDataSessionRepository remote data session repository
      * @param iRemoteDataTimeSeriesRepository remote data time series repository
      * @param iApplicationContext application context
-     * @param iUserSessionService user session
      */
-    public DataSyncService(LocalDataRepository iLocalDataRepository, RemoteDataRepository.Session iRemoteDataSessionRepository, RemoteDataRepository.TimeSeries iRemoteDataTimeSeriesRepository, Context iApplicationContext, UserSessionService iUserSessionService){
+    public DataSyncService(LocalDataRepository iLocalDataRepository, RemoteDataRepository.TimeSeries iRemoteDataTimeSeriesRepository, Context iApplicationContext){
         mApplicationContext = iApplicationContext;
 
         mLocalDataRepository = iLocalDataRepository;
-        mRemoteDataSessionRepository = iRemoteDataSessionRepository;
         mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
-        mUserSessionService = iUserSessionService;
 
         mIsWifiEnabled = false;
         mIsDataSyncEnabled = false;
@@ -190,7 +184,7 @@ public class DataSyncService{
      * @brief start data sync
      */
 
-    private synchronized void startDataSync() {
+    public synchronized void startDataSync() {
         Log.d(TAG, "start data sync");
         // data transfert is started only if not started/transfering already
         if(mIsDataSyncEnabled || mIsDataSyncInProgress){

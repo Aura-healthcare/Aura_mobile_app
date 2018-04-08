@@ -95,8 +95,8 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
      * @param iPassword password credential
      * @throws Exception
      */
-    public void connect(String iUser, String iPassword) throws Exception {
-        mInfluxDB = InfluxDBFactory.connect(INFLUX_DB_URL, iUser, iPassword);
+    public void connect(String iDatabaseURL, String iUser, String iPassword) throws Exception {
+        mInfluxDB = InfluxDBFactory.connect(iDatabaseURL, iUser, iPassword);
     }
 
     /**

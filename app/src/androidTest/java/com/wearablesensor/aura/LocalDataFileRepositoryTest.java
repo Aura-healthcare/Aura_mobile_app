@@ -48,36 +48,7 @@ public class LocalDataFileRepositoryTest{
 
     private LocalDataFileRepository mLocalDataFileRepository;
 
-    private boolean isFileExistAt(String iFileName){
-        FileInputStream lFileStream = null;
-        try {
-            lFileStream =  InstrumentationRegistry.getTargetContext().openFileInput(iFileName);
-        } catch (FileNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
-
-    private File[] getDataFiles(){
-        File lrootFolder = InstrumentationRegistry.getTargetContext().getFilesDir();
-        File[] lDataFiles = lrootFolder.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return Pattern.matches(".+dat$", pathname.getName());
-            }
-        });
-
-        return lDataFiles;
-    }
-    private void cleanPrivateFiles(){
-        File lrootFolder = InstrumentationRegistry.getTargetContext().getFilesDir();
-        File[] lDataFiles = getDataFiles();
-
-        // clean all data files
-        for(File lFile : lDataFiles){
-            InstrumentationRegistry.getTargetContext().deleteFile(lFile.getName());
-        }
-    }
+    private DataFileHelper mDataFileHelper;
 
     // create a rule for an exception grabber that you can use across
     // the methods in this test class
@@ -87,6 +58,7 @@ public class LocalDataFileRepositoryTest{
     @Before
     public void setUp(){
         mLocalDataFileRepository = new LocalDataFileRepository( InstrumentationRegistry.getTargetContext());
+        mDataFileHelper = new DataFileHelper();
     }
 
     @Test
@@ -96,8 +68,8 @@ public class LocalDataFileRepositoryTest{
         mLocalDataFileRepository.savePhysioSignalSamples(lPhysioSignalList);
         // no data files has been written
 
-        assertThat("empty physio signals list recording failed", getDataFiles().length == 0 );
-        cleanPrivateFiles();
+        assertThat("empty physio signals list recording failed", mDataFileHelper.getDataFiles().length == 0 );
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -122,8 +94,8 @@ public class LocalDataFileRepositoryTest{
         mLocalDataFileRepository.savePhysioSignalSamples(lPhysioSignalList);
 
         // encrypted file is recorded with the name including timestamp of the first saved sample
-        assertThat("Multiple physio signals recording failed", isFileExistAt(LocalDataFileRepository.getCachePhysioFilename(lTimestamp1)));
-        cleanPrivateFiles();
+        assertThat("Multiple physio signals recording failed", mDataFileHelper.isFileExistAt(LocalDataFileRepository.getCachePhysioFilename(lTimestamp1)));
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -147,7 +119,7 @@ public class LocalDataFileRepositoryTest{
         FileOutputStream lOutputStream = InstrumentationRegistry.getTargetContext().openFileOutput(INVALID_DATA_FILE_NAME, Context.MODE_PRIVATE);
         lOutputStream.write("Invalid Invalid Invalid Invalid".getBytes());
         assertThat("query invalid file content failed", lPhysioSignalList.size() == 0 );
-        cleanPrivateFiles();
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -177,14 +149,14 @@ public class LocalDataFileRepositoryTest{
         assertThat("query multiples entries failed - wrong elements type", (lPhysioSignalOutList.get(0).getType() == lPhysioSignalList.get(0).getType()) &&
                                                                                           (lPhysioSignalOutList.get(1).getType() == lPhysioSignalList.get(1).getType()) &&
                                                                                           (lPhysioSignalOutList.get(2).getType() == lPhysioSignalList.get(2).getType()));
-        cleanPrivateFiles();
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
     public void saveSeizure_NullEntry() throws Exception{
         mLocalDataFileRepository.saveSeizure(null);
-        assertThat("null seizure event recording failed", !isFileExistAt(LocalDataFileRepository.getCacheSensitiveEventFilename()));
-        cleanPrivateFiles();
+        assertThat("null seizure event recording failed", !mDataFileHelper.isFileExistAt(LocalDataFileRepository.getCacheSensitiveEventFilename()));
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -196,8 +168,8 @@ public class LocalDataFileRepositoryTest{
 
         SeizureEventModel lSeizureEventModel = new SeizureEventModel(lUserUuid, lTimestamp1, lTimestamp2, "Big");
         mLocalDataFileRepository.saveSeizure(lSeizureEventModel);
-        assertThat("Single seizure event recording failed", isFileExistAt(LocalDataFileRepository.getCacheSensitiveEventFilename()));
-        cleanPrivateFiles();
+        assertThat("Single seizure event recording failed", mDataFileHelper.isFileExistAt(LocalDataFileRepository.getCacheSensitiveEventFilename()));
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -222,7 +194,7 @@ public class LocalDataFileRepositoryTest{
 
         lSeizureList = mLocalDataFileRepository.querySeizures(LocalDataFileRepository.getCacheSensitiveEventFilename());
         assertThat("Multiples seizures event query failed", (lSeizureList.size() == 4));
-        cleanPrivateFiles();
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -240,8 +212,8 @@ public class LocalDataFileRepositoryTest{
             mLocalDataFileRepository.cachePhysioSignalSample(new RRIntervalModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid,lTimestamp, i));
         }
 
-        assertThat("Cache events failed - file recorded", getDataFiles().length == 2);
-        cleanPrivateFiles();
+        assertThat("Cache events failed - file recorded", mDataFileHelper.getDataFiles().length == 2);
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -275,7 +247,7 @@ public class LocalDataFileRepositoryTest{
 
         mLocalDataFileRepository.removePhysioSignalSamples(LocalDataFileRepository.getCachePhysioFilename(lTimestamp1));
         mLocalDataFileRepository.removePhysioSignalSamples(LocalDataFileRepository.getCachePhysioFilename(lTimestamp2));
-        assertThat("RemovePhysioSignals failed - files not deleted", getDataFiles().length == 0);
-        cleanPrivateFiles();
+        assertThat("RemovePhysioSignals failed - files not deleted", mDataFileHelper.getDataFiles().length == 0);
+        mDataFileHelper.cleanPrivateFiles();
     }
 }
