@@ -87,14 +87,15 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
 
     private InfluxDB mInfluxDB;
 
-    @Override
     /**
      * @brief initialize connection between remote database and Aura application
      *
+     * @param iDatabaseURL database end point
      * @param iUser username credential
      * @param iPassword password credential
      * @throws Exception
      */
+    @Override
     public void connect(String iDatabaseURL, String iUser, String iPassword) throws Exception {
         mInfluxDB = InfluxDBFactory.connect(iDatabaseURL, iUser, iPassword);
     }
