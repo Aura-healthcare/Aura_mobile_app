@@ -87,6 +87,12 @@ jobs:
 
     - stage: quality
       install: true
+      addons:
+  	sonarcloud:
+    	  organization: "association-aura" 
+          token:
+            secure: "L+nCWrIEghK9OOC6xra2WtfTlkqu8dSyvU+ItNq0th3E27IB3AMezMkt4V/LlrRmlYs0r8D7EyBNI0RNKHimckfnV0A2ajB86CoBemNccCr0HyNz0j6CvuB/OeUmuoKdMkKqIccec0Rq3De6qoRnJjbfYdqJwiP30qzPVpydQnu/EvZXZ8elxdnG10oJuzQ/atlIfO21kn7BgYiRl5dmf9HNTAAQYCPiaC8Q2UQ70FjAfubYHGnOlfmSpx9rj2S2U5RjZTqwu7eAT/T7gzSp/oh4QHJAr7V2uylGxhn0F2j87sk/pR0WIQ/zvbc/mAmpUOINfoBdQ6QZ7UCNdWpnsO18XPfUd5XjOdmoe4LaWfIROV3w427oQrfB0x2bdplmdj1IxgjKDozNax/vccKJiLyQWv0ki52gHpiL3KqLnkA1duL5uQLvuS5uTCk2xjQIuWZY3skOKknjC3tEtKm5DzRAw39NZ9MupLSoh2HbWvjRBPfaScD3lTK88rsXIcvd0Y3SQQz+DWZwvPLOXscKVaxRjtyEqkuPYIGMgv+vFiC2/Bm24USPFHXNhFT/R/VZLV6AT8kuc+bQISJSTZJOOzAv7yX0sZslzq0D/tKUoSPEbvkdtbT2AzIIfnPNSADj4pYXUUixjJ1lv+i1qEKmyvyy3pIUOPLildr5on0IuXQ="
+
       before_script:
         # Accept licenses
         - mkdir -p $ANDROID_HOME/licenses
@@ -94,7 +100,7 @@ jobs:
         - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
       script:
         - ./gradlew jacocoTestReport
-        - ./gradlew sonarqube -Dsonar.organization=$SONAR_ORGANISATION -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+        - sonar-scanner
 
       cache:
         directories:
