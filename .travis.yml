@@ -94,7 +94,7 @@ jobs:
         - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
       script:
         - ./gradlew jacocoTestReport
-        - ./gradlew sonarqube -Dsonar.organization=$SONAR_ORGANISATION -Dsonar.login=$SONAR_TOKEN
+        - ./gradlew sonarqube -Dsonar.organization=$SONAR_ORGANISATION -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
 
       cache:
         directories:
