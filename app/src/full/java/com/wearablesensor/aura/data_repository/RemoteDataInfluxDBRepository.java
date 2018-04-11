@@ -66,7 +66,6 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
     private final static String DB_ELECTRO_DERMAL_ACTIVITY_MEASUREMENT = "electro_dermal_activity";
     private final static String DB_ACCELEROMETER_MEASUREMENT = "accelerometer";
     private final static String DB_GYROSCOPE_MEASUREMENT = "gyroscope";
-    private final static String DB_MAGNETOMETER_MEASUREMENT = "magnetometer";
 
 
     private final static String DB_USER_EVENT_MEASUREMENT = "user_event";
@@ -182,9 +181,6 @@ public class RemoteDataInfluxDBRepository implements RemoteDataRepository.TimeSe
         }
         else if(iPhysioSignalModel.getType() == MotionGyroscopeModel.MOTION_GYROSCOPE_MODEL){
             return buildMotionGyroscopeModel((MotionGyroscopeModel) iPhysioSignalModel);
-        }
-        else if(iPhysioSignalModel.getType() == MotionMagnetometerModel.MOTION_MAGNETOMETER_MODEL){
-            return buildMotionMagnetometerModel((MotionMagnetometerModel) iPhysioSignalModel);
         }
 
         return null;
