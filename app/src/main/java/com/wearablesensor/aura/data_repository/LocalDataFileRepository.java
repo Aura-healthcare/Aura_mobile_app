@@ -159,12 +159,12 @@ public class LocalDataFileRepository implements LocalDataRepository {
 
         String lFilename = getCachePhysioFilename(iPhysioSignalSamples.get(0).getTimestamp());
         FileOutputStream lFileOutputStream = null;
-
+        OutputStream lOutputStream = null;
 
         Log.d(TAG, "Start Recording");
         try {
             lFileOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
-            OutputStream lOutputStream = new BufferedOutputStream(lFileOutputStream);
+            lOutputStream = new BufferedOutputStream(lFileOutputStream);
 
             // Creates an output stream which encrypts the data as
             // it is written to it and writes it out to the file.
@@ -183,6 +183,16 @@ public class LocalDataFileRepository implements LocalDataRepository {
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        finally {
+            if(lFileOutputStream != null){
+                lFileOutputStream.close();
+            }
+
+            if(lOutputStream != null){
+                lOutputStream.close();
+            }
+
         }
     }
 
