@@ -26,18 +26,14 @@ import android.util.Log;
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
-import com.idevicesinc.sweetblue.BleServer;
 import com.idevicesinc.sweetblue.utils.Uuids;
-import com.mbientlab.metawear.impl.JseMetaWearBoard;
-import com.mbientlab.metawear.module.AccelerometerBosch;
-import com.mbientlab.metawear.module.GyroBmi160;
+
 import com.wearablesensor.aura.DataCollectorServiceConstants;
 import com.wearablesensor.aura.DataCollectorService;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
 import com.wearablesensor.aura.data_repository.models.MotionGyroscopeModel;
-import com.wearablesensor.aura.data_repository.models.MotionMagnetometerModel;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
@@ -53,12 +49,8 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceive
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;

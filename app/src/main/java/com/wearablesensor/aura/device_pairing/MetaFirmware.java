@@ -1,5 +1,5 @@
 /**
- * @file DeviceInfo.java
+ * @file MetaFirmware.java
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
