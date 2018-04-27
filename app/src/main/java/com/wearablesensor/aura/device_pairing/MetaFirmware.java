@@ -123,10 +123,10 @@ public class MetaFirmware {
             byte[] lGyroDataConfig= new byte[] {(byte) (0x20 | OutputDataRate.ODR_100_HZ.bitmask), Range.FSR_2000.bitmask};
 
             lGyroDataConfig[1] &= 0xf8;
-            lGyroDataConfig[1] |= iRange.bitmask;
+            lGyroDataConfig[1]|= iRange.bitmask;
 
             lGyroDataConfig[0] &= 0xf0;
-            lGyroDataConfig[0] |= iOutputDataRate.bitmask;
+            lGyroDataConfig[0]|= iOutputDataRate.bitmask;
 
             lGyroDataConfig[0] &= 0xcf;
             lGyroDataConfig[0] |= (iFilterMode.ordinal() << 4);
@@ -155,7 +155,7 @@ public class MetaFirmware {
             public final byte bitmask;
 
             OutputDataRate() {
-                this.bitmask= (byte) (ordinal() + 6);
+                this.bitmask= (byte)(ordinal() + 5);
             }
         }
         /**
