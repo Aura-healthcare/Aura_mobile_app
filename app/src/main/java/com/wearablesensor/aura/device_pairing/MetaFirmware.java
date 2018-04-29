@@ -29,8 +29,13 @@
 
 package com.wearablesensor.aura.device_pairing;
 
+import java.util.UUID;
+
 public class MetaFirmware {
 
+    public final static UUID META_GATT_SERVICE = UUID.fromString("326A9000-85CB-9195-D9DD-464CFBBAE75A");
+    public final static UUID META_GATT_CONFIG_CHARACTERISTIC = UUID.fromString("326A9001-85CB-9195-D9DD-464CFBBAE75A");
+    public final static UUID META_GATT_NOTFICATIONS_CHARACTERISTIC = UUID.fromString("326A9006-85CB-9195-D9DD-464CFBBAE75A");
     public static class Acceleration{
 
         public static byte[] getConfig(Acceleration.OutputDataRate iOutputDataRate, Acceleration.Range iRange){
