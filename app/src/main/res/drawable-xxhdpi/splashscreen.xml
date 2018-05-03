@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:drawable="@color/white" />
+    <item>
+
+    <shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+        <gradient
+            android:startColor="@color/splashscreen_dark"
+            android:endColor="@color/splashscreen_light"
+            android:angle="180"/>
+    </shape>
+    </item>
 
     <item>
         <bitmap
-            android:gravity="center|clip_horizontal"
-            android:scaleGravity="fill_horizontal"
-            android:src="@drawable/aura_logo_xxhd"/>
+            android:gravity="center"
+            android:src="@drawable/head_logo_very_small"/>
     </item>
 
 </layer-list>

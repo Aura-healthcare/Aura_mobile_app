@@ -94,13 +94,13 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
                     notificationIntent, 0);
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.aura_icon_2018);
+                    R.drawable.head_logo_very_small);
 
             Notification notification = new NotificationCompat.Builder(this)
                     .setContentTitle("Aura")
                     .setTicker("Aura")
                     .setContentText("Data Collection")
-                    .setSmallIcon(R.drawable.aura_icon_2018)
+                    .setSmallIcon(R.drawable.head_logo_very_small)
                     .setLargeIcon(
                             Bitmap.createScaledBitmap(icon, 128, 128, false))
                     .setContentIntent(pendingIntent)

@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffffff</color>
-    <color name="app_primary">#1976D2</color>
-    <color name="app_primary_dark">#1565C0</color>
+    <!--<color name="app_primary">#1976D2</color>
+    <color name="app_primary_dark">#1565C0</color>-->
+    <color name="app_primary">@color/main_blue</color>
+    <color name="app_primary_dark">@color/main_blue</color>
     <color name="grey">#DDDDDD</color>
     <color name="light_grey">#EEEEEE</color>
     <color name="white_transparent">#99FFFFFF</color>
     <color name="black">#000</color>
 
-    <color name= "hrv_grey">#4b4b4b</color>
-    <color name= "hrv_blue">#2d52cc</color>
+    <color name="splashscreen_dark">#0C5C75</color>
+    <color name="splashscreen_light">#1286A1</color>
+    <color name= "main_grey">#4b4b4b</color>
+    <color name= "main_blue">#2d52cc</color>
 
 </resources>

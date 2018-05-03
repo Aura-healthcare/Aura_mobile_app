@@ -5,25 +5,27 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="56dp"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp">
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
 
-        <ImageView android:src="@drawable/aura_logo_title_nobg_xxhd"
-            android:layout_width="wrap_content"
-            android:layout_height="144dp"
-            android:layout_marginBottom="24dp"
-            android:layout_gravity="center_horizontal" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="50dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/aura_logo" />
 
         <!-- new password -->
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp">
             <EditText android:id="@+id/first_signin_new_password_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -37,7 +39,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp">
             <EditText android:id="@+id/first_signin_confirm_password_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,6 +56,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="6dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
             android:padding="12dp"
             android:text="@string/action_continue"/>
 

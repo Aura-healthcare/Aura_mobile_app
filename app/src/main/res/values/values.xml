@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="accent_material_light">#030cae</color>
-    <color name="primary_dark_material_light">#2730dd</color>
-    <color name="primary_material_light">#5c82ff</color>
-    <string name="facebook_app_id" translatable="false">1924581031107980</string>
+    <color name="accent_material_light">@color/main_blue</color>
+    <color name="primary_dark_material_light">@color/splashscreen_dark</color>
+    <color name="primary_material_light">@color/main_blue</color>
 
 </resources>
