@@ -25,7 +25,9 @@ iDevicesInc - SweetBlue - support multi Bluetooth connection on most Android pla
 
 ## User Experience
 
-<img src="documentation/splash-screen.png" width="230">  <img src="documentation/login-screen.png" width="230">  <img src="documentation/monitoring-screen.png" width="230"> <img src="documentation/seizure-report-screen.png" width="230">
+<img src="documentation/splash-screen.png" width="230">  <img src="documentation/login-screen.png" width="230">  <img src="documentation/monitoring-screen.png" width="230"> 
+<img src="documentation/monitoring-drawer-screen.png" width="230">
+<img src="documentation/seizure-report-screen.png" width="230">
 
 
 ## App Architecture
