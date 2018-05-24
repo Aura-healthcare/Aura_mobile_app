@@ -38,9 +38,11 @@ import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
+import com.wearablesensor.aura.data_repository.FileStorage;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
@@ -58,6 +60,10 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -71,7 +77,6 @@ public class DataSyncService{
 
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
-
     private Boolean mIsWifiEnabled;
     private Boolean mIsDataSyncEnabled;
     private Boolean mIsDataSyncInProgress;
@@ -91,6 +96,8 @@ public class DataSyncService{
 
         mLocalDataRepository = iLocalDataRepository;
         mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
+
+        //mRemoteWebSocket = new RemoteDataWebSocketRepository(iApplicationContext, "wss://db.aura.healthcare");
 
         mIsWifiEnabled = false;
         mIsDataSyncEnabled = false;
@@ -185,25 +192,16 @@ public class DataSyncService{
      */
 
     public synchronized void startDataSync() {
-        Log.d(TAG, "start data sync");
-        // data transfert is started only if not started/transfering already
-        if(mIsDataSyncEnabled || mIsDataSyncInProgress){
-            return;
-        }
+       Log.d(TAG, "Start Data ");
 
-        mIsDataSyncEnabled = true;
-        setDataSyncIsInProgress(true);
-
-
-        Log.d(TAG, "clear cache");
         try {
-            mLocalDataRepository.clearCache();
+            mRemoteDataTimeSeriesRepository.connectToServer();
+            sendAll();
         } catch (Exception e) {
+            Log.d(TAG, "Fail to connect ");
             e.printStackTrace();
         }
 
-        Log.d(TAG, "push data packets - " + mIsDataSyncEnabled + " " + mIsDataSyncInProgress);
-        new PushDataPacketsOnRemoteAsync().execute();
     }
 
     /**
@@ -220,98 +218,53 @@ public class DataSyncService{
         mIsDataSyncEnabled = false;
     }
 
-    /**
-     * @brief asynchronous task that handles the data packets push on a background thread
-     */
-    // TODO: we should implement a Loader and cache/remote data sync logic
-    class PushDataPacketsOnRemoteAsync extends AsyncTask<Void, Integer, Boolean> {
-        final private String TAG = PushDataPacketsOnRemoteAsync.class.getSimpleName();
+    public ConcurrentLinkedQueue<String> mPackets;
 
-        private PowerManager.WakeLock mWakeLock;
-        private String[] mPackets;
-
-
-        public String[] getPackets(){
-            String lPath = mApplicationContext.getFilesDir().getPath();
-            File lDirectory = new File(lPath);
-            File[] lFiles = lDirectory.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File pathname) {
-                    if(pathname.toString().contains(LocalDataFileRepository.CACHE_FILENAME)){
-                        return true;
-                    }
-
-                    return false;
+    public ConcurrentLinkedQueue getPackets(){
+        String lPath = mApplicationContext.getFilesDir().getPath();
+        File lDirectory = new File(lPath);
+        File[] lFiles = lDirectory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                if(pathname.toString().contains(FileStorage.CACHE_FILENAME)){
+                    return true;
                 }
-            });
 
-            if(lFiles == null || lFiles.length == 0){
-                return null;
+                return false;
             }
-            String[] oFileNames = new String[lFiles.length];
-            for (int i = 0; i < lFiles.length; i++)
-            {
-                oFileNames[i] = lFiles[i].getName();
+        });
+
+        if(lFiles == null || lFiles.length == 0){
+            return null;
+        }
+
+        ConcurrentLinkedQueue<String> oFileNames = new ConcurrentLinkedQueue<String>();
+        for (int i = 0; i < lFiles.length; i++)
+        {
+            oFileNames.add(lFiles[i].getName());
+        }
+
+        Log.d(TAG, "File number " + oFileNames.size());
+        return oFileNames;
+    }
+
+    public void sendAll() {
+        mPackets = getPackets();
+        
+        while (mPackets != null && mPackets.size() > 0) {
+
+            String lPacket = mPackets.poll();
+            try {
+                String lData = mLocalDataRepository.queryPhysioSignalSamples(lPacket);
+                mRemoteDataTimeSeriesRepository.save(lData);
+                mLocalDataRepository.removePhysioSignalSamples(lPacket);
+                EventBus.getDefault().post(new DataSyncUpdateStateNotification());
+
+            } catch (Exception e) {
+                Log.d(TAG, "Fail to save data packet");
+                mPackets.add(lPacket);
             }
-
-            Log.d(TAG, "File number " + oFileNames.length);
-            return oFileNames;
         }
-
-        protected void onPreExecute() {
-            PowerManager powerManager = (PowerManager) mApplicationContext.getSystemService(mApplicationContext.POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                    "DataSyncWakelockTag");
-            mWakeLock.acquire();
-
-            mPackets = getPackets();
-        }
-
-        protected Boolean doInBackground(Void... arg0) {
-            Log.d(TAG, "doInBackground");
-
-            while(mPackets != null && mPackets.length > 0 && mIsDataSyncEnabled) {
-
-                String lPacket = mPackets[0];
-                try {
-                    Timer.init("start transfer");
-                    Timer.logResult("start data package transfer "+ lPacket);
-
-                    if(lPacket.contains(LocalDataFileRepository.PHYSIO_SIGNAL_SUFFIX)) {
-                        final ArrayList<PhysioSignalModel> lPhysioSignalSamples = mLocalDataRepository.queryPhysioSignalSamples(lPacket);
-                        Timer.logResult("query data  " + lPacket);
-                        mRemoteDataTimeSeriesRepository.savePhysioSignalSamples(lPhysioSignalSamples);
-                        Timer.logResult("save data " + lPacket);
-                    }
-                    else if(lPacket.contains(LocalDataFileRepository.SENSITIVE_EVENT_SUFFIX)) {
-                        final ArrayList<SeizureEventModel> lSensitiveEvents = mLocalDataRepository.querySeizures(lPacket);
-                        Timer.logResult("query data  " + lPacket);
-                        mRemoteDataTimeSeriesRepository.saveSeizures(lSensitiveEvents);
-                        Timer.logResult("save data " + lPacket);
-                    }
-
-                    mLocalDataRepository.removePhysioSignalSamples(lPacket);
-
-                    mPackets = getPackets();
-                    EventBus.getDefault().post(new DataSyncUpdateStateNotification());
-
-                } catch (Exception e) {
-                    Log.d(TAG, "Fail to save data packet");
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        protected void onPostExecute(Boolean iSuccess) {
-            Timer.logResult("end transfer");
-
-            setDataSyncIsInProgress(false);
-            mWakeLock.release();
-        }
-
     }
 
 }

@@ -32,43 +32,13 @@
 package com.wearablesensor.aura.data_repository;
 
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public interface LocalDataRepository {
-    /**
-     * @brief query a list of physiological data samples from a cache file
-     *
-     * @param iFilename cache file storing the physio signal samples
-     *
-     * @return a list of physiological data samples
-     *
-     * @throws Exception
-     */
 
-    public ArrayList<PhysioSignalModel> queryPhysioSignalSamples(String iFilename) throws Exception;
-
-    /**
-     * @brief save a batch of physiological signal sample in the local storage
-     *
-     * @param iPhysioSignalSamples physiological data list to be stored
-     *
-     * @throws Exception
-     */
-    public void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
-
-    /**
-     * @brief remove a batch of physiological signal samples from the local storage
-     *
-     * @param iFilename physiological data list to be removed
-     *
-     * @throws Exception
-     */
-    public void removePhysioSignalSamples(String iFilename) throws Exception;
 
     /**
      * @brief cache a physiological data sample in the heap and periodically clear cache and save data to local
@@ -80,16 +50,24 @@ public interface LocalDataRepository {
 
 
     /**
-     * @brief query a list of  sensitive events
+     * @brief get physiological data samples from file
      *
-     * @param iFilename cache file storing the physio signal samples
+     * @param iFilename file storing the physiological data
      *
-     * @return a list of physiological data samples
+     * @return physiological data samples as a JSON compact string
      *
      * @throws Exception
      */
+    public String queryPhysioSignalSamples(String iFilename) throws Exception;
 
-    public ArrayList<SeizureEventModel> querySeizures(String iFilename) throws Exception;
+    /**
+     * @brief remove a batch of physiological signal samples from the local storage
+     *
+     * @param iFilename physiological data list to be removed
+     *
+     * @throws Exception
+     */
+    public void removePhysioSignalSamples(String iFilename) throws Exception;
 
     /**
      * @brief save a seizure event
@@ -104,5 +82,5 @@ public interface LocalDataRepository {
      * @brief clear cache and store data from heap to local data storage
      *
      */
-    void clearCache() throws Exception;
+    void forceSavingPhysioSignalSamples() throws Exception;
 }

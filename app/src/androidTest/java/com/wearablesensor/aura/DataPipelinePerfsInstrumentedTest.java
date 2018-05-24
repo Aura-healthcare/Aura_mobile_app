@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
 import com.wearablesensor.aura.data_sync.DataSyncService;
 
@@ -34,17 +34,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DataPipelinePerfsInstrumentedTest {
 
     private final String TAG = DataPipelinePerfsInstrumentedTest.class.getSimpleName();
-    private String TEST_INFLUX_DB = "http://192.168.1.16:8086";
+    private String TEST_SERVER = "wss://servertest.aura.healthcare";
 
     private final int SMALL_NUMBER_OF_ENTRIES = 1000;
-    private final int MEDIUM_NUMBER_OF_ENTRIES = 100000;
-    private final int ONE_DAY_NUMBER_OF_ENTRIES = 24000000;
+    private final int MEDIUM_NUMBER_OF_ENTRIES = 500000;
+    private final int ONE_DAY_NUMBER_OF_ENTRIES = 30000000;
 
     private DataSyncService mDataSyncService;
 
     private Context mApplicationContext;
     private LocalDataFileRepository mLocalDataFileRepository;
-    private RemoteDataInfluxDBRepository mRemoteDataRepository;
+    private RemoteDataWebSocketRepository mRemoteDataRepository;
 
     private DataFileHelper mDataFileHelper;
 
@@ -83,8 +83,7 @@ public class DataPipelinePerfsInstrumentedTest {
         mDataFileHelper.cleanPrivateFiles();
 
         mLocalDataFileRepository = new LocalDataFileRepository(mApplicationContext);
-        mRemoteDataRepository = new RemoteDataInfluxDBRepository();
-        mRemoteDataRepository.connect(TEST_INFLUX_DB,"test", "test");
+        mRemoteDataRepository = new RemoteDataWebSocketRepository(TEST_SERVER, InstrumentationRegistry.getTargetContext());
 
         mDataSyncService = new DataSyncService(mLocalDataFileRepository, mRemoteDataRepository, mApplicationContext);
     }
@@ -104,7 +103,7 @@ public class DataPipelinePerfsInstrumentedTest {
         }
 
         Log.d(TAG, "cacheSmallNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
-        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length == 9);
+        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length > 0);
 
         mDataSyncService.startDataSync();
         boolean lUploadComplete = waitUntilAllFilesHasBeenUploaded(mDataFileHelper, 100);
@@ -113,8 +112,6 @@ public class DataPipelinePerfsInstrumentedTest {
         assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
     }
-
-
 
     @Ignore
     @Test
@@ -130,8 +127,9 @@ public class DataPipelinePerfsInstrumentedTest {
         }
 
         Log.d(TAG, "cacheMediumNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
-        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length == 990);
+        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length > 300);
 
+        Log.d(TAG, "startDataSync -- " + mDataFileHelper.getDataFiles().length);
         mDataSyncService.startDataSync();
         boolean lUploadComplete = waitUntilAllFilesHasBeenUploaded(mDataFileHelper, 600);
 
@@ -153,7 +151,7 @@ public class DataPipelinePerfsInstrumentedTest {
         }
 
         Log.d(TAG, "cacheHighNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
-        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length == 23763);
+        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length > 20000);
 
         mDataSyncService.startDataSync();
         boolean lUploadComplete = waitUntilAllFilesHasBeenUploaded(mDataFileHelper, 600);

@@ -38,6 +38,7 @@ public class PhysioSignalModel {
 
     protected String mTimestamp;     // timestamp formatted on Iso8601
 
+
     protected String mType;          // data type
 
     protected PhysioSignalModel() {
@@ -98,7 +99,7 @@ public class PhysioSignalModel {
 
     @Override
     public String toString(){
-        return mUuid + " " + mType + " " + mTimestamp + " " + mUser + " " + mDeviceAdress;
+        return mTimestamp;
     }
 
     @Override

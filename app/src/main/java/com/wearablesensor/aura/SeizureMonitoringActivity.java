@@ -44,7 +44,6 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
-import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
@@ -141,12 +140,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_seizure_monitoring);
-        try{
-            ((AuraApplication) getApplication()).getRemoteDataTimeSeriesRepository().connect(RemoteDataInfluxDBRepository.INFLUX_DB_URL,"lecoued", "lecoued");
-        }catch(Exception e){
-            Log.d(TAG, "Fail initialization InfluxDB");
-            e.printStackTrace();
-        }
 
         loadUser();
 
@@ -214,7 +207,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @Override
     public void onStop(){
         try {
-            ((AuraApplication) getApplication()).getLocalDataRepository().clearCache();
+            ((AuraApplication) getApplication()).getLocalDataRepository().forceSavingPhysioSignalSamples();
 
         }
         catch(Exception e){

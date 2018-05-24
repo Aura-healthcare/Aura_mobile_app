@@ -87,25 +87,17 @@ public interface RemoteDataRepository {
         /**
          * @brief initialize connection between remote database and Aura application
          *
-         * @param iUser username credential
-         * @param iPassword password credential
+         * @throws Exception
+         */
+        void connectToServer();
+
+        /**
+         * @brief send data to remote server
          *
-         * @throws Exception
+         * @param iData data content
          */
-        void connect(String iDatabaseURL, String iUser, String iPassword) throws Exception;
+        void save(String iData);
 
-        /**
-         * @param iPhysioSignalSamples list of physiological signal samples to be saved
-         * @throws Exception
-         * @brief save a list of physiological signal samples
-         */
-        void savePhysioSignalSamples(final ArrayList<PhysioSignalModel> iPhysioSignalSamples) throws Exception;
 
-        /**
-         * @param iSensitiveEvents list of seizure event samples
-         * @throws Exception
-         * @brief save a list of seizure event samples
-         */
-        void saveSeizures(final ArrayList<SeizureEventModel> iSensitiveEvents) throws Exception;
     }
 }

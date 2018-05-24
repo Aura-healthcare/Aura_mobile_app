@@ -30,10 +30,12 @@ import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHel
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataInfluxDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
+import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
 import com.wearablesensor.aura.data_sync.DataSyncService;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import java.net.URISyntaxException;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -63,7 +65,11 @@ public class AuraApplication extends MultiDexApplication {
 
         mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
-        mRemoteDataTimeSeriesRepository = new RemoteDataInfluxDBRepository();
+        try {
+            mRemoteDataTimeSeriesRepository = new RemoteDataWebSocketRepository(RemoteDataWebSocketRepository.PREPROD_SERVER_URL, this);
+        } catch (URISyntaxException e) {
+
+        }
 
         mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
 

@@ -34,6 +34,7 @@ package com.wearablesensor.aura.data_sync;
 import android.content.Context;
 import android.util.Log;
 
+import com.wearablesensor.aura.data_repository.FileStorage;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncServiceObserver;
@@ -126,7 +127,7 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         File[] files = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                if (pathname.toString().contains(LocalDataFileRepository.CACHE_FILENAME)) {
+                if (pathname.toString().contains(FileStorage.CACHE_FILENAME)) {
                     return true;
                 }
 
