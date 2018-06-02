@@ -9,10 +9,16 @@ Here are some important resources:
 
   * [AURA website](http://www.aura.healthcare) tells you who and where we are, and
   * [AURA Gitbook](https://github.com/Aura-healthcare/Aura_gitbook) , give you acces to the technical documentation
-  * [AURA Kanban](https://github.com/Aura-healthcare/Aura_gitbook/projects/1) is our day-to-day project management space
-  * For sharing state of the art technology and be part of passionate discussions on healthcare future, Feel free to join us on [Slack !](https://associationaura.slack.com)
+  * [AURA Current Sprint](https://github.com/Aura-healthcare/Aura_gitbook/projects/1) is our day-to-day project management plan for the incomming two weeks
+  * [AURA Global pilot study](https://github.com/Aura-healthcare/Aura_gitbook/projects/2) is an overview of what's needed for the MVP prototype to start the pilot study on 40 patients.
+  * For sharing state of the art technology and be part of passionate discussions on healthcare future, Feel free to join us on [Slack !](https://join.slack.com/t/associationaura/shared_invite/enQtMzczOTAwNjkzMTIwLTc0MjFmOWNhM2E0NzMyNGY3MjBlMTU5YWQ0NmRhZDVkZWZlNjNiMmJjMTU1YTY2NWZkMWVjYTVkMDdlZTJhYjI)
   * Found BUGS? [Github issues](https://github.com/Aura-healthcare/Aura_gitbook/issues) is where to report them
 
+## An overview of the project
+![alt text](documentation/TimelineMilestonesAURA.jpg "AURA Milestones")
+
+![alt text](documentation/BigPictureAURA.png "AURA project big picture")
+As much as possible we try to write issues and user stories so that they match the flags of the diagram above
 ## Testing
 
 Travis CI is running after every commits and we have an overview of the code coverage using CodeCov.
