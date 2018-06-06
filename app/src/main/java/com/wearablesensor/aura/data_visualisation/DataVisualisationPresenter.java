@@ -82,17 +82,15 @@ public class DataVisualisationPresenter implements DataVisualisationContract.Pre
     public void onDevicePairingEvent(DevicePairingNotification iDevicePairingNotification){
         DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
 
-        if(lStatus == DevicePairingStatus.CONNECTED){
-            mView.enablePhysioSignalVisualisation();
-        }
-        else if(lStatus == DevicePairingStatus.DISCONNECTED){
+        if(lStatus == DevicePairingStatus.DEVICE_CONNECTED || lStatus == DevicePairingStatus.DEVICE_DISCONNECTED){
             mView.disablePhysioSignalVisualisation();
         }
-        if(lStatus == DevicePairingStatus.RECEIVED_DATA){
+        else if(lStatus == DevicePairingStatus.RECEIVED_DATA){
             DevicePairingReceivedDataNotification lDevicePairingNotification = (DevicePairingReceivedDataNotification) iDevicePairingNotification;
             Log.d(TAG, "ReceivedData" + lDevicePairingNotification.getPhysioSignal().toString());
             receiveNewPhysioSample(lDevicePairingNotification.getPhysioSignal());
-        }    }
+        }
+    }
 
         @Subscribe(threadMode = ThreadMode.MAIN)
         public void onSignalStatusChange(TimeSerieEvent event){

@@ -22,7 +22,6 @@ import android.util.Log;
 
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
@@ -62,10 +61,7 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
             return;
         }
 
-        if(mBluetoothDevicePairingService.isPairing()){
-            mView.progressPairing();
-        }
-        else if(mBluetoothDevicePairingService.isPaired()){
+        if(mBluetoothDevicePairingService.isPaired()){
             LinkedList<DeviceInfo> lDeviceList = mBluetoothDevicePairingService.getDeviceList();
             mView.successPairing(lDeviceList);
         }
@@ -85,15 +81,18 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
         DevicePairingStatus lStatus = iDevicePairingNotification.getStatus();
         Log.d(TAG, "DevicePairing onNotificationReceived " + lStatus);
 
-        if(lStatus == DevicePairingStatus.CONNECTED){
-            DevicePairingConnectedNotification lDevicePairingNotification = (DevicePairingConnectedNotification) iDevicePairingNotification;
-            mView.successPairing(mBluetoothDevicePairingService.getDeviceList());
-        }
-        else if(lStatus == DevicePairingStatus.DISCONNECTED){
-            mView.failParing();
-        }
-        else if(lStatus == DevicePairingStatus.IN_PROGRESS){
-            mView.progressPairing();
+        if(lStatus == DevicePairingStatus.DEVICE_CONNECTED || lStatus == DevicePairingStatus.DEVICE_DISCONNECTED){
+            if(mBluetoothDevicePairingService == null){
+                return;
+            }
+
+            LinkedList<DeviceInfo> lDeviceList = mBluetoothDevicePairingService.getDeviceList();
+            if(lDeviceList.size() == 0){
+                mView.failParing();
+            }
+            else{
+                mView.successPairing(lDeviceList);
+            }
         }
         else if(lStatus == DevicePairingStatus.RECEIVED_BATTERY_LEVEL){
             DevicePairingBatteryLevelNotification lDevicePairingNotification = (DevicePairingBatteryLevelNotification) iDevicePairingNotification;

@@ -55,7 +55,7 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
     @BindView(R.id.realtime_physio_signal_list_view) GridView mRealtimePhysioSignalListView;
     private RealTimePhysioSignalListAdapter mPhysioSignalListAdapter;
 
-    private HashMap<String, PhysioSignalModel> mCurrentRRIntervals;
+    private HashMap<String, PhysioSignalModel> mCurrentPhysioSignals;
 
     private OnFragmentInteractionListener mListener;
 
@@ -91,7 +91,7 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
         View view = inflater.inflate(R.layout.fragment_hrv_realtime_display, container, false);
         ButterKnife.bind(this, view);
 
-        mCurrentRRIntervals = new HashMap<>();
+        mCurrentPhysioSignals = new HashMap<>();
         mPhysioSignalListAdapter = new RealTimePhysioSignalListAdapter(this.getContext(), R.layout.realtime_physio_signal_item);
         mRealtimePhysioSignalListView.setAdapter(mPhysioSignalListAdapter);
 
@@ -134,7 +134,7 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
      */
     public void enablePhysioSignalVisualisation() {
         mPhysioSignalListAdapter.clear();
-        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentPhysioSignals.entrySet()) {
             mPhysioSignalListAdapter.add(lEntry.getValue());
         }
 
@@ -146,7 +146,7 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
      * @brief disable data visualisation on app
      */
     public void disablePhysioSignalVisualisation() {
-        mCurrentRRIntervals.clear();
+        mCurrentPhysioSignals.clear();
 
         mPhysioSignalListAdapter.clear();
         mPhysioSignalListAdapter.notifyDataSetChanged();
@@ -159,9 +159,9 @@ public class PhysioSignalVisualisationFragment extends Fragment implements DataV
      * @param physiological data sample
      */
     public void refreshPhysioSignalVisualisation(PhysioSignalModel iPhysioSignal) {
-        mCurrentRRIntervals.put(iPhysioSignal.getDeviceAdress() + "-" + iPhysioSignal.getType(), iPhysioSignal);
+        mCurrentPhysioSignals.put(iPhysioSignal.getDeviceAdress() + "-" + iPhysioSignal.getType(), iPhysioSignal);
         mPhysioSignalListAdapter.clear();
-        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentRRIntervals.entrySet()) {
+        for(Map.Entry<String, PhysioSignalModel> lEntry : mCurrentPhysioSignals.entrySet()) {
             mPhysioSignalListAdapter.add(lEntry.getValue());
         }
 
