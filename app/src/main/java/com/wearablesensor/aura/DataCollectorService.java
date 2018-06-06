@@ -34,14 +34,13 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
@@ -81,12 +80,13 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
 
         }
         else if(intent.getAction().equals(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION)) {
+            Log.d(TAG, "Service Start");
+
             Intent notificationIntent = new Intent(this, SeizureMonitoringActivity.class);
             notificationIntent.setAction(DataCollectorServiceConstants.ACTION.MAIN_ACTION);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-            mDevicePairingService.automaticPairing(getApplicationContext());
             mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, intent.getExtras().getString("UserUUID"));
             mRealTimeDataProcessorService.addMetricAnalyserObserver(this);
 
@@ -110,6 +110,8 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
                     notification);
 
         }else if(intent.getAction().equals(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION)){
+            Log.d(TAG, "Stop Start");
+
             stopForeground(true);
             stopSelf();
         }

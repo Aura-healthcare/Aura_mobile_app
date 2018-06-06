@@ -107,4 +107,13 @@
     <string name="menu_contact">Contact</string>
     <string name="menu_cgu">Terms and conditions</string>
     <string name="menu_general_information">General information</string>
+
+    <string name="title_activity_device_paring" >Device Pairing Activity</string>
+    <string name="title_activity_device_scan" >Device Scan Activity</string>
+    <string name="device_scan_start_monitoring" >Start monitoring</string>
+    <string name="device_scan_text">Devices scan</string>
+    <string name="device_scan_cardiac_group">Cardiac devices</string>
+    <string name="device_scan_motion_group" >Motion devices</string>
+    <string name="device_scan_electro_dermal_group" >Electro dermal devices</string>
+
 </resources>

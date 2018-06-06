@@ -19,17 +19,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura.device_pairing;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.idevicesinc.sweetblue.BleManager;
+import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
 import com.idevicesinc.sweetblue.utils.Uuids;
 
-import com.wearablesensor.aura.DataCollectorServiceConstants;
-import com.wearablesensor.aura.DataCollectorService;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
@@ -43,8 +41,11 @@ import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattMetaWear
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattMovementCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDeviceDiscoveredNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDiscoveryNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -55,7 +56,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
@@ -248,46 +248,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             public void onEvent(DiscoveryEvent e) {
                 if (e.was(LifeCycle.DISCOVERED)) {
                     Log.d(TAG, "Discovery Event - "+ e.device().getName_native());
-                    if(isHeartRateCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION,null));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                    else if(isGSRTemperatureCustomCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-                        lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mCustomMAXREFDES73ReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-                        lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                    else if(isMotionMovuinoCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-
-                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.RX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-                        lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.TX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-                        connectDevice(e.device(), lStateListeners);
-                    }
-                    else if(isMetaWearCompatibleDevice(e.device())){
-                        ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
-
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {(byte)0x1, (byte) 0x1, (byte) 0x1}));
-
-                        byte[] lAccConfig = MetaFirmware.Acceleration.getConfig(MetaFirmware.Acceleration.OutputDataRate.ODR_50_HZ, MetaFirmware.Acceleration.Range.AR_2G);
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_CONFIG.id, lAccConfig[0]/*(byte)0x27*/, lAccConfig[1]/*(byte)0x3*/}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_INTERRUPT.id, (byte) 0x1}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_INTERRUPT_ENABLE.id, (byte) 0x1, (byte) 0x0}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.POWER_MODE.id, (byte) 0x1, (byte) 0x1}));
-
-                        byte[] lGyroConfig = MetaFirmware.Gyroscope.getConfig(MetaFirmware.Gyroscope.OutputDataRate.ODR_50_HZ, MetaFirmware.Gyroscope.Range.FSR_500, MetaFirmware.Gyroscope.FilterMode.NORMAL);
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.CONFIG.id, lGyroConfig[0]/*(byte)0x26*/, lGyroConfig[1]/*(byte)0x04*/}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.DATA.id, (byte) 0x1}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.DATA_INTERRUPT_ENABLE.id, (byte) 0x1, (byte) 0x0}));
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.POWER_MODE.id, (byte) 0x1, (byte) 0x1}));
-
-
-                        lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_NOTFICATIONS_CHARACTERISTIC, mMetaWearReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
-
-                        connectDevice(e.device(), lStateListeners);
+                    if(isCompatibleDevice(e.device())) {
+                        LinkedList<BleDevice> lDeviceList = getDiscoveredDeviceList();
+                        EventBus.getDefault().post(new DevicePairingDeviceDiscoveredNotification(lDeviceList));
                     }
                 }
             }
@@ -296,9 +259,93 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         mConnectedDevices = new ConcurrentHashMap<String, BleDevice>();
     }
 
+    @Override
+    public void automaticScan(final Context iContext){
+        super.automaticScan(iContext);
+
+        Log.d(TAG, "automaticScan");
+        BluetoothEnabler.start(iContext, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
+
+            private Boolean mHasBeenCanceled = false;
+
+            @Override
+            public Please onEvent(BluetoothEnablerEvent e) {
+                Log.d(TAG, "Bluetooth Enabler Event - " + e);
+
+                if (e.status().isCancelled()) {
+                    mHasBeenCanceled = true;
+                    LinkedList<BleDevice> lDeviceList = getDiscoveredDeviceList();
+                    EventBus.getDefault().post(new DevicePairingEndDiscoveryNotification(lDeviceList));
+                }
+                if (e.isDone()) {
+                    scan(iContext);
+                }
+
+                return super.onEvent(e);
+            }
+        });
+
+    }
+
+    public void scan(final Context iContext){
+        mScanningHandler = new Handler();
+
+        mScanningHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                BleManager.get(iContext).stopScan();
+
+                LinkedList<BleDevice> lDeviceList = getDiscoveredDeviceList();
+                EventBus.getDefault().post(new DevicePairingEndDiscoveryNotification(lDeviceList));
+            }
+        }, SCAN_PERIOD);
+        BleManager.get(iContext).startScan(mDiscoveryListener);
+    }
+
+    @Override
+    public void configureAndConnectDevice(BleDevice iDevice){
+        if(isHeartRateCompatibleDevice(iDevice)){
+            ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+            lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION,null));
+            connectDevice(iDevice, lStateListeners);
+        }
+        else if(isGSRTemperatureCustomCompatibleDevice(iDevice)){
+            ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+            lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mCustomMAXREFDES73ReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            connectDevice(iDevice, lStateListeners);
+        }
+        else if(isMotionMovuinoCompatibleDevice(iDevice)){
+            ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+
+            //lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.RX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            //lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.TX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+
+            connectDevice(iDevice, lStateListeners);
+        }
+        else if(isMetaWearCompatibleDevice(iDevice)){
+            ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
+
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {(byte)0x1, (byte) 0x1, (byte) 0x1}));
+
+            byte[] lAccConfig = MetaFirmware.Acceleration.getConfig(MetaFirmware.Acceleration.OutputDataRate.ODR_50_HZ, MetaFirmware.Acceleration.Range.AR_2G);
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_CONFIG.id, lAccConfig[0]/*(byte)0x27*/, lAccConfig[1]/*(byte)0x3*/}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_INTERRUPT.id, (byte) 0x1}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.DATA_INTERRUPT_ENABLE.id, (byte) 0x1, (byte) 0x0}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.ACCELERATION.id, MetaFirmware.Acceleration.Register.POWER_MODE.id, (byte) 0x1, (byte) 0x1}));
+
+            byte[] lGyroConfig = MetaFirmware.Gyroscope.getConfig(MetaFirmware.Gyroscope.OutputDataRate.ODR_50_HZ, MetaFirmware.Gyroscope.Range.FSR_500, MetaFirmware.Gyroscope.FilterMode.NORMAL);
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.CONFIG.id, lGyroConfig[0]/*(byte)0x26*/, lGyroConfig[1]/*(byte)0x04*/}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.DATA.id, (byte) 0x1}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.DATA_INTERRUPT_ENABLE.id, (byte) 0x1, (byte) 0x0}));
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.POWER_MODE.id, (byte) 0x1, (byte) 0x1}));
 
 
-
+            lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_NOTFICATIONS_CHARACTERISTIC, mMetaWearReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            connectDevice(iDevice, lStateListeners);
+        }
+    }
 
     /**
      * @brief method to handle device connect logic - service profile, measurement characteristic, incomming data parsing
@@ -307,6 +354,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @param iStateListeners
      */
     private void connectDevice(BleDevice iDevice, final ArrayList<StateListenerConfig> iStateListeners) {
+
+        EventBus.getDefault().post(new DevicePairingNotification(DevicePairingStatus.START_CONNECTING));
+
         iDevice.connect(new BleDevice.StateListener(){
             @Override
             public void onEvent(BleDevice.StateListener.StateEvent e) {
@@ -316,7 +366,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 if(e.didEnter(BleDeviceState.INITIALIZED)){
                     Log.d(TAG, "deviceConnected");
                     mConnectedDevices.put(e.device().getMacAddress(), e.device());
-                    startPairing();
+                    deviceConnected();
 
                     for(StateListenerConfig iStateListener : iStateListeners) {
                         if (iStateListener.getAction() == StateListenerAction.ENABLE_NOTIFICATION) {
@@ -331,14 +381,12 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 else if (e.didEnter(BleDeviceState.DISCONNECTED)){
                     Log.d(TAG, "deviceDisconnected");
                     mConnectedDevices.remove(e.device().getMacAddress());
-                    e.device().undiscover();
 
                     if(allDevicesDisconnected()){
-                        endPairing();
+                        mPaired = false;
                     }
-                    else {
-                        BleManager.get(mContext).disconnectAll();
-                    }
+
+                    deviceDisconnected();
                 }
             }
         });
@@ -360,7 +408,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private boolean isCompatibleDevice(BleDevice device) {
+    private  boolean isCompatibleDevice(BleDevice device) {
 
         if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionMovuinoCompatibleDevice(device) || isMetaWearCompatibleDevice(device)){
             return true;
@@ -376,7 +424,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private boolean isHeartRateCompatibleDevice(BleDevice device) {
+    public static boolean isHeartRateCompatibleDevice(BleDevice device) {
 
         String lDeviceName = device.getName_native();
 
@@ -400,7 +448,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
+    public static boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
         String lDeviceName = device.getName_native();
 
         if(lDeviceName != null) {
@@ -422,7 +470,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @param device available bluetooth device
      * @return true if device is compatible, false otherwise
      */
-    public boolean isMotionMovuinoCompatibleDevice(BleDevice device){
+    public static boolean isMotionMovuinoCompatibleDevice(BleDevice device){
         String lDeviceName = device.getName_native();
         if(lDeviceName != null){
             String lDeviceUpperName = lDeviceName.toUpperCase();
@@ -443,7 +491,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @param device available bluetooth device
      * @return true if device is compatible, false otherwise
      */
-    private boolean isMetaWearCompatibleDevice(BleDevice device){
+    public static boolean isMetaWearCompatibleDevice(BleDevice device){
         String lDeviceName = device.getName_native();
 
         if(lDeviceName != null) {
@@ -456,45 +504,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             return false;
         }
         return false;
-    }
-
-    /**
-     * @brief start automatic pairing
-     *
-     * @param iContext application context
-     */
-    public void automaticPairing(final Context iContext){
-
-        super.automaticPairing(iContext);
-
-        mConnectedDevices.clear();
-        mScanningHandler = new Handler();
-
-        mScanningHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                BleManager.get(iContext).stopScan();
-                if(mConnectedDevices.size() < 1){
-                    endPairing();
-                }
-            }
-        }, SCAN_PERIOD);
-
-        BleManager.get(iContext).startScan(mDiscoveryListener);
-    }
-
-    public void startPairing(){
-        super.startPairing();
-    }
-
-    public void endPairing(){
-        super.endPairing();
-        Intent stopIntent = new Intent(mContext, DataCollectorService.class);
-        stopIntent.setAction(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION);
-        mContext.startService(stopIntent);
-
-        EventBus.getDefault().post(new DevicePairingDisconnectedNotification());
-
     }
 
     /**

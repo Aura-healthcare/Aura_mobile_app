@@ -41,18 +41,14 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.wearablesensor.aura.AuraApplication;
+
+import com.wearablesensor.aura.DeviceScanActivity;
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.SeizureMonitoringActivity;
-import com.wearablesensor.aura.SessionSignInActivity;
 import com.wearablesensor.aura.SignInActivity;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
-import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 
 import java.util.Date;
-import java.util.Set;
 
 public class UserSessionService {
 
@@ -144,7 +140,7 @@ public class UserSessionService {
         lEditor.commit();
 
         Log.d(TAG, "USER RECORD" + getUser().getUuid() + " " + getUser().getAmazonId());
-        Intent intent = new Intent(mApplicationContext, SeizureMonitoringActivity.class);
+        Intent intent = new Intent(mApplicationContext, DeviceScanActivity.class);
         iActivity.startActivity(intent);
         iActivity.finish();
     }

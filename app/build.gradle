@@ -67,6 +67,7 @@ dependencies {
     }
     implementation 'com.github.florent37:singledateandtimepicker:1.2.2'
     implementation 'lib.kingja.switchbutton:switchbutton:1.1.3'
+    implementation 'com.eyalbira.loadingdots:loading-dots:1.0.2'
     compile "org.java-websocket:Java-WebSocket:1.3.8"
     compileOnly 'org.projectlombok:lombok:1.16.20'
     annotationProcessor 'org.projectlombok:lombok:1.16.20'

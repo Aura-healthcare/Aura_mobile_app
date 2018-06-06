@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+
+        <ImageView
+            android:id="@+id/device_scan_status"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:src="@drawable/icon_pairing_symbol_neutral"
+            />
+
+        <com.eyalbira.loadingdots.LoadingDots
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/device_scan_inProgress"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:paddingBottom="25dp"
+        android:paddingLeft="7dp"
+
+        app:LoadingDots_auto_play="true"
+
+        app:LoadingDots_loop_duration="1000"
+
+        app:LoadingDots_dots_color="#777777"
+        app:LoadingDots_dots_size="10dp"
+        app:LoadingDots_dots_space="2dp"
+        app:LoadingDots_jump_height="15dp"
+        android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/device_pairing_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="2dp"
+            android:layout_weight="2"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+        <TextView
+            android:id="@+id/device_pairing_adress"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="2dp"
+            android:text=""
+            android:layout_weight="4"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+
+</LinearLayout>

@@ -26,9 +26,13 @@ import java.util.Observable;
 import android.os.Vibrator;
 import android.util.Log;
 
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingInProgressNotification;
+import com.idevicesinc.sweetblue.BleDevice;
+import com.idevicesinc.sweetblue.BleDeviceIterator;
+import com.idevicesinc.sweetblue.BleDeviceState;
+import com.idevicesinc.sweetblue.BleManager;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStartDiscoveryNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -39,44 +43,37 @@ public class DevicePairingService{
     protected Context mContext;
 
     protected Boolean mPaired;
-    protected Boolean mIsPairing;
-
 
     public DevicePairingService(Context iContext){
         mContext = iContext;
 
         mPaired = false;
-        mIsPairing = false;
     }
 
-    public void automaticPairing(Context applicationContext){
-        Log.d(TAG, "Start automatic Pairing");
-        mIsPairing = true;
+    /**
+     * @param iContext activity context used to pop dialog box
+     */
+    public void automaticScan(Context iContext){
+        Log.d(TAG, "start automaticScan ");
 
-        EventBus.getDefault().post(new DevicePairingInProgressNotification());
+        LinkedList<BleDevice> lDeviceList = getDiscoveredDeviceList();
+        EventBus.getDefault().post(new DevicePairingStartDiscoveryNotification(lDeviceList));
     }
 
-    public void startPairing(){
-        Log.d(TAG, "start Pairing ");
+    public void deviceConnected(){
+        Log.d(TAG, "deviceConnected");
 
         mPaired = true;
-        mIsPairing = false;
-
-        EventBus.getDefault().post(new DevicePairingConnectedNotification());
+        EventBus.getDefault().post(new DevicePairingNotification(DevicePairingStatus.DEVICE_CONNECTED));
 
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(PHONE_VIBRATION_DURATION);
-
-
     }
 
-    public void endPairing(){
-        Log.d(TAG, "end Pairing");
+    public void deviceDisconnected(){
+        Log.d(TAG, "deviceDisconnected");
 
-        mPaired = false;
-        mIsPairing = false;
-
-        EventBus.getDefault().post(new DevicePairingDisconnectedNotification());
+        EventBus.getDefault().post(new DevicePairingNotification(DevicePairingStatus.DEVICE_DISCONNECTED));
 
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(PHONE_VIBRATION_DURATION);
@@ -86,7 +83,24 @@ public class DevicePairingService{
         return mPaired;
     }
 
-    public Boolean isPairing(){ return mIsPairing; }
+    /**
+     * @brief discovered device list getter
+     *
+     * @return discovered device list
+     */
+    public LinkedList<BleDevice> getDiscoveredDeviceList(){
+        LinkedList<BleDevice> lDeviceList = new LinkedList<>();
+
+        BleDeviceIterator it = BleManager.get(mContext).getDevices(BleDeviceState.DISCOVERED);
+        for (; it.hasNext(); ) {
+            BleDevice lDevice = it.next();
+            if (lDevice.is(BleDeviceState.CONNECTED) || lDevice.is(BleDeviceState.CONNECTING) || lDevice.is(BleDeviceState.DISCOVERED) || lDevice.is(BleDeviceState.DISCONNECTED)) {
+                lDeviceList.add(lDevice);
+            }
+        }
+
+        return lDeviceList;
+    }
 
     public LinkedList<DeviceInfo> getDeviceList(){
         return new LinkedList<>();
@@ -94,5 +108,9 @@ public class DevicePairingService{
 
     public void close() {
         Log.d(TAG, "close Service");
+    }
+
+    public void configureAndConnectDevice(BleDevice iBleDevice) {
+        Log.d(TAG, "configureAndConnectDevice");
     }
 }

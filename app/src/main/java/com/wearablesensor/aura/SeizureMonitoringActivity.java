@@ -48,7 +48,6 @@ import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
@@ -183,7 +182,23 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDrawerToggle.syncState();
 
         //wait the fragment to be fully displayed before starting automatic pairing
-        startAutomaticPairing();
+        startDataCollector();
+    }
+
+    private void startDataCollector(){
+        // no running Aura Data Collector service
+        if(!isMyServiceRunning(DataCollectorService.class)){
+            Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
+            startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
+            startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
+            startService(startIntent);
+
+            doBindService();
+        }
+        // running Aura Data Collector service but not binded to Activity
+        else if(isMyServiceRunning(DataCollectorService.class) && mDataCollectorService == null){
+            doBindService();
+        }
     }
 
     private void loadUser() {
@@ -223,68 +238,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         //disable leaving activity on back button pressed
     }
 
-    private void startAutomaticPairing(){
-        // no running Aura Data Collector service
-        if(!isMyServiceRunning(DataCollectorService.class)){
-            BluetoothEnabler.start(this, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
 
-                private Boolean mHasBeenCanceled = false;
-
-                @Override
-                public Please onEvent(BluetoothEnablerEvent e) {
-                    Log.d(TAG, "Bluetooth Enabler Event - " + e);
-
-                    if(e.status().isCancelled()){
-                        mDevicePairingDetailsPresenter.onDevicePairingEvent(new DevicePairingDisconnectedNotification());
-                        mHasBeenCanceled = true;
-                    }
-                    if (e.isDone()) {
-
-                        if(mHasBeenCanceled){
-                            mHasBeenCanceled = false;
-                        }
-                        else{
-                            Log.d(TAG, "Bluetooth Enabler Event - " + e.status());
-
-                            Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
-                            startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
-                            startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
-                            startService(startIntent);
-
-                            doBindService();
-                        }
-                    }
-
-                    return super.onEvent(e);
-                }
-            });
-        }
-        // running Aura Data Collector service but not binded to Activity
-        else if(isMyServiceRunning(DataCollectorService.class) && mDataCollectorService == null){
-            doBindService();
-        }
-        // binded Aura Data Collector service but not paired with device -> restart service
-        else if(mDataCollectorService != null && !mDataCollectorService.getDevicePairingService().isPairing() && !mDataCollectorService.getDevicePairingService().isPaired() ) {
-            BluetoothEnabler.start(this, new BluetoothEnabler.DefaultBluetoothEnablerFilter() {
-                @Override
-                public Please onEvent(BluetoothEnablerEvent e) {
-                    Log.d(TAG, "Bluetooth Enabler Event - " + e);
-                    if (e.isDone()) {
-                        Intent startIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
-                        startIntent.putExtra("UserUUID", ((AuraApplication) getApplication()).getUserSessionService().getUser().getUuid());
-                        startIntent.setAction(DataCollectorServiceConstants.ACTION.STARTFOREGROUND_ACTION);
-                        startService(startIntent);
-
-                        doBindService();
-                    } else if (e.status().isCancelled()) {
-
-                    }
-
-                    return super.onEvent(e);
-                }
-            });
-        }
-    }
 
     private boolean isMyServiceRunning(Class<?> iServiceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -346,7 +300,10 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @Override
     public void onDevicePairingAttempt() {
-        startAutomaticPairing();
+        Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
+        this.finish();
     }
 
     @Override

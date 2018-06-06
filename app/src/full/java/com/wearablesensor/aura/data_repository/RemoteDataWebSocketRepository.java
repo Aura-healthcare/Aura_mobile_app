@@ -1,5 +1,5 @@
 /**
- * @file RemoteDataInfluxDBRepository.java
+ * @file RemoteDataWebSocketRepository.java
  * @author  clecoued <clement.lecouedic@aura.healthcare>
  * @version 1.0
  *
@@ -26,9 +26,8 @@
  * RemoteDataInfluxDBRepository is a remote data storage specialized in time series data storage
  *
  * We consider a two-step initialization:
- *  1) connect to InfluxDB database
- * Currently secured connection to database is done using basic user/password credentials.
- *  2) 3 .. N) query or save data in database
+ *  1) connect to web socket server
+ *  2) send data files as messages
  */
 
 
@@ -56,13 +55,11 @@ import javax.net.ssl.X509TrustManager;
 public class RemoteDataWebSocketRepository extends WebSocketClient implements RemoteDataRepository.TimeSeries{
 
     private final String TAG = this.getClass().getSimpleName();
-    private Context mApplicationContext;
 
     public final static String PREPROD_SERVER_URL = "wss://db.preprod.aura.healthcare";
 
     public RemoteDataWebSocketRepository(String iDatabaseUrl, Context iApplicationContext) throws URISyntaxException {
         super(new URI(iDatabaseUrl));
-        mApplicationContext = iApplicationContext;
     }
 
     @Override
