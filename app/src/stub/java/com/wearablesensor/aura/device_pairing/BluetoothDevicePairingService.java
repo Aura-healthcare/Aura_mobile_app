@@ -19,16 +19,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura.device_pairing;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.support.annotation.UiThread;
 import android.util.Log;
 
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleManager;
-import com.idevicesinc.sweetblue.utils.Uuids;
-import com.wearablesensor.aura.DataCollectorService;
-import com.wearablesensor.aura.DataCollectorServiceConstants;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.models.ElectroDermalActivityModel;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
@@ -41,11 +37,8 @@ import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattHeartRat
 import com.wearablesensor.aura.device_pairing.bluetooth.gatt.reader.GattMovementCharacteristicReader;
 import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingConnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDisconnectedNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDiscoveryNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
-import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -142,6 +135,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
         stubDeviceDataFlow(eventManager);
+        mPaired = true;
     }
 
     @UiThread
@@ -157,6 +151,17 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
         handler.postDelayed(sendDataOnTic, manager.getFrequency());
+    }
+
+    @Override
+    public void automaticScan(Context iContext) {
+        super.automaticScan(iContext);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        EventBus.getDefault().post(new DevicePairingEndDiscoveryNotification(new LinkedList<BleDevice>()));
     }
 
     /**
@@ -182,7 +187,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private boolean isHeartRateCompatibleDevice(BleDevice device) {
+    public static boolean isHeartRateCompatibleDevice(BleDevice device) {
 
         String lDeviceName = device.getName_native();
 
@@ -206,7 +211,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
+    public static boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
         String lDeviceName = device.getName_native();
 
         if(lDeviceName != null) {
@@ -221,7 +226,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         return false;
     }
 
-    public boolean isMotionMovuinoCompatibleDevice(BleDevice device){
+    public static boolean isMotionMovuinoCompatibleDevice(BleDevice device){
         String lDeviceName = device.getName_native();
         if(lDeviceName != null){
             String lDeviceUpperName = lDeviceName.toUpperCase();
@@ -234,60 +239,27 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         return false;
     }
+
     /**
-     * @brief start automatic pairing
+     * @brief check if available bluetooth devices are compatibles for wrist motion
+     * data streaming with Aura prototype
      *
-     * @param iContext application context
+     * @param device available bluetooth device
+     * @return true if device is compatible, false otherwise
      */
-    public void automaticPairing(final Context iContext){
+    public static boolean isMetaWearCompatibleDevice(BleDevice device){
+        String lDeviceName = device.getName_native();
 
-        // stub
-        mPaired = true;
-        DevicePairingNotification iDevicePairingNotification = new DevicePairingConnectedNotification();
-        EventBus.getDefault().post(iDevicePairingNotification);
+        if(lDeviceName != null) {
+            String lDeviceUpperName = lDeviceName.toUpperCase();
 
-        /*
-        super.automaticPairing(iContext);
-
-        mConnectedDevices.clear();
-        mScanningHandler = new Handler();
-
-        mScanningHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                BleManager.get(iContext).stopScan();
-                if(mConnectedDevices.size() < 1){
-                    endPairing();
-                }
+            if (lDeviceUpperName.contains("METAWEAR")) {
+                return true;
             }
-        }, SCAN_PERIOD);
 
-        BleManager.get(iContext).startScan(mDiscoveryListener);
-        */
-    }
-
-    public void startPairing(){
-        // stub - super.startPairing();
-
-        mPaired = true;
-        mIsPairing = false;
-
-        DevicePairingNotification iDevicePairingNotification = new DevicePairingNotification(DevicePairingStatus.CONNECTED);
-        EventBus.getDefault().post(iDevicePairingNotification);
-    }
-
-    public void endPairing(){
-        // stub - super.endPairing();
-
-        mPaired = false;
-        mIsPairing = false;
-
-        Intent stopIntent = new Intent(mContext, DataCollectorService.class);
-        stopIntent.setAction(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION);
-        mContext.startService(stopIntent);
-
-        EventBus.getDefault().post(new DevicePairingDisconnectedNotification());
-
+            return false;
+        }
+        return false;
     }
 
     /**
@@ -307,6 +279,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         EventBus.getDefault().post(new DevicePairingReceivedDataNotification(iPhysioSignal));
     }
+
 
     /**
      * @brief receive Battery level update for a single device
@@ -329,10 +302,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         DeviceInfo device2 = new DeviceInfo("02:34:56:78:32", "D2");
         oDeviceList.add(device1);
         oDeviceList.add(device2);
-        // stub
-        /*for ( Map.Entry<String, BleDevice> lEntry : mConnectedDevices.entrySet() ) {
-            oDeviceList.add(new DeviceInfo(lEntry.getValue().getMacAddress(), lEntry.getValue().getName_native()));
-        }*/
+
 
         return oDeviceList;
     }
