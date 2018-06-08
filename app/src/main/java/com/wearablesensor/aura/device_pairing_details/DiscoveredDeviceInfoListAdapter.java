@@ -30,6 +30,7 @@ package com.wearablesensor.aura.device_pairing_details;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ import com.eyalbira.loadingdots.LoadingDots;
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
 
 public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
@@ -64,7 +66,10 @@ public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
         TextView lDeviceNameText = (TextView) convertView.findViewById(R.id.device_pairing_name);
         TextView lDeviceAdressText = (TextView) convertView.findViewById(R.id.device_pairing_adress);
         ImageView lDeviceStatus = (ImageView) convertView.findViewById(R.id.device_scan_status);
+        ImageView lDeviceType = (ImageView) convertView.findViewById(R.id.device_scan_type);
+
         LoadingDots lDeviceLoadingInProgress = (LoadingDots) convertView.findViewById(R.id.device_scan_inProgress);
+
 
         // Populate the data into the template view using the data object
         lDeviceNameText.setText(lBleDevice.getName_native());
@@ -86,7 +91,8 @@ public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
         }
         else {
             if (lBleDevice.is(BleDeviceState.CONNECTED)) {
-                lDeviceStatus.setImageResource(R.drawable.icon_pairing_symbol_success);
+                enableDeviceType(lDeviceType, lBleDevice);
+                lDeviceStatus.setImageResource(R.drawable.icon_pairing_symbol_connected);
                 lDeviceStatus.setVisibility(View.VISIBLE);
                 lDeviceLoadingInProgress.setVisibility(View.GONE);
                 lDeviceNameText.setTextColor(Color.BLACK);
@@ -97,6 +103,7 @@ public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
                 lDeviceNameText.setTextColor(Color.BLACK);
                 lDeviceAdressText.setTextColor(Color.BLACK);
             } else {
+                disableDeviceType(lDeviceType, lBleDevice);
                 lDeviceStatus.setImageResource(R.drawable.icon_pairing_symbol_neutral);
                 lDeviceStatus.setVisibility(View.VISIBLE);
                 lDeviceLoadingInProgress.setVisibility(View.GONE);
@@ -108,6 +115,29 @@ public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
         return convertView;
     }
 
+    private void disableDeviceType(ImageView iDeviceType, BleDevice iDevice){
+        if(BluetoothDevicePairingService.isHeartRateCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.hrv_pulse_disable);
+        }
+        else if(BluetoothDevicePairingService.isMetaWearCompatibleDevice(iDevice) || BluetoothDevicePairingService.isMotionMovuinoCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.accelerometer_picture_disable);
+        }
+        else if(BluetoothDevicePairingService.isGSRTemperatureCustomCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.electro_dermal_activity_picture_disable);
+        }
+    }
+
+    private void enableDeviceType(ImageView iDeviceType, BleDevice iDevice){
+        if(BluetoothDevicePairingService.isHeartRateCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.hrv_connected);
+        }
+        else if(BluetoothDevicePairingService.isMetaWearCompatibleDevice(iDevice) || BluetoothDevicePairingService.isMotionMovuinoCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.accelerometer_picture_connected);
+        }
+        else if(BluetoothDevicePairingService.isGSRTemperatureCustomCompatibleDevice(iDevice)){
+            iDeviceType.setImageResource(R.drawable.electro_dermal_activity_picture_connected);
+        }
+    }
     public void setIsConnecting(boolean iIsConnecting){
         mIsConnecting = iIsConnecting;
     }

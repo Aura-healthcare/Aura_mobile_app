@@ -1,4 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="heartbeat_metric_anomaly">Mauvaise détection des battements du coeur</string>
+    <!-- Menu items -->
+    <string name="menu_connect">Connecté</string>
+    <string name="menu_disconnect">Déconnecté</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_stop">Stop</string>
+    <string name="menu_synchronize">Synchro</string>
+    <string name="title_activity_login">Se connecter</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_user_name">Nom d\'utilisateur</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="action_sign_in">Se connecter</string>
+    <string name="action_continue">Continuer</string>
+    <string name="action_sign_in_short">Se Connecter</string>
+    <string name="error_invalid_email">L\'adresse email est invalide</string>
+    <string name="error_invalid_password">Le mot de passe est trop court</string>
+    <string name="error_incorrect_password">Le mot de passe est incorrecte</string>
+    <string name="error_field_required">Le champs est requis</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+-            completions."
+-        </string>
+
+    <!-- Strings related to sign-in -->
+    <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_first_sign_in">FirstSignInActivity</string>
+
+    <string name="signin_username_tooltip">Entrer un nom d\'utilisateur valide</string>
+    <string name="signin_pending_message">Authentification..</string>
+    <string name="signin_failed">Echec de l\'authentification</string>
+
+    <string name="fail_extra_message_no_internet">Vérifier votre connection internet</string>
+    <string name="fail_extra_message_invalid_credentials">Les identifiants sont incorrects</string>
+
+    <string name="first_sign_in_new_password">Nouveau mot de passe</string>
+    <string name="first_sign_in_confirm_new_password">Confirmer le nouveau mot de passe</string>
+    <string name="first_sign_in_invalid_password_format">Le nouveau mot de passe doit contenir 8 lettres minimum avec au moins 1 lettre minuscule, 1 lettre majuscule et un chiffre</string>
+    <string name="first_sign_in_new_confirm_password_not_matching">Le nouveau mot de passe et sa confirmation ne correspondent pas</string>
+
+    <string name="session_signin_pending_message">"Accéder à la session..."</string>
+
+    <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
+
+    <string name="navigation_drawer_open">Epi Project</string>
+    <string name="navigation_drawer_close">Epi Project</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- Strings related to device pairing -->
+    <string name="automatic_pairing_fail">Echec de l\'appairage automatique</string>
+    <string name="device_pairing_button">Se connecter</string>
+    <string name="default_device_name">Aucun dispositif n\'est appairé</string>
+
+    <!-- Strings related to data syncing -->
+    <string name="push_data_fail">L\'envoi des données sur le Cloud a échoué</string>
+
+    <string name="data_sync_no_signal">Activer votre Wifi pour synchroniser les données</string>
+    <string name="data_sync_low_signal"> Le signal Wifi est trop faible pour transferrer les données</string>
+    <string name="last_sync">Dernière synchro: \n</string>
+    <string name="remaining_packet_sync">Paquets à transferer: </string>
+
+    <!-- Strings related to seizure report panel -->
+    <string name="title_seizure_report">Reporter une crise</string>
+    <string name="seizure_intensity_small">Legère</string>
+    <string name="seizure_intensity_medium">Moyenne</string>
+    <string name="seizure_intensity_big">Importante</string>
+    <string name="seizure_reports_comments">Commentaires</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="confirm_button">Confirmer</string>
+
+    <string name="default_value">---</string>
+
+    <string name="menu_monitoring">Suivi continu</string>
+    <string name="menu_mobile_app">Application mobile</string>
+    <string name="menu_contact">Contact</string>
+    <string name="menu_cgu">CGU</string>
+    <string name="menu_general_information">Informations générales</string>
+
+    <string name="title_activity_device_paring" >Device Pairing Activity</string>
+    <string name="title_activity_device_scan" >Device Scan Activity</string>
+    <string name="device_scan_start_monitoring" >Démarrer le suivi</string>
+    <string name="device_scan_text">Scanner les dispositifs</string>
+    <string name="device_scan_scan_and_detect">Repérer vos appareils connectés</string>
 </resources>

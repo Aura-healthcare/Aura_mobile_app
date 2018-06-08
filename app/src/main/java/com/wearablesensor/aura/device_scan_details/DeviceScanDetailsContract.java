@@ -57,6 +57,10 @@ public class DeviceScanDetailsContract {
 
         void displayDeviceDisconnected();
 
+        void enableStartMonitoring();
+
+        void disableStartMonitoring();
+
         /**
          * @brief end scan display
          *

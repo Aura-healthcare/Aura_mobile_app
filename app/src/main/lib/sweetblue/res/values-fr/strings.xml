@@ -10,4 +10,23 @@
     <string name="sb_ok">OK</string>
     <string name="sb_deny">Refuser</string>
     <string name="sb_accept">Accepter</string>
+
+
+    <string name="ble_not_supported">Le BLE n\'est pas supporté</string>
+    <string name="label_data">Données:</string>
+    <string name="label_device_address">Adresse du dispositif:</string>
+    <string name="label_state">Etat:</string>
+    <string name="no_data">Pas de données</string>
+    <string name="connected">Connecté</string>
+    <string name="disconnected">Déconnecté</string>
+    <string name="title_devices">Scan des dispositifs Bluetooth</string>
+    <string name="error_bluetooth_not_supported">Le Bluetooth n\'est pas supporté</string>
+
+
+    <string name="unknown_device">Dispositif inconnu</string>
+    <string name="unknown_characteristic">Charactéristique inconnue</string>
+    <string name="unknown_service">Service inconnu</string>
+
+
+
 </resources>

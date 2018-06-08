@@ -8,8 +8,8 @@
             android:id="@+id/device_scan_status"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:src="@drawable/icon_pairing_symbol_neutral"
             />
 
@@ -37,7 +37,7 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:layout_marginLeft="2dp"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -48,8 +48,18 @@
             android:gravity="center_vertical"
             android:layout_marginLeft="2dp"
             android:text=""
-            android:layout_weight="4"
+            android:textSize="6dp"
+            android:layout_weight="2"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
+        <ImageView
+            android:id="@+id/device_scan_type"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/electro_dermal_activity_picture"
+            />
 
 </LinearLayout>

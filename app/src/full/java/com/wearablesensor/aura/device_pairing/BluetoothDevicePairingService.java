@@ -408,7 +408,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      *
      * @return true if device is compatible, false otherwise
      */
-    private  boolean isCompatibleDevice(BleDevice device) {
+    public static boolean isCompatibleDevice(BleDevice device) {
 
         if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionMovuinoCompatibleDevice(device) || isMetaWearCompatibleDevice(device)){
             return true;

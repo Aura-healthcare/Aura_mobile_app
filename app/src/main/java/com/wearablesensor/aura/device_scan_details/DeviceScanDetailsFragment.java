@@ -35,13 +35,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 
 import com.idevicesinc.sweetblue.BleDevice;
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing_details.DiscoveredDeviceInfoListAdapter;
 
 import java.util.LinkedList;
@@ -53,15 +53,14 @@ import butterknife.OnClick;
 public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDetailsContract.View{
     private static final String TAG = DeviceScanDetailsFragment.class.getSimpleName();
 
-    @BindView(R.id.device_pairing_step) TextView mDeviceStepTextView;
-    @BindView(R.id.device_pairing_skip_step) TextView mDeviceSkipStep;
-    @BindView(R.id.discovered_device_list_view_cardiac) ListView mDiscoveredDevicesListCardiac;
-    @BindView(R.id.discovered_device_list_view_motion) ListView mDiscoveredDevicesListMotion;
-    @BindView(R.id.discovered_device_list_view_electro_dermal) ListView mDiscoveredDevicesListElectroDermal;
+    @BindView(R.id.device_start_monitoring_button) Button mDeviceStartMonitoringButton;
+    @BindView(R.id.discovered_device_list_view) ListView mDiscoveredDevicesList;
+    @BindView(R.id.question_mark_image) ImageView mQuestionMark;
 
+    @BindView(R.id.device_scan_action_container) RelativeLayout mDeviceScanActionContainer;
     @BindView(R.id.device_scan_progress_bar) ProgressBar mProgressBar;
-    @OnClick(R.id.device_pairing_skip_step)
-    public void skipStep(){
+    @OnClick(R.id.device_start_monitoring_button)
+    public void startSeizureMonitoring(){
             mPresenter.goToSeizureMonitoring();
     }
 
@@ -71,9 +70,8 @@ public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDet
         mPresenter.startScan();
     }
 
-    private DiscoveredDeviceInfoListAdapter mDiscoveredDevicesListAdapterCardiac;
-    private DiscoveredDeviceInfoListAdapter mDiscoveredDevicesListAdapterMotion;
-    private DiscoveredDeviceInfoListAdapter mDiscoveredDevicesListAdapterElectroDermal;
+    private DiscoveredDeviceInfoListAdapter mDiscoveredDevicesListAdapter;
+
 
     private DeviceScanDetailsContract.Presenter mPresenter;
 
@@ -106,74 +104,40 @@ public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDet
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_device_pairing_step, container, false);
+        View view = inflater.inflate(R.layout.fragment_device_scan, container, false);
         ButterKnife.bind(this, view);
 
-        mDiscoveredDevicesListAdapterCardiac = new DiscoveredDeviceInfoListAdapter(this.getContext(), R.layout.discovered_device_info_item);
-        mDiscoveredDevicesListCardiac.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mDiscoveredDevicesListAdapter = new DiscoveredDeviceInfoListAdapter(this.getContext(), R.layout.discovered_device_info_item);
+        mDiscoveredDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                BleDevice lBleDevice = mDiscoveredDevicesListAdapterCardiac.getItem(position);
+                BleDevice lBleDevice = mDiscoveredDevicesListAdapter.getItem(position);
                 mPresenter.connectDevice(lBleDevice);
             }
         });
-        mDiscoveredDevicesListCardiac.setAdapter(mDiscoveredDevicesListAdapterCardiac);
+        mDiscoveredDevicesList.setAdapter(mDiscoveredDevicesListAdapter);
 
-        mDiscoveredDevicesListAdapterMotion = new DiscoveredDeviceInfoListAdapter(this.getContext(), R.layout.discovered_device_info_item);
-        mDiscoveredDevicesListMotion.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                BleDevice lBleDevice = mDiscoveredDevicesListAdapterMotion.getItem(position);
-                mPresenter.connectDevice(lBleDevice);
-            }
-        });
-        mDiscoveredDevicesListMotion.setAdapter(mDiscoveredDevicesListAdapterMotion);
-
-        mDiscoveredDevicesListAdapterElectroDermal = new DiscoveredDeviceInfoListAdapter(this.getContext(), R.layout.discovered_device_info_item);
-        mDiscoveredDevicesListElectroDermal.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                BleDevice lBleDevice = mDiscoveredDevicesListAdapterElectroDermal.getItem(position);
-                mPresenter.connectDevice(lBleDevice);
-            }
-        });
-        mDiscoveredDevicesListElectroDermal.setAdapter(mDiscoveredDevicesListAdapterElectroDermal);
         return view;
     }
 
 
     public void updateScanList(LinkedList<BleDevice> iDeviceList){
-        mDiscoveredDevicesListAdapterCardiac.clear();
-        mDiscoveredDevicesListAdapterMotion.clear();
-        mDiscoveredDevicesListAdapterElectroDermal.clear();
+        mDiscoveredDevicesListAdapter.clear();
 
         for(BleDevice iDevice : iDeviceList){
-            if(BluetoothDevicePairingService.isMetaWearCompatibleDevice(iDevice)){
-                mDiscoveredDevicesListAdapterMotion.add(iDevice);
-            }
-            else if(BluetoothDevicePairingService.isHeartRateCompatibleDevice(iDevice)){
-                mDiscoveredDevicesListAdapterCardiac.add(iDevice);
-            }
-            else if(BluetoothDevicePairingService.isGSRTemperatureCustomCompatibleDevice(iDevice)){
-                mDiscoveredDevicesListAdapterElectroDermal.add(iDevice);
-            }
+            mDiscoveredDevicesListAdapter.add(iDevice);
         }
     }
 
     private void refreshScanDeviceList() {
-        mDiscoveredDevicesListAdapterCardiac.notifyDataSetChanged();
-        mDiscoveredDevicesListAdapterMotion.notifyDataSetChanged();
-        mDiscoveredDevicesListAdapterElectroDermal.notifyDataSetChanged();
-
+        mDiscoveredDevicesListAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void displayStartScan(LinkedList<BleDevice> iDeviceList) {
         mProgressBar.setVisibility(View.VISIBLE);
-        mScanButton.setVisibility(View.GONE);
-        mDeviceSkipStep.setVisibility(View.GONE);
+        mQuestionMark.setVisibility(View.GONE);
 
         updateScanList(iDeviceList);
     }
@@ -187,9 +151,7 @@ public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDet
 
     @Override
     public void displayStartConnecting() {
-        mDiscoveredDevicesListAdapterCardiac.setIsConnecting(true);
-        mDiscoveredDevicesListAdapterMotion.setIsConnecting(true);
-        mDiscoveredDevicesListAdapterElectroDermal.setIsConnecting(true);
+        mDiscoveredDevicesListAdapter.setIsConnecting(true);
 
         refreshScanDeviceList();
     }
@@ -198,9 +160,7 @@ public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDet
     public void displayDeviceConnected() {
         refreshScanDeviceList();
 
-        mDiscoveredDevicesListAdapterCardiac.setIsConnecting(false);
-        mDiscoveredDevicesListAdapterMotion.setIsConnecting(false);
-        mDiscoveredDevicesListAdapterElectroDermal.setIsConnecting(false);
+        mDiscoveredDevicesListAdapter.setIsConnecting(false);
     }
 
     @Override
@@ -210,12 +170,23 @@ public class DeviceScanDetailsFragment extends Fragment implements DeviceScanDet
     }
 
     @Override
+    public void enableStartMonitoring() {
+        mDeviceScanActionContainer.setVisibility(View.GONE);
+        mDeviceStartMonitoringButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void disableStartMonitoring() {
+        mDeviceScanActionContainer.setVisibility(View.VISIBLE);
+        mDeviceStartMonitoringButton.setVisibility(View.GONE);
+    }
+
+    @Override
     public void displayEndScan(LinkedList<BleDevice> iDeviceList) {
         updateScanList(iDeviceList);
 
         refreshScanDeviceList();
 
-        mDeviceSkipStep.setVisibility(View.VISIBLE);
         mScanButton.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
     }
