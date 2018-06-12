@@ -2,26 +2,45 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:background="@drawable/border_set"
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:gravity="bottom">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/report_seizure_button"
-            android:drawableBottom="@drawable/seizure_report_icon"
+        android:layout_height="wrap_content">
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:text="@string/title_seizure_report"/>
+            android:layout_height="110dp"
+            android:layout_alignParentTop="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/header_aura" />
 
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:src="@drawable/seizure_report_icon_left"/>
+            <Button
+                android:id="@+id/report_seizure_button"
+                android:layout_width="200dp"
+                android:layout_marginTop="10dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:background="@color/white"
+                android:textColor="@color/splashscreen_light"
+                android:text="@string/title_seizure_report"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:src="@drawable/seizure_report_icon_right"/>
+        </LinearLayout>
+
+    </RelativeLayout>
 </LinearLayout>
+
+

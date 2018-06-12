@@ -42,6 +42,7 @@ import com.eyalbira.loadingdots.LoadingDots;
 import com.idevicesinc.sweetblue.BleDevice;
 import com.idevicesinc.sweetblue.BleDeviceState;
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.device_pairing.AuraDevicePairingCompatibility;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
 
@@ -116,25 +117,25 @@ public class DiscoveredDeviceInfoListAdapter extends ArrayAdapter<BleDevice>{
     }
 
     private void disableDeviceType(ImageView iDeviceType, BleDevice iDevice){
-        if(BluetoothDevicePairingService.isHeartRateCompatibleDevice(iDevice)){
+        if(AuraDevicePairingCompatibility.isHeartRateCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.hrv_pulse_disable);
         }
-        else if(BluetoothDevicePairingService.isMetaWearCompatibleDevice(iDevice) || BluetoothDevicePairingService.isMotionMovuinoCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isMetaWearCompatibleDevice(iDevice.getName_native()) || AuraDevicePairingCompatibility.isMotionMovuinoCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.accelerometer_picture_disable);
         }
-        else if(BluetoothDevicePairingService.isGSRTemperatureCustomCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isGSRTemperatureCustomCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.electro_dermal_activity_picture_disable);
         }
     }
 
     private void enableDeviceType(ImageView iDeviceType, BleDevice iDevice){
-        if(BluetoothDevicePairingService.isHeartRateCompatibleDevice(iDevice)){
+        if(AuraDevicePairingCompatibility.isHeartRateCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.hrv_connected);
         }
-        else if(BluetoothDevicePairingService.isMetaWearCompatibleDevice(iDevice) || BluetoothDevicePairingService.isMotionMovuinoCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isMetaWearCompatibleDevice(iDevice.getName_native()) || AuraDevicePairingCompatibility.isMotionMovuinoCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.accelerometer_picture_connected);
         }
-        else if(BluetoothDevicePairingService.isGSRTemperatureCustomCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isGSRTemperatureCustomCompatibleDevice(iDevice.getName_native())){
             iDeviceType.setImageResource(R.drawable.electro_dermal_activity_picture_connected);
         }
     }

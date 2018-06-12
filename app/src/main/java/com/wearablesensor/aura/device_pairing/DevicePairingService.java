@@ -95,7 +95,7 @@ public class DevicePairingService{
         for (; it.hasNext(); ) {
             BleDevice lDevice = it.next();
             if (lDevice.is(BleDeviceState.CONNECTED) || lDevice.is(BleDeviceState.CONNECTING) || lDevice.is(BleDeviceState.DISCOVERED) || lDevice.is(BleDeviceState.DISCONNECTED)) {
-                if(BluetoothDevicePairingService.isCompatibleDevice(lDevice)) {
+                if(AuraDevicePairingCompatibility.isCompatibleDevice(lDevice.getName_native())) {
                     lDeviceList.add(lDevice);
                 }
             }

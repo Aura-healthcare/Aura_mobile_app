@@ -9,7 +9,7 @@
     <ImageView
         android:id="@+id/physio_signal_item_picture"
         android:layout_gravity="center_horizontal"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_width="fill_parent"
         android:paddingTop="2dp"
         android:paddingBottom="5dp"

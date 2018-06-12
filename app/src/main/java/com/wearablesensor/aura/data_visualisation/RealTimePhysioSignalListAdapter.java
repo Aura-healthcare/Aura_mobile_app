@@ -31,12 +31,10 @@ package com.wearablesensor.aura.data_visualisation;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -62,7 +60,7 @@ import java.util.ArrayList;
 
 public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalModel> {
 
-    private Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+    private Bitmap lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_connected);
 
     public RealTimePhysioSignalListAdapter(Context context, int resource) {
         super(context, resource);
@@ -98,21 +96,21 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
         else if(lPhysioSignal.getType().equals(SkinTemperatureModel.SKIN_TEMPERATURE_TYPE)){
             SkinTemperatureModel lSkinTemperatureModel = ((SkinTemperatureModel) lPhysioSignal);
 
-            Bitmap lSkinTemperatureBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.skin_temperature_picture);
+            Bitmap lSkinTemperatureBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.skin_temperature_picture_connected);
             lImageView.setImageBitmap(lSkinTemperatureBitmap);
             lValueView.setText(String.valueOf(lSkinTemperatureModel.getTemperature()) + " Celsius");
         }
         else if(lPhysioSignal.getType().equals(ElectroDermalActivityModel.ELECTRO_DERMAL_ACTIVITY)){
             ElectroDermalActivityModel lElectroDermalActivityModel = ((ElectroDermalActivityModel) lPhysioSignal);
 
-            Bitmap lElectroDermalActivityBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.electro_dermal_activity_picture);
+            Bitmap lElectroDermalActivityBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.electro_dermal_activity_picture_connected);
             lImageView.setImageBitmap(lElectroDermalActivityBitmap);
             lValueView.setText(String.format("%.2f", lElectroDermalActivityModel.getElectroDermalActivity()) + " microSiemens" );
         }
         else if(lPhysioSignal.getType().equals(MotionAccelerometerModel.MOTION_ACCELEROMETER_MODEL)){
             MotionAccelerometerModel lMotionAccelerometerModel = ((MotionAccelerometerModel) lPhysioSignal);
 
-            Bitmap lMotionAccelerometerBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.accelerometer_picture);
+            Bitmap lMotionAccelerometerBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.accelerometer_picture_connected);
             lImageView.setImageBitmap(lMotionAccelerometerBitmap);
             float[] lAccelerometerValues = lMotionAccelerometerModel.getAccelerometer();
 
@@ -146,7 +144,7 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
         else if(lPhysioSignal.getType().equals(MotionGyroscopeModel.MOTION_GYROSCOPE_MODEL)){
             MotionGyroscopeModel lMotionGyroscopeModel = ((MotionGyroscopeModel) lPhysioSignal);
 
-            Bitmap lMotionGyroscopeBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.gyroscope_picture);
+            Bitmap lMotionGyroscopeBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.gyroscope_picture_connected);
             lImageView.setImageBitmap(lMotionGyroscopeBitmap);
             float[] lGyroscopeValues = lMotionGyroscopeModel.getGyroscope();
 
@@ -213,7 +211,7 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
            iSet = new BarDataSet(yVals1, "DataSet 1");
 
            iSet.setDrawIcons(false);
-           iSet.setColor(Color.rgb(45,82,124));
+           iSet.setColor(getContext().getResources().getColor(R.color.splashscreen_light));
            ArrayList<IBarDataSet> lDataSets = new ArrayList<IBarDataSet>();
            lDataSets.add(iSet);
 
@@ -228,6 +226,6 @@ public class RealTimePhysioSignalListAdapter extends ArrayAdapter<PhysioSignalMo
     }
 
     public void leavHeartBeatAnomalyMode() {
-        lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_picture);
+        lHrvBitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.hrv_connected);
     }
 }

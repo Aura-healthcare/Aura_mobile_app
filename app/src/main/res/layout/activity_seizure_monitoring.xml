@@ -34,10 +34,11 @@
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"/>
     </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginTop="110dp"
         android:orientation="vertical">
     </LinearLayout>

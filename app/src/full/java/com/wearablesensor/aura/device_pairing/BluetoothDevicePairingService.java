@@ -248,7 +248,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             public void onEvent(DiscoveryEvent e) {
                 if (e.was(LifeCycle.DISCOVERED)) {
                     Log.d(TAG, "Discovery Event - "+ e.device().getName_native());
-                    if(isCompatibleDevice(e.device())) {
+                    if(AuraDevicePairingCompatibility.isCompatibleDevice(e.device().getName_native())) {
                         LinkedList<BleDevice> lDeviceList = getDiscoveredDeviceList();
                         EventBus.getDefault().post(new DevicePairingDeviceDiscoveredNotification(lDeviceList));
                     }
@@ -304,19 +304,19 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     @Override
     public void configureAndConnectDevice(BleDevice iDevice){
-        if(isHeartRateCompatibleDevice(iDevice)){
+        if(AuraDevicePairingCompatibility.isHeartRateCompatibleDevice(iDevice.getName_native())){
             ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
             lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mHeartRateReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
             lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION,null));
             connectDevice(iDevice, lStateListeners);
         }
-        else if(isGSRTemperatureCustomCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isGSRTemperatureCustomCompatibleDevice(iDevice.getName_native())){
             ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
             lStateListeners.add(new StateListenerConfig(Uuids.HEART_RATE_SERVICE_UUID, Uuids.HEART_RATE_MEASUREMENT, mCustomMAXREFDES73ReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
             lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
             connectDevice(iDevice, lStateListeners);
         }
-        else if(isMotionMovuinoCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isMotionMovuinoCompatibleDevice(iDevice.getName_native())){
             ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
 
             //lStateListeners.add(new StateListenerConfig(Uuids.RX_SERVICE_UUID, Uuids.RX_CHAR_UUID, mMotionMovuinoReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
@@ -324,7 +324,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
             connectDevice(iDevice, lStateListeners);
         }
-        else if(isMetaWearCompatibleDevice(iDevice)){
+        else if(AuraDevicePairingCompatibility.isMetaWearCompatibleDevice(iDevice.getName_native())){
             ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
 
             lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {(byte)0x1, (byte) 0x1, (byte) 0x1}));
@@ -399,111 +399,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      */
     private boolean allDevicesDisconnected() {
         return mConnectedDevices.size() == 0;
-    }
-
-    /**
-     * @brief check if available bluetooth devices are compatibles with Aura prototype
-     *
-     * @param device available bluetooth device
-     *
-     * @return true if device is compatible, false otherwise
-     */
-    public static boolean isCompatibleDevice(BleDevice device) {
-
-        if(isHeartRateCompatibleDevice(device) || isGSRTemperatureCustomCompatibleDevice(device) || isMotionMovuinoCompatibleDevice(device) || isMetaWearCompatibleDevice(device)){
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @brief check if available bluetooth devices are compatibles for heart rate data streaming with Aura prototype
-     *
-     * @param device available bluetooth device
-     *
-     * @return true if device is compatible, false otherwise
-     */
-    public static boolean isHeartRateCompatibleDevice(BleDevice device) {
-
-        String lDeviceName = device.getName_native();
-
-        if(lDeviceName != null) {
-            String lDeviceUpperName = lDeviceName.toUpperCase();
-
-            if ((lDeviceUpperName.contains("RHYTHM") || lDeviceUpperName.contains("POLAR") || lDeviceUpperName.contains("MIO"))) {
-                return true;
-            }
-
-            return false;
-        }
-        return false;
-    }
-
-    /**
-     * @brief check if available bluetooth devices are compatibles for temperature and electro dermal activity
-     * data streaming with Aura prototype
-     *
-     * @param device available bluetooth device
-     *
-     * @return true if device is compatible, false otherwise
-     */
-    public static boolean isGSRTemperatureCustomCompatibleDevice(BleDevice device) {
-        String lDeviceName = device.getName_native();
-
-        if(lDeviceName != null) {
-            String lDeviceUpperName = lDeviceName.toUpperCase();
-
-            if( lDeviceUpperName.contains("MAXREFDES73")) {
-                return true;
-            }
-            return false;
-        }
-
-        return false;
-    }
-
-    /**
-     * @brief check if available bluetooth devices are compatibles for wrist motion
-     * data streaming with Aura prototype
-     *
-     * @param device available bluetooth device
-     * @return true if device is compatible, false otherwise
-     */
-    public static boolean isMotionMovuinoCompatibleDevice(BleDevice device){
-        String lDeviceName = device.getName_native();
-        if(lDeviceName != null){
-            String lDeviceUpperName = lDeviceName.toUpperCase();
-
-            if( lDeviceUpperName.contains("MOVUINO")){
-                return true;
-            }
-            return false;
-        }
-
-        return false;
-    }
-
-    /**
-     * @brief check if available bluetooth devices are compatibles for wrist motion
-     * data streaming with Aura prototype
-     *
-     * @param device available bluetooth device
-     * @return true if device is compatible, false otherwise
-     */
-    public static boolean isMetaWearCompatibleDevice(BleDevice device){
-        String lDeviceName = device.getName_native();
-
-        if(lDeviceName != null) {
-            String lDeviceUpperName = lDeviceName.toUpperCase();
-
-            if (lDeviceUpperName.contains("METAWEAR")) {
-                return true;
-            }
-
-            return false;
-        }
-        return false;
     }
 
     /**

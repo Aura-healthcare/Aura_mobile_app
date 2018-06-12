@@ -1,68 +1,46 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:background="@drawable/border_set"
-    tools:context="com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/device_pairing_image"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:src="@drawable/icon_pairing_symbol_success"
-        android:cropToPadding="true"
+    <GridView
+        android:id="@+id/device_pairing_layout"
+        android:layout_width="165dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="7dp"
+        android:numColumns="3"
+        android:layout_centerHorizontal="true"
+       >
+
+    </GridView>
+
+
+    <TextView
+        android:id="@+id/device_scan_button"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="40dp"
+        android:textSize="15dp"
+        android:textAllCaps="true"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:text="@string/seizure_monitoring"
+        android:background="@color/splashscreen_light"
+        />
+
+    <Button
+        android:id="@+id/device_pairing_button"
+        android:layout_width="165dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="7dp"
+        android:layout_gravity="center_horizontal"
+        android:textSize="15dp"
+        android:textColor="@color/splashscreen_dark"
+        android:background="@color/grey"
+        android:layout_centerHorizontal="true"
+        android:text="@string/device_pairing_button"
         android:visibility="gone"/>
 
-    <LinearLayout
-        android:id="@+id/device_pairing_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="4"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/device_pairing_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text="@string/default_device_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <ListView
-            android:id="@+id/device_list_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:divider="#CCCCCC"
-            android:dividerHeight="1dp">
-        </ListView>
-
-        <Button
-            android:id="@+id/device_pairing_button"
-            android:drawableLeft="@drawable/action_manual_pairing"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:text="@string/device_pairing_button"/>
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/device_pairing_progress_bar"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"/>
-
-</LinearLayout>
+</RelativeLayout>

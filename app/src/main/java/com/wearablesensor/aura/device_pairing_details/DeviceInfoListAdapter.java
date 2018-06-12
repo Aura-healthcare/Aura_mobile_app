@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.device_pairing.AuraDevicePairingCompatibility;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
 
 public class DeviceInfoListAdapter extends ArrayAdapter<DeviceInfo>{
@@ -55,16 +56,25 @@ public class DeviceInfoListAdapter extends ArrayAdapter<DeviceInfo>{
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.device_info_item, parent, false);
         }
         // Lookup view for data population
-        TextView lDeviceNameText = (TextView) convertView.findViewById(R.id.device_pairing_name);
-        TextView lDeviceAdressText = (TextView) convertView.findViewById(R.id.device_pairing_adress);
-        ImageView lDeviceBatteryLevelImage = (ImageView) convertView.findViewById(R.id.device_battery_level);
-        // Populate the data into the template view using the data object
-        lDeviceNameText.setText(lDeviceInfo.getName());
-        lDeviceAdressText.setText(lDeviceInfo.getId());
-        lDeviceBatteryLevelImage.setImageResource(getBatteryLevelImage(lDeviceInfo.getBatteryLevel()));
 
+        ImageView lDeviceSymbol = (ImageView) convertView.findViewById(R.id.device_symbol);
+        ImageView lDeviceBatteryLevelImage = (ImageView) convertView.findViewById(R.id.device_battery_level);
+        lDeviceBatteryLevelImage.setImageResource(getBatteryLevelImage(lDeviceInfo.getBatteryLevel()));
+        lDeviceSymbol.setImageResource(getDeviceSymbol(lDeviceInfo));
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    private int getDeviceSymbol(DeviceInfo lDeviceInfo) {
+        if( AuraDevicePairingCompatibility.isHeartRateCompatibleDevice(lDeviceInfo.getName()) ){
+            return R.drawable.hrv_connected;
+        }
+        else if( AuraDevicePairingCompatibility.isMetaWearCompatibleDevice(lDeviceInfo.getName()) ){
+            return R.drawable.accelerometer_picture_connected;
+        }
+        else {
+            return R.drawable.electro_dermal_activity_picture_connected;
+        }
     }
 
     private int getBatteryLevelImage(BatteryLevel iBatteryLevel){

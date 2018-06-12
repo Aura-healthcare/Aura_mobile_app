@@ -70,6 +70,7 @@
     <string name="session_signin_pending_message">"Enter Session..."</string>
 
     <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
+    <string name="seizure_monitoring">Monitoring</string>
 
     <string name="navigation_drawer_open">Epi Project</string>
     <string name="navigation_drawer_close">Epi Project</string>

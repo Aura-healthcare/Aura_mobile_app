@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -61,11 +62,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
     private ArrayAdapter<DeviceInfo> mDeviceListAdapter;
 
-    @BindView(R.id.device_pairing_image) ImageView mImageView;
-    @BindView(R.id.device_pairing_progress_bar) ProgressBar mPropressBar;
-    @BindView(R.id.device_pairing_status) TextView mDeviceStatusView;
-    @BindView(R.id.device_list_view) ListView mDeviceListView;
-
+    @BindView(R.id.device_pairing_layout) GridView mDeviceGridView;
     @BindView(R.id.device_pairing_button) Button mDevicePairingButton;
     @OnClick(R.id.device_pairing_button)
     public void OnClickDevicePairingButton(View v){
@@ -74,8 +71,6 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         }
 
     }
-
-    @BindView(R.id.device_pairing_layout) LinearLayout mDevicePairingLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -111,7 +106,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         ButterKnife.bind(this, view);
 
         mDeviceListAdapter = new DeviceInfoListAdapter(this.getContext(), R.layout.device_info_item);
-        mDeviceListView.setAdapter(mDeviceListAdapter);
+        mDeviceGridView.setAdapter(mDeviceListAdapter);
         return view;
     }
 
@@ -147,36 +142,18 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
     @Override
     public void successPairing(LinkedList<DeviceInfo> iDeviceList) {
-        mPropressBar.setVisibility(View.GONE);
-
-        mDeviceStatusView.setVisibility(View.GONE);
-
         mDeviceListAdapter.clear();
         mDeviceListAdapter.addAll(iDeviceList);
-        mDeviceListView.setVisibility(View.VISIBLE);
 
-        Drawable successPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_success);
-        mImageView.setImageDrawable(successPairingDrawable);
-        mImageView.setVisibility(View.VISIBLE);
-
-        mDevicePairingLayout.setVisibility(View.VISIBLE);
+        mDeviceGridView.setVisibility(View.VISIBLE);
         mDevicePairingButton.setVisibility(View.GONE);
     }
 
     @Override
     public void failParing() {
-        mPropressBar.setVisibility(View.GONE);
-
-        mDeviceStatusView.setVisibility(View.VISIBLE);
-
         mDeviceListAdapter.clear();
-        mDeviceListView.setVisibility(View.GONE);
 
-        Drawable failPairingDrawable = ContextCompat.getDrawable(getContext(), R.drawable.icon_pairing_symbol_fail);
-        mImageView.setImageDrawable(failPairingDrawable);
-        mImageView.setVisibility(View.VISIBLE);
-
-        mDevicePairingLayout.setVisibility(View.VISIBLE);
+        mDeviceGridView.setVisibility(View.GONE);
         mDevicePairingButton.setVisibility(View.VISIBLE);
     }
 
@@ -194,10 +171,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
     @Override
     public void progressPairing(){
-        mPropressBar.setVisibility(View.VISIBLE);
 
-        mDevicePairingLayout.setVisibility(View.GONE);
-        mImageView.setVisibility(View.GONE);
     }
 
     @Override

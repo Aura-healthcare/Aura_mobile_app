@@ -43,6 +43,7 @@
     <string name="session_signin_pending_message">"Accéder à la session..."</string>
 
     <string name="title_activity_seizure_monitoring">SeizureMonitoringActivity</string>
+    <string name="seizure_monitoring">Suivi</string>
 
     <string name="navigation_drawer_open">Epi Project</string>
     <string name="navigation_drawer_close">Epi Project</string>

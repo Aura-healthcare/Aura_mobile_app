@@ -1,40 +1,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:gravity="center"
     android:orientation="horizontal" >
-
-    <LinearLayout
-        android:layout_width="0px"
-        android:layout_height="wrap_content"
-        android:layout_weight="4"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/device_pairing_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <TextView
-            android:id="@+id/device_pairing_adress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-    </LinearLayout>
+    
+    <ImageView
+        android:id="@+id/device_symbol"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/hrv_connected"
+        />
 
     <ImageView
         android:id="@+id/device_battery_level"
-        android:layout_width="0px"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:src="@drawable/battery_unknown"
-        android:layout_weight="1"/>
-
+        />
 </LinearLayout>

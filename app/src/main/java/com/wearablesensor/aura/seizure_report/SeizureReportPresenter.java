@@ -88,9 +88,9 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
         lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(SeizureReportFragment.class.getSimpleName()));
 
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
         lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
 
         lTransaction.addToBackStack(null);
 

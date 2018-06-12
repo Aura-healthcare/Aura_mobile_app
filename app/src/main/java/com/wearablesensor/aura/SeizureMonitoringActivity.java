@@ -254,9 +254,9 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
 
         lTransaction.add(R.id.content_frame, mDevicePairingFragment, DevicePairingDetailsFragment.class.getSimpleName());
+        lTransaction.add(R.id.content_frame, mPhysioSignalVisualisationFragment, PhysioSignalVisualisationFragment.class.getSimpleName() );
         lTransaction.add(R.id.content_frame, mDataSyncFragment , DataSyncFragment.class.getSimpleName());
         lTransaction.add(R.id.content_frame, mSeizureStatusFragment, SeizureStatusFragment.class.getSimpleName());
-        lTransaction.add(R.id.content_frame, mPhysioSignalVisualisationFragment, PhysioSignalVisualisationFragment.class.getSimpleName() );
         lTransaction.addToBackStack(null);
 
         // Commit the transaction

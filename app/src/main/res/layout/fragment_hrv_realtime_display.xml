@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/border_set"
-    tools:context="com.wearablesensor.aura.data_visualisation.RRSamplesVisualisationFragment"
+    android:layout_margin="10dp"
     android:orientation="vertical">
 
     <GridView
@@ -12,7 +11,7 @@
         android:numColumns="3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:divider="#CCCCCC"
+        android:divider="@color/splashscreen_light"
         android:dividerHeight="1dp"
         >
     </GridView>
