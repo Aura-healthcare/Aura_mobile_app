@@ -123,17 +123,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         }
     }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectItem(position);
-        }
-
-        private void selectItem(int position) {
-            Toast.makeText(getApplicationContext(), "Youhou"+position, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -181,8 +170,38 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
+        mNavigationView.setCheckedItem(R.id.nav_SuiviContinu);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.nav_SuiviContinu:
+                        break;
+                    case R.id.nav_LeaveApp:
+                        quitApplication();
+                        break;
+                }
+                return true;
+            }
+
+        });
         //wait the fragment to be fully displayed before starting automatic pairing
         startDataCollector();
+    }
+
+    private void quitApplication() {
+        stopDataCollector();
+
+        finish();
+    }
+
+    private void stopDataCollector() {
+        doUnbindService();
+
+        Intent stopIntent = new Intent(SeizureMonitoringActivity.this, DataCollectorService.class);
+        stopIntent.setAction(DataCollectorServiceConstants.ACTION.STOPFOREGROUND_ACTION);
+        stopService(stopIntent);
     }
 
     private void startDataCollector(){

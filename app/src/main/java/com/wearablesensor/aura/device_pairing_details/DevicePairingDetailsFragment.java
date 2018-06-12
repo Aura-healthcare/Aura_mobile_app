@@ -145,6 +145,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         mDeviceListAdapter.clear();
         mDeviceListAdapter.addAll(iDeviceList);
 
+        mDeviceListAdapter.notifyDataSetChanged();
+
         mDeviceGridView.setVisibility(View.VISIBLE);
         mDevicePairingButton.setVisibility(View.GONE);
     }
@@ -152,6 +154,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     @Override
     public void failParing() {
         mDeviceListAdapter.clear();
+
+        mDeviceListAdapter.notifyDataSetChanged();
 
         mDeviceGridView.setVisibility(View.GONE);
         mDevicePairingButton.setVisibility(View.VISIBLE);
