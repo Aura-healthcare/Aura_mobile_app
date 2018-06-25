@@ -6,12 +6,14 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import com.idevicesinc.sweetblue.utils.Event;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
 import com.wearablesensor.aura.data_repository.models.MotionAccelerometerModel;
 import com.wearablesensor.aura.data_sync.DataSyncService;
 
+import org.greenrobot.eventbus.EventBus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -34,11 +36,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DataPipelinePerfsInstrumentedTest {
 
     private final String TAG = DataPipelinePerfsInstrumentedTest.class.getSimpleName();
-    private String TEST_SERVER = "wss://servertest.aura.healthcare";
+    private String TEST_SERVER = "wss://data.preprod.aura.healthcare";
 
-    private final int SMALL_NUMBER_OF_ENTRIES = 1000;
+    private final int SMALL_NUMBER_OF_ENTRIES = 10000;
     private final int MEDIUM_NUMBER_OF_ENTRIES = 500000;
-    private final int ONE_DAY_NUMBER_OF_ENTRIES = 30000000;
+    private final int ONE_DAY_NUMBER_OF_ENTRIES = 3000000;
 
     private DataSyncService mDataSyncService;
 
@@ -86,13 +88,13 @@ public class DataPipelinePerfsInstrumentedTest {
         mRemoteDataRepository = new RemoteDataWebSocketRepository(TEST_SERVER, InstrumentationRegistry.getTargetContext());
 
         mDataSyncService = new DataSyncService(mLocalDataFileRepository, mRemoteDataRepository, mApplicationContext);
+        mDataSyncService.setDataSyncEnabled(true);
+        EventBus.getDefault().register(mDataSyncService);
     }
 
     @Ignore
     @Test
     public void cache_SmallNumberOfEntries() throws Exception {
-
-
         for (int i = 0; i < SMALL_NUMBER_OF_ENTRIES; i++) {
             String lPhysioUuid = UUID.randomUUID().toString();
             String lDeviceAdressUuid = UUID.randomUUID().toString();
@@ -100,6 +102,9 @@ public class DataPipelinePerfsInstrumentedTest {
 
             final String lTimestamp = DateIso8601Mapper.getString(new Date());
             mLocalDataFileRepository.cachePhysioSignalSample(new MotionAccelerometerModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid, lTimestamp, new float[]{0.5f, 1.0f, -0.5f}, "2G"));
+            if(i%1000 == 0) {
+                Log.d(TAG, "cache - files:" + i);
+            }
         }
 
         Log.d(TAG, "cacheSmallNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
@@ -124,10 +129,13 @@ public class DataPipelinePerfsInstrumentedTest {
 
             final String lTimestamp = DateIso8601Mapper.getString(new Date());
             mLocalDataFileRepository.cachePhysioSignalSample(new MotionAccelerometerModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid, lTimestamp, new float[]{0.5f, 1.0f, -0.5f}, "2G"));
+            if(i%1000 == 0) {
+                Log.d(TAG, "cache - files:" + i);
+            }
         }
 
         Log.d(TAG, "cacheMediumNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
-        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length > 300);
+        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length == 100);
 
         Log.d(TAG, "startDataSync -- " + mDataFileHelper.getDataFiles().length);
         mDataSyncService.startDataSync();
@@ -163,6 +171,6 @@ public class DataPipelinePerfsInstrumentedTest {
 
     @After
     public void tearDown(){
-
+        EventBus.getDefault().unregister(mDataSyncService);
     }
 }

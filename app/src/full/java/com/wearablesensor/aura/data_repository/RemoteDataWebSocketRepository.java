@@ -37,16 +37,22 @@ package com.wearablesensor.aura.data_repository;
 import android.content.Context;
 import android.util.Log;
 
+import com.wearablesensor.aura.data_sync.notifications.DataAckNotification;
+
+import org.greenrobot.eventbus.EventBus;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -56,7 +62,7 @@ public class RemoteDataWebSocketRepository extends WebSocketClient implements Re
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public final static String PREPROD_SERVER_URL = "wss://db.preprod.aura.healthcare";
+    public final static String PREPROD_SERVER_URL = "wss://data.preprod.aura.healthcare";
 
     public RemoteDataWebSocketRepository(String iDatabaseUrl, Context iApplicationContext) throws URISyntaxException {
         super(new URI(iDatabaseUrl));
@@ -96,10 +102,13 @@ public class RemoteDataWebSocketRepository extends WebSocketClient implements Re
         }
 
 
-        SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocketFactory factory = sslContext.getSocketFactory();
 
         try {
             this.setSocket( factory.createSocket() );
+
+            // force web-socket to stay open
+            this.getSocket().setSoTimeout(0);
         } catch (IOException e) {
             Log.d(TAG, "Socket IO exception");
             e.printStackTrace();
@@ -115,6 +124,7 @@ public class RemoteDataWebSocketRepository extends WebSocketClient implements Re
 
     @Override
     public void save(String iData) {
+        Log.d("SendAll", "Send");
         this.send(iData);
     }
 
@@ -126,8 +136,12 @@ public class RemoteDataWebSocketRepository extends WebSocketClient implements Re
 
     @Override
     public void onMessage(String message) {
-        Log.d(TAG, "onMessage");
-
+        Log.d(TAG, "onMessage " + message);
+        DataAckNotification lAckNotification = new DataAckNotification(message);
+        if(lAckNotification.getStatus().equals("OK") ){
+            Log.d(TAG, "sendDeleteFile - " + lAckNotification.getFileName() + " - " + lAckNotification.getStatus());
+            EventBus.getDefault().post(lAckNotification);
+        }
     }
 
     @Override

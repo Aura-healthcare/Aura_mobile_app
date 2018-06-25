@@ -42,28 +42,25 @@ import com.wearablesensor.aura.data_repository.FileStorage;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
-import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
-import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
+import com.wearablesensor.aura.data_sync.notifications.DataAckNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncNoSignalNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
-import com.wearablesensor.aura.user_session.UserPreferencesModel;
-import com.wearablesensor.aura.user_session.UserSessionService;
-import com.wearablesensor.aura.utils.Timer;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.java_websocket.WebSocketImpl;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.FileNotFoundException;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -79,10 +76,13 @@ public class DataSyncService{
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
     private Boolean mIsWifiEnabled;
     private Boolean mIsDataSyncEnabled;
-    private Boolean mIsDataSyncInProgress;
+    private AtomicBoolean mIsDataSyncInProgress;
 
     private Subscription mWifiStateChangeSubscription;
     private Subscription mWifiSignalLevelChangeSubscription;
+
+    ScheduledExecutorService mScheduler;
+
 
     /**
      * @brief constructor
@@ -97,12 +97,12 @@ public class DataSyncService{
         mLocalDataRepository = iLocalDataRepository;
         mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
 
-        //mRemoteWebSocket = new RemoteDataWebSocketRepository(iApplicationContext, "wss://db.aura.healthcare");
-
         mIsWifiEnabled = false;
         mIsDataSyncEnabled = false;
+        mIsDataSyncInProgress = new AtomicBoolean(false);
         setDataSyncIsInProgress(false);
 
+        mScheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     /**
@@ -110,6 +110,8 @@ public class DataSyncService{
      */
 
     public void initialize(){
+        EventBus.getDefault().register(this);
+
         mWifiStateChangeSubscription = ReactiveWifi.observeWifiStateChange(mApplicationContext)
                                                     .subscribeOn(Schedulers.io())
                                                     .observeOn(AndroidSchedulers.mainThread())
@@ -160,7 +162,10 @@ public class DataSyncService{
         if (mWifiSignalLevelChangeSubscription != null && !mWifiSignalLevelChangeSubscription.isUnsubscribed()) {
             mWifiSignalLevelChangeSubscription.unsubscribe();
         }
+
+        EventBus.getDefault().unregister(this);
     }
+
 
     /**
      * @brief setter for data sync is in progress
@@ -168,7 +173,7 @@ public class DataSyncService{
      * @param iStatus progress status
      */
     public void setDataSyncIsInProgress(Boolean iStatus){
-        mIsDataSyncInProgress = iStatus;
+        mIsDataSyncInProgress.set(iStatus);
 
         if(iStatus == true){
             EventBus.getDefault().post(new DataSyncStartNotification());
@@ -185,7 +190,7 @@ public class DataSyncService{
      */
 
     public boolean isDataSyncInProgress() {
-        return mIsDataSyncInProgress;
+        return mIsDataSyncInProgress.get();
     }
     /**
      * @brief start data sync
@@ -194,13 +199,29 @@ public class DataSyncService{
     public synchronized void startDataSync() {
        Log.d(TAG, "Start Data ");
 
+        mIsDataSyncEnabled = true;
+
         try {
             mRemoteDataTimeSeriesRepository.connectToServer();
-            sendAll();
         } catch (Exception e) {
             Log.d(TAG, "Fail to connect ");
             e.printStackTrace();
+            return;
         }
+
+        // sync data with server continuously
+        mScheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if(isDataSyncInProgress()){
+                    return;
+                }
+
+                setDataSyncIsInProgress(true);
+                sendAll();
+                setDataSyncIsInProgress(false);
+            }
+        }, 0, 1, TimeUnit.MINUTES);
 
     }
 
@@ -216,6 +237,21 @@ public class DataSyncService{
         }
 
         mIsDataSyncEnabled = false;
+
+        mScheduler.shutdownNow();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDataAckNotification(DataAckNotification iAckNotification) {
+        String lPacket = iAckNotification.getFileName();
+        Log.d(TAG, "Delete File " + lPacket);
+        try {
+            mLocalDataRepository.removePhysioSignalSamples(lPacket);
+            mPackets.remove(lPacket);
+            EventBus.getDefault().post(new DataSyncUpdateStateNotification());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public ConcurrentLinkedQueue<String> mPackets;
@@ -250,21 +286,44 @@ public class DataSyncService{
 
     public void sendAll() {
         mPackets = getPackets();
-        
-        while (mPackets != null && mPackets.size() > 0) {
+        boolean isFileExisting = true;
+
+        Log.d("SendAll", "PacketNumber - " + mPackets.size());
+        while (mPackets != null && mPackets.size() > 0 && mIsDataSyncEnabled) {
+
+            isFileExisting = true;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             String lPacket = mPackets.poll();
+            if(lPacket == null){
+                return;
+            }
+
             try {
                 String lData = mLocalDataRepository.queryPhysioSignalSamples(lPacket);
                 mRemoteDataTimeSeriesRepository.save(lData);
-                mLocalDataRepository.removePhysioSignalSamples(lPacket);
-                EventBus.getDefault().post(new DataSyncUpdateStateNotification());
+            }
+            catch (FileNotFoundException e){
+                Log.d("SendAll", "File does not exist anymore");
+                e.printStackTrace();
+                isFileExisting = false;
+            }
+            catch (Exception e) {
+                Log.d("SendAll", "Fail to save data packet");
+                e.printStackTrace();
+            }
 
-            } catch (Exception e) {
-                Log.d(TAG, "Fail to save data packet");
+            if(isFileExisting){
                 mPackets.add(lPacket);
             }
         }
     }
 
+    public void setDataSyncEnabled(boolean iStatus) {
+        mIsDataSyncEnabled = iStatus;
+    }
 }

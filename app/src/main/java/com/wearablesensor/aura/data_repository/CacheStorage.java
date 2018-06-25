@@ -49,8 +49,8 @@ public class CacheStorage  {
         FULL
     } // cache status
 
-    public final static int CACHE_CHANNEL_HIGH_DATA_LIMIT = 500;
-    public final static int CACHE_CHANNEL_LOW_DATA_LIMIT = 100;
+    public final static int CACHE_CHANNEL_HIGH_DATA_LIMIT = 5000;
+    public final static int CACHE_CHANNEL_LOW_DATA_LIMIT = 1000;
 
     /**
      * @brief constructor
