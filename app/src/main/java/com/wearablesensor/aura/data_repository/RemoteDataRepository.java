@@ -40,6 +40,8 @@ import com.wearablesensor.aura.user_session.UserPreferencesModel;
 
 import org.influxdb.InfluxDBFactory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public interface RemoteDataRepository {
@@ -84,12 +86,14 @@ public interface RemoteDataRepository {
     }
 
     interface TimeSeries {
+
+         void closeServer() throws InterruptedException;
         /**
          * @brief initialize connection between remote database and Aura application
          *
          * @throws Exception
          */
-        void connectToServer();
+        void connectToServer() throws InterruptedException, IOException, URISyntaxException;
 
         /**
          * @brief send data to remote server

@@ -58,18 +58,59 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class RemoteDataWebSocketRepository extends WebSocketClient implements RemoteDataRepository.TimeSeries{
+public class RemoteDataWebSocketRepository implements RemoteDataRepository.TimeSeries{
 
     private final String TAG = this.getClass().getSimpleName();
-
+    private WebSocketClient mWebSocketClient;
+    private String mDatabaseUrl;
     public final static String PREPROD_SERVER_URL = "wss://data.preprod.aura.healthcare";
 
-    public RemoteDataWebSocketRepository(String iDatabaseUrl, Context iApplicationContext) throws URISyntaxException {
-        super(new URI(iDatabaseUrl));
+    public RemoteDataWebSocketRepository(String iDatabaseUrl) {
+        mDatabaseUrl = iDatabaseUrl;
     }
 
     @Override
-    public void connectToServer() {
+    public void closeServer() throws InterruptedException {
+        try {
+            mWebSocketClient.closeBlocking();
+            mWebSocketClient = null;
+        } catch (InterruptedException e) {
+            Log.d(TAG, "Fail to close server");
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void connectToServer() throws InterruptedException, IOException, URISyntaxException {
+
+        mWebSocketClient = new WebSocketClient(new URI(mDatabaseUrl)) {
+            @Override
+            public void onOpen(ServerHandshake handshakedata) {
+                Log.d(TAG, "onOpen");
+            }
+
+            @Override
+            public void onMessage(String message) {
+                Log.d(TAG, "onMessage " + message);
+                DataAckNotification lAckNotification = new DataAckNotification(message);
+                if(lAckNotification.getStatus().equals("OK") ){
+                    Log.d(TAG, "sendDeleteFile - " + lAckNotification.getFileName() + " - " + lAckNotification.getStatus());
+                    EventBus.getDefault().post(lAckNotification);
+                }
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                Log.d(TAG, "onClose " + reason);
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                Log.d(TAG, "onError");
+                ex.printStackTrace();
+            }
+        };
 
         SSLContext sslContext;
 
@@ -105,56 +146,32 @@ public class RemoteDataWebSocketRepository extends WebSocketClient implements Re
         SSLSocketFactory factory = sslContext.getSocketFactory();
 
         try {
-            this.setSocket( factory.createSocket() );
+            mWebSocketClient.setSocket(factory.createSocket());
 
             // force web-socket to stay open
-            this.getSocket().setSoTimeout(0);
+            mWebSocketClient.getSocket().setSoTimeout(0);
+            mWebSocketClient.setConnectionLostTimeout(20);
+
         } catch (IOException e) {
             Log.d(TAG, "Socket IO exception");
             e.printStackTrace();
+            throw e;
         }
 
+
         try {
-            this.connectBlocking();
+            mWebSocketClient.connectBlocking();
         } catch (InterruptedException e) {
             Log.d(TAG, "Fail to connect");
             e.printStackTrace();
+            throw e;
         }
     }
 
     @Override
     public void save(String iData) {
         Log.d("SendAll", "Send");
-        this.send(iData);
+        mWebSocketClient.send(iData);
     }
-
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        Log.d(TAG, "onOpen");
-
-    }
-
-    @Override
-    public void onMessage(String message) {
-        Log.d(TAG, "onMessage " + message);
-        DataAckNotification lAckNotification = new DataAckNotification(message);
-        if(lAckNotification.getStatus().equals("OK") ){
-            Log.d(TAG, "sendDeleteFile - " + lAckNotification.getFileName() + " - " + lAckNotification.getStatus());
-            EventBus.getDefault().post(lAckNotification);
-        }
-    }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        Log.d(TAG, "onClose " + reason);
-
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        Log.d(TAG, "onError");
-        ex.printStackTrace();
-    }
-
 
 }

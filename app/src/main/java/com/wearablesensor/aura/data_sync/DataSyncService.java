@@ -52,6 +52,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.java_websocket.WebSocketImpl;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -62,10 +63,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+
 
 public class DataSyncService{
     private final String TAG = this.getClass().getSimpleName();
@@ -74,13 +72,10 @@ public class DataSyncService{
 
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
-    private Boolean mIsWifiEnabled;
-    private Boolean mIsDataSyncEnabled;
+    private AtomicBoolean mIsDataSyncEnabled;
     private AtomicBoolean mIsDataSyncInProgress;
 
-    private Subscription mWifiStateChangeSubscription;
-    private Subscription mWifiSignalLevelChangeSubscription;
-
+    private PowerManager.WakeLock mWakeLock;
     ScheduledExecutorService mScheduler;
 
 
@@ -97,12 +92,9 @@ public class DataSyncService{
         mLocalDataRepository = iLocalDataRepository;
         mRemoteDataTimeSeriesRepository = iRemoteDataTimeSeriesRepository;
 
-        mIsWifiEnabled = false;
-        mIsDataSyncEnabled = false;
+        mIsDataSyncEnabled = new AtomicBoolean(false);
         mIsDataSyncInProgress = new AtomicBoolean(false);
         setDataSyncIsInProgress(false);
-
-        mScheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     /**
@@ -112,41 +104,7 @@ public class DataSyncService{
     public void initialize(){
         EventBus.getDefault().register(this);
 
-        mWifiStateChangeSubscription = ReactiveWifi.observeWifiStateChange(mApplicationContext)
-                                                    .subscribeOn(Schedulers.io())
-                                                    .observeOn(AndroidSchedulers.mainThread())
-                                                    .subscribe(new Action1<WifiState>() {
-                                                        @Override public void call(WifiState wifiState) {
-                                                            if(wifiState.equals(WifiState.DISABLED)){
-                                                                Log.d(TAG, "Wifi Disable");
-                                                                mIsWifiEnabled = false;
-
-                                                                EventBus.getDefault().post(new DataSyncNoSignalNotification());
-
-                                                                stopDataSync();
-                                                            }
-                                                            else if(wifiState.equals(WifiState.ENABLED)){
-                                                                mIsWifiEnabled = true;
-                                                                Log.d(TAG, "Wifi Enable");
-                                                            }
-                                                        }
-                                                    });
-
-
-        mWifiSignalLevelChangeSubscription = ReactiveWifi.observeWifiSignalLevel(mApplicationContext)
-                                                         .subscribeOn(Schedulers.io())
-                                                         .observeOn(AndroidSchedulers.mainThread())
-                                                         .subscribe(new Action1<WifiSignalLevel>() {
-                                                            @Override public void call(WifiSignalLevel signalLevel) {
-
-                                                                if(!mIsWifiEnabled){
-                                                                    return;
-                                                                }
-
-                                                                 Log.d(TAG, "Wifi Signal Level - " + signalLevel);
-                                                                 startDataSync();
-                                                            }
-                                                        });
+        startDataSync();
     }
 
     /**
@@ -154,14 +112,6 @@ public class DataSyncService{
      */
     public void close(){
         stopDataSync();
-
-        if (mWifiStateChangeSubscription != null && !mWifiStateChangeSubscription.isUnsubscribed()) {
-            mWifiStateChangeSubscription.unsubscribe();
-        }
-
-        if (mWifiSignalLevelChangeSubscription != null && !mWifiSignalLevelChangeSubscription.isUnsubscribed()) {
-            mWifiSignalLevelChangeSubscription.unsubscribe();
-        }
 
         EventBus.getDefault().unregister(this);
     }
@@ -176,9 +126,16 @@ public class DataSyncService{
         mIsDataSyncInProgress.set(iStatus);
 
         if(iStatus == true){
+            //TODO: wakekock will be removed as soon as we move DataSync in DataCollector service
+            PowerManager powerManager = (PowerManager) mApplicationContext.getSystemService(mApplicationContext.POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DataSyncWakelockTag");
+            mWakeLock.acquire();
             EventBus.getDefault().post(new DataSyncStartNotification());
         }
         else {
+            if(mWakeLock != null) {
+                mWakeLock.release();
+            }
             EventBus.getDefault().post(new DataSyncEndNotification());
         }
     }
@@ -197,19 +154,15 @@ public class DataSyncService{
      */
 
     public synchronized void startDataSync() {
-       Log.d(TAG, "Start Data ");
+        Log.d(TAG, "Start Data - " + mIsDataSyncEnabled.get() + " - " + mIsDataSyncInProgress.get() );
 
-        mIsDataSyncEnabled = true;
-
-        try {
-            mRemoteDataTimeSeriesRepository.connectToServer();
-        } catch (Exception e) {
-            Log.d(TAG, "Fail to connect ");
-            e.printStackTrace();
+        if(mIsDataSyncEnabled.get()) {
             return;
         }
 
+        mIsDataSyncEnabled.set(true);
         // sync data with server continuously
+        mScheduler = Executors.newSingleThreadScheduledExecutor();
         mScheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -217,8 +170,25 @@ public class DataSyncService{
                     return;
                 }
 
+                Log.d(TAG, "Run Scheduled Thread");
                 setDataSyncIsInProgress(true);
+                try {
+                    mRemoteDataTimeSeriesRepository.connectToServer();
+                } catch (Exception e) {
+                    setDataSyncIsInProgress(false);
+                    Log.d(TAG, "Fail to connect to Server");
+                    return;
+                }
+
                 sendAll();
+
+                try {
+                    mRemoteDataTimeSeriesRepository.closeServer();
+                } catch (InterruptedException e) {
+                    setDataSyncIsInProgress(false);
+                    Log.d(TAG, "Fail to close server");
+                }
+
                 setDataSyncIsInProgress(false);
             }
         }, 0, 1, TimeUnit.MINUTES);
@@ -229,14 +199,14 @@ public class DataSyncService{
      * @brief stop data sync
      */
 
-    private synchronized void stopDataSync(){
+    public synchronized void stopDataSync(){
         Log.d(TAG, "stop data transfer");
         // data transfert is stopped only if not stopped already
-        if(!mIsDataSyncEnabled){
+        if(!mIsDataSyncEnabled.get()){
             return;
         }
 
-        mIsDataSyncEnabled = false;
+        mIsDataSyncEnabled.set(false);
 
         mScheduler.shutdownNow();
     }
@@ -259,6 +229,7 @@ public class DataSyncService{
     public ConcurrentLinkedQueue getPackets(){
         String lPath = mApplicationContext.getFilesDir().getPath();
         File lDirectory = new File(lPath);
+
         File[] lFiles = lDirectory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -280,7 +251,6 @@ public class DataSyncService{
             oFileNames.add(lFiles[i].getName());
         }
 
-        Log.d(TAG, "File number " + oFileNames.size());
         return oFileNames;
     }
 
@@ -288,8 +258,7 @@ public class DataSyncService{
         mPackets = getPackets();
         boolean isFileExisting = true;
 
-        Log.d("SendAll", "PacketNumber - " + mPackets.size());
-        while (mPackets != null && mPackets.size() > 0 && mIsDataSyncEnabled) {
+        while (mPackets != null && mPackets.size() > 0 && mIsDataSyncEnabled.get()) {
 
             isFileExisting = true;
             try {
@@ -312,6 +281,11 @@ public class DataSyncService{
                 e.printStackTrace();
                 isFileExisting = false;
             }
+            catch (WebsocketNotConnectedException e){
+                Log.d(TAG, "SendAll - Fail to save data packet");
+                e.printStackTrace();
+                return;
+            }
             catch (Exception e) {
                 Log.d("SendAll", "Fail to save data packet");
                 e.printStackTrace();
@@ -321,9 +295,5 @@ public class DataSyncService{
                 mPackets.add(lPacket);
             }
         }
-    }
-
-    public void setDataSyncEnabled(boolean iStatus) {
-        mIsDataSyncEnabled = iStatus;
     }
 }

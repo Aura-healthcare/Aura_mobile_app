@@ -130,6 +130,7 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
 
     @Override
     public void onDestroy(){
+        mDevicePairingService.close();
     }
 
     @Override

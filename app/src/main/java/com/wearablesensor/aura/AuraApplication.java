@@ -65,11 +65,7 @@ public class AuraApplication extends MultiDexApplication {
 
         mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
-        try {
-            mRemoteDataTimeSeriesRepository = new RemoteDataWebSocketRepository(RemoteDataWebSocketRepository.PREPROD_SERVER_URL, this);
-        } catch (URISyntaxException e) {
-
-        }
+        mRemoteDataTimeSeriesRepository = new RemoteDataWebSocketRepository(RemoteDataWebSocketRepository.PREPROD_SERVER_URL);
 
         mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
 

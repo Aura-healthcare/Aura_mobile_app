@@ -85,10 +85,9 @@ public class DataPipelinePerfsInstrumentedTest {
         mDataFileHelper.cleanPrivateFiles();
 
         mLocalDataFileRepository = new LocalDataFileRepository(mApplicationContext);
-        mRemoteDataRepository = new RemoteDataWebSocketRepository(TEST_SERVER, InstrumentationRegistry.getTargetContext());
+        mRemoteDataRepository = new RemoteDataWebSocketRepository(TEST_SERVER);
 
         mDataSyncService = new DataSyncService(mLocalDataFileRepository, mRemoteDataRepository, mApplicationContext);
-        mDataSyncService.setDataSyncEnabled(true);
         EventBus.getDefault().register(mDataSyncService);
     }
 
@@ -116,6 +115,50 @@ public class DataPipelinePerfsInstrumentedTest {
         assertThat("Data upload timed out", lUploadComplete);
         assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
+        mDataSyncService.stopDataSync();
+    }
+
+    @Ignore
+    @Test
+    public void cache_SmallNumberOfEntries_MultiplePushes() throws Exception {
+        for (int i = 0; i < SMALL_NUMBER_OF_ENTRIES; i++) {
+            String lPhysioUuid = UUID.randomUUID().toString();
+            String lDeviceAdressUuid = UUID.randomUUID().toString();
+            String lUserUuid = UUID.randomUUID().toString();
+
+            final String lTimestamp = DateIso8601Mapper.getString(new Date());
+            mLocalDataFileRepository.cachePhysioSignalSample(new MotionAccelerometerModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid, lTimestamp, new float[]{0.5f, 1.0f, -0.5f}, "2G"));
+            if(i%1000 == 0) {
+                Log.d(TAG, "cache - files:" + i);
+            }
+        }
+
+        Log.d(TAG, "cacheSmallNumberOfEntries - files:" + mDataFileHelper.getDataFiles().length);
+        assertThat("Data not properly recorded", mDataFileHelper.getDataFiles().length > 0);
+
+        mDataSyncService.startDataSync();
+        boolean lUploadComplete = waitUntilAllFilesHasBeenUploaded(mDataFileHelper, 100);
+        assertThat("Data upload timed out", lUploadComplete);
+        assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
+
+        for (int i = 0; i < SMALL_NUMBER_OF_ENTRIES; i++) {
+            String lPhysioUuid = UUID.randomUUID().toString();
+            String lDeviceAdressUuid = UUID.randomUUID().toString();
+            String lUserUuid = UUID.randomUUID().toString();
+
+            final String lTimestamp = DateIso8601Mapper.getString(new Date());
+            mLocalDataFileRepository.cachePhysioSignalSample(new MotionAccelerometerModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid, lTimestamp, new float[]{0.5f, 1.0f, -0.5f}, "2G"));
+            if(i%1000 == 0) {
+                Log.d(TAG, "cache - files:" + i);
+            }
+        }
+
+        lUploadComplete = waitUntilAllFilesHasBeenUploaded(mDataFileHelper, 500);
+
+        assertThat("Data upload timed out", lUploadComplete);
+        assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
+        mDataFileHelper.cleanPrivateFiles();
+        mDataSyncService.stopDataSync();
     }
 
     @Ignore
@@ -144,6 +187,7 @@ public class DataPipelinePerfsInstrumentedTest {
         assertThat("Data upload has timed out", lUploadComplete);
         assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
+        mDataSyncService.stopDataSync();
     }
 
     @Ignore
@@ -167,6 +211,7 @@ public class DataPipelinePerfsInstrumentedTest {
         assertThat("Data upload has timed out", lUploadComplete);
         assertThat("Data not properly uploaded", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
+        mDataSyncService.stopDataSync();
     }
 
     @After

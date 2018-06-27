@@ -39,16 +39,27 @@ public class DataAckNotification {
 
     public DataAckNotification(String iAckMessage){
         mAckMessage = iAckMessage;
+        mAckStatus = "";
+        mFileName = "";
 
-        String[] parsedMessage = mAckMessage.split("\\s:\\s");
-        mAckStatus = parsedMessage[1];
+        String[] lParsedMessage = mAckMessage.split("\\s:\\s");
+        if(lParsedMessage.length < 2){
+            return;
+        }
 
-        String[] parsedFileName = parsedMessage[0].split("_");
-        StringBuilder builder = new StringBuilder(parsedFileName[2]);
-        builder.insert(13, ":");
-        builder.insert(16, ":");
+        mAckStatus = lParsedMessage[1];
 
-        mFileName = FileStorage.getCachePhysioFilename(builder.toString());
+        String[] lParsedFileName = lParsedMessage[0].split("_");
+        if(lParsedFileName.length < 3){
+            return;
+        }
+
+        StringBuilder lBuilder = new StringBuilder(lParsedFileName[2]);
+        lBuilder.insert(13, ":");
+        lBuilder.insert(16, ":");
+
+
+        mFileName = FileStorage.getCachePhysioFilename(lBuilder.toString());
     }
 
     public String getStatus(){
