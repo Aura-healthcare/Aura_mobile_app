@@ -97,8 +97,12 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
         public void onServiceConnected(ComponentName className, IBinder service) {
             mDataCollectorService = ((DataCollectorService.LocalBinder)service).getService();
+
             mDevicePairingDetailsPresenter.setDevicePairingService(mDataCollectorService.getDevicePairingService());
             mDevicePairingDetailsPresenter.start();
+
+            mDataSyncPresenter.setDataSyncService(mDataCollectorService.getDataSyncService());
+            mDataSyncPresenter.start();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -137,7 +141,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(( (mDataCollectorService != null) ? mDataCollectorService.getDevicePairingService():null), mDevicePairingFragment);
 
         mDataSyncFragment = new DataSyncFragment();
-        mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(), ((AuraApplication) getApplication()).getDataSyncService(), mDataSyncFragment);
+        mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(),( (mDataCollectorService != null) ?  mDataCollectorService.getDataSyncService():null), mDataSyncFragment);
 
         mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
         mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);
@@ -235,7 +239,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     public void onStart(){
         super.onStart();
 
-        ((AuraApplication) getApplication()).getDataSyncService().initialize();
     }
 
     @Override
@@ -248,7 +251,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             Log.d(TAG, "Fail to save cache data on exit");
         }
 
-        ((AuraApplication) getApplication()).getDataSyncService().close();
         super.onStop();
     }
 

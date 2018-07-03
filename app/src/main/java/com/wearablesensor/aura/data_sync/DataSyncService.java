@@ -30,28 +30,21 @@
 package com.wearablesensor.aura.data_sync;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.PowerManager;
+import android.net.wifi.WifiManager;
+
 import android.util.Log;
 
-import com.github.pwittchen.reactivewifi.ReactiveWifi;
-import com.github.pwittchen.reactivewifi.WifiSignalLevel;
-import com.github.pwittchen.reactivewifi.WifiState;
-import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.FileStorage;
-import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.data_sync.notifications.DataAckNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
-import com.wearablesensor.aura.data_sync.notifications.DataSyncNoSignalNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.java_websocket.WebSocketImpl;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.io.File;
@@ -64,7 +57,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-
 public class DataSyncService{
     private final String TAG = this.getClass().getSimpleName();
 
@@ -75,8 +67,7 @@ public class DataSyncService{
     private AtomicBoolean mIsDataSyncEnabled;
     private AtomicBoolean mIsDataSyncInProgress;
 
-    private PowerManager.WakeLock mWakeLock;
-    ScheduledExecutorService mScheduler;
+    private ScheduledExecutorService mScheduler;
 
 
     /**
@@ -112,7 +103,6 @@ public class DataSyncService{
      */
     public void close(){
         stopDataSync();
-
         EventBus.getDefault().unregister(this);
     }
 
@@ -126,16 +116,9 @@ public class DataSyncService{
         mIsDataSyncInProgress.set(iStatus);
 
         if(iStatus == true){
-            //TODO: wakekock will be removed as soon as we move DataSync in DataCollector service
-            PowerManager powerManager = (PowerManager) mApplicationContext.getSystemService(mApplicationContext.POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DataSyncWakelockTag");
-            mWakeLock.acquire();
             EventBus.getDefault().post(new DataSyncStartNotification());
         }
         else {
-            if(mWakeLock != null) {
-                mWakeLock.release();
-            }
             EventBus.getDefault().post(new DataSyncEndNotification());
         }
     }
@@ -166,11 +149,17 @@ public class DataSyncService{
         mScheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "Run Scheduled Thread");
+
+                if(!isWifiEnabled()){
+                    Log.d(TAG, "Wifi Not Enabled");
+                    return;
+                }
+
                 if(isDataSyncInProgress()){
                     return;
                 }
 
-                Log.d(TAG, "Run Scheduled Thread");
                 setDataSyncIsInProgress(true);
                 try {
                     mRemoteDataTimeSeriesRepository.connectToServer();
@@ -193,6 +182,11 @@ public class DataSyncService{
             }
         }, 0, 1, TimeUnit.MINUTES);
 
+    }
+
+    private boolean isWifiEnabled() {
+        WifiManager wifi = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
+        return wifi.isWifiEnabled();
     }
 
     /**

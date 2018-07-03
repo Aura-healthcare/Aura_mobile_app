@@ -32,6 +32,7 @@
 package com.wearablesensor.aura.data_sync;
 
 import android.content.Context;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.FileStorage;
@@ -82,6 +83,11 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
     public void start() {
         Integer lDataPacketNumber = getDataPacketsNumber();
         mView.refreshDataPackerNumber(lDataPacketNumber);
+
+        if(mDataSyncService == null){
+            mView.endPushDataOnCloud();
+            return;
+        }
 
         if(mDataSyncService.isDataSyncInProgress()){
             mView.startPushDataOnCloud();
@@ -136,5 +142,9 @@ public class DataSyncPresenter extends DataSyncServiceObserver implements DataSy
         });
 
         return files.length;
+    }
+
+    public void setDataSyncService(DataSyncService iDataSyncService){
+        mDataSyncService = iDataSyncService;
     }
 }

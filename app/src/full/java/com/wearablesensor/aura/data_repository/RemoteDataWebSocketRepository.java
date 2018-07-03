@@ -150,7 +150,7 @@ public class RemoteDataWebSocketRepository implements RemoteDataRepository.TimeS
 
             // force web-socket to stay open
             mWebSocketClient.getSocket().setSoTimeout(0);
-            mWebSocketClient.setConnectionLostTimeout(20);
+            mWebSocketClient.setConnectionLostTimeout(60);
 
         } catch (IOException e) {
             Log.d(TAG, "Socket IO exception");

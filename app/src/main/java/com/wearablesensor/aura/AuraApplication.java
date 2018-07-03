@@ -44,8 +44,6 @@ public class AuraApplication extends MultiDexApplication {
 
     private LocalDataRepository mLocalDataRepository;
     private RemoteDataRepository.Session mRemoteDataSessionRepository;
-    private RemoteDataRepository.TimeSeries mRemoteDataTimeSeriesRepository;
-    private DataSyncService mDataSyncService;
 
     private UserSessionService mUserSessionService;
 
@@ -65,13 +63,8 @@ public class AuraApplication extends MultiDexApplication {
 
         mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
         mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
-        mRemoteDataTimeSeriesRepository = new RemoteDataWebSocketRepository(RemoteDataWebSocketRepository.PREPROD_SERVER_URL);
 
         mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
-
-        mDataSyncService = new DataSyncService(mLocalDataRepository,
-                                               mRemoteDataTimeSeriesRepository,
-                                               lApplicationContext);
     }
 
     @Override
@@ -94,14 +87,6 @@ public class AuraApplication extends MultiDexApplication {
 
     public RemoteDataRepository.Session getRemoteDataSessionRepository() {
         return mRemoteDataSessionRepository;
-    }
-
-    public RemoteDataRepository.TimeSeries getRemoteDataTimeSeriesRepository(){
-        return mRemoteDataTimeSeriesRepository;
-    }
-
-    public DataSyncService getDataSyncService(){
-        return mDataSyncService;
     }
 
     public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
