@@ -382,7 +382,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     Log.d(TAG, "deviceDisconnected");
                     // workaround - disconnect only previously connected devices
                     // do not process every disconnected events
-                    if(e.device().is(BleDeviceState.CONNECTING) || e.device().is(BleDeviceState.CONNECTED)) {
+                    if(e.device().is(BleDeviceState.CONNECTING) || e.device().is(BleDeviceState.CONNECTED) || e.didExit(BleDeviceState.CONNECTED)) {
                         mConnectedDevices.remove(e.device().getMacAddress());
 
                         if (allDevicesDisconnected()) {
