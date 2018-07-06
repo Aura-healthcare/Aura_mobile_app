@@ -160,8 +160,8 @@ public class LocalDataFileRepositoryTest{
             mLocalDataFileRepository.cachePhysioSignalSample(new RRIntervalModel(lPhysioUuid, lDeviceAdressUuid, lUserUuid,lTimestamp, i));
         }
 
-        mLocalDataFileRepository.removePhysioSignalSamples(FileStorage.getCachePhysioFilename(lTimestamp1));
-        mLocalDataFileRepository.removePhysioSignalSamples(FileStorage.getCachePhysioFilename(lTimestamp2));
+        mLocalDataFileRepository.removePhysioSignalSamples(FileStorage.getCachePhysioFilename(RRIntervalModel.RR_INTERVAL_TYPE, lTimestamp1));
+        mLocalDataFileRepository.removePhysioSignalSamples(FileStorage.getCachePhysioFilename(RRIntervalModel.RR_INTERVAL_TYPE, lTimestamp2));
         assertThat("RemovePhysioSignals failed - files not deleted", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
     }

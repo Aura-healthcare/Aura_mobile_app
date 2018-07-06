@@ -194,7 +194,7 @@ public class FileStorageTest {
 
         mFileStorage.savePhysioSignals(lPhysioSignalList);
 
-        String lPhysioSignalsContent = mFileStorage.queryRawContent(FileStorage.getCachePhysioFilename(lTimestamp1));
+        String lPhysioSignalsContent = mFileStorage.queryRawContent(FileStorage.getCachePhysioFilename(MotionGyroscopeModel.MOTION_GYROSCOPE_MODEL, lTimestamp1));
 
         boolean lStatus = compareStringToJsonFile(mTestApplicationContext, lPhysioSignalsContent, "savePhysioSignals.json");
         assertThat("file content does not match with references json file", lStatus);

@@ -59,7 +59,7 @@ public class DataAckNotification {
         lBuilder.insert(16, ":");
 
 
-        mFileName = FileStorage.getCachePhysioFilename(lBuilder.toString());
+        mFileName = FileStorage.getCachePhysioFilename(lParsedFileName[1], lBuilder.toString());
     }
 
     public String getStatus(){

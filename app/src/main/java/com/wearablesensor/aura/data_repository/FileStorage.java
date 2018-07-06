@@ -112,7 +112,8 @@ public class FileStorage {
             return;
         }
 
-        String lFilename = getCachePhysioFilename(iPhysioSignalSamples.peek().getTimestamp());
+        PhysioSignalModel lPhysioSignal = iPhysioSignalSamples.peek();
+        String lFilename = getCachePhysioFilename(lPhysioSignal.getType(), lPhysioSignal.getTimestamp());
         FileOutputStream lFileOutputStream = null;
         OutputStream lOutputStream = null;
 
@@ -308,8 +309,8 @@ public class FileStorage {
         return lSeizureEventSamples;
     }
 
-    public static String getCachePhysioFilename(String iTimestamp){
-        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX +iTimestamp+".dat";
+    public static String getCachePhysioFilename(String iDatatype, String iTimestamp){
+        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX + iDatatype + "_" + iTimestamp + ".dat";
     }
 
     public static String getCacheSensitiveEventFilename(){
