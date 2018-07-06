@@ -146,6 +146,11 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
 
     @Override
     public void onDestroy(){
+        try {
+            mLocalDataRepository.forceSavingPhysioSignalSamples();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mDataSyncService.close();
         mDevicePairingService.close();
     }
