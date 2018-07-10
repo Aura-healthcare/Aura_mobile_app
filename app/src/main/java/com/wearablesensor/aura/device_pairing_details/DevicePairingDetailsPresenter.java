@@ -67,7 +67,7 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
             mView.successPairing(lDeviceList);
 
             // initialize battery state
-            for (Map.Entry<String, DeviceInfo> lDevice : mBluetoothDevicePairingService.getMetaWearCacheDeviceInfo().entrySet()) {
+            for (Map.Entry<String, DeviceInfo> lDevice : mBluetoothDevicePairingService.getCachedDevicesInfo().entrySet()) {
                 mView.refreshDeviceBatteryLevel(lDevice.getValue());
             }
         }

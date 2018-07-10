@@ -46,7 +46,6 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDisc
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
-import com.wearablesensor.aura.device_pairing_details.BatteryLevel;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -57,7 +56,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
@@ -241,7 +239,6 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                         }
                     }
                 }
-
             }
         };
 
@@ -348,8 +345,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.DATA_INTERRUPT_ENABLE.id, (byte) 0x1, (byte) 0x0}));
             lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[]{MetaFirmware.Module.GYROSCOPE.id, MetaFirmware.Gyroscope.Register.POWER_MODE.id, (byte) 0x1, (byte) 0x1}));
 
-
             lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_NOTFICATIONS_CHARACTERISTIC, mMetaWearReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+
             connectDevice(iDevice, lStateListeners);
         }
     }
@@ -394,7 +391,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     if(e.device().is(BleDeviceState.CONNECTING) || e.device().is(BleDeviceState.CONNECTED) || e.didExit(BleDeviceState.CONNECTED)) {
                         mConnectedDevices.remove(e.device().getMacAddress());
                         mCachedDevicesInfo.remove(e.device().getMacAddress());
-                        
+
                         if (allDevicesDisconnected()) {
                             mPaired = false;
                         }
@@ -443,7 +440,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         EventBus.getDefault().post(new DevicePairingBatteryLevelNotification(iDeviceInfo));
     }
 
-    public ConcurrentHashMap<String, DeviceInfo> getMetaWearCacheDeviceInfo() {
+    public ConcurrentHashMap<String, DeviceInfo> getCachedDevicesInfo() {
         return mCachedDevicesInfo;
     }
 
@@ -471,6 +468,5 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         BleManager.get(mContext).turnOff();
         super.close();
     }
-
 
 }
