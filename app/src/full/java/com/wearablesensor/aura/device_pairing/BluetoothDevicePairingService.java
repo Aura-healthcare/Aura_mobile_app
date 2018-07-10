@@ -46,6 +46,7 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDisc
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.device_pairing_details.BatteryLevel;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -56,6 +57,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
@@ -68,6 +70,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private Handler mScanningHandler;
     private BleManager.DiscoveryListener mDiscoveryListener;
 
+    private ConcurrentHashMap<String, DeviceInfo> mCachedDevicesInfo;
     // a enum to describe action types that can be applied to a specific GATT characteristic
     public enum StateListenerAction{
         READ,
@@ -176,7 +179,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         mBatteryReadWriteListener = new BleDevice.ReadWriteListener() {
             @Override
             public void onEvent(ReadWriteEvent e) {
-                if (e.wasSuccess() && e.type() == Type.NOTIFICATION) {
+                if (e.wasSuccess() && e.type() == Type.NOTIFICATION || e.type() == Type.READ) {
                    int lBatteryPercentage = e.data_byte();
                     Log.d(TAG, "Battery  Event"  + e.data_byte() + " "+ e.data().length);
                     DeviceInfo lDeviceInfo = new DeviceInfo(e.device().getMacAddress(), e.device().getName_native(), lBatteryPercentage);
@@ -257,6 +260,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         };
 
         mConnectedDevices = new ConcurrentHashMap<String, BleDevice>();
+        mCachedDevicesInfo = new ConcurrentHashMap<String, DeviceInfo>();
     }
 
     @Override
@@ -327,6 +331,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         else if(AuraDevicePairingCompatibility.isMetaWearCompatibleDevice(iDevice.getName_native())){
             ArrayList<StateListenerConfig> lStateListeners = new ArrayList<>();
 
+            lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.ENABLE_NOTIFICATION, null));
+            lStateListeners.add(new StateListenerConfig(Uuids.BATTERY_SERVICE_UUID, Uuids.BATTERY_LEVEL, mBatteryReadWriteListener, StateListenerAction.READ, null));
+
             lStateListeners.add(new StateListenerConfig(MetaFirmware.META_GATT_SERVICE, MetaFirmware.META_GATT_CONFIG_CHARACTERISTIC, null, StateListenerAction.WRITE, new byte[] {(byte)0x1, (byte) 0x1, (byte) 0x1}));
 
             byte[] lAccConfig = MetaFirmware.Acceleration.getConfig(MetaFirmware.Acceleration.OutputDataRate.ODR_50_HZ, MetaFirmware.Acceleration.Range.AR_2G);
@@ -373,6 +380,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                             e.device().enableNotify(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), iStateListener.getReadWriteListener());
                         } else if (iStateListener.getAction() == StateListenerAction.WRITE) {
                             e.device().write(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), iStateListener.getGattAttributes());
+                        } else if (iStateListener.getAction() == StateListenerAction.READ){
+                            e.device().read(iStateListener.getGattService(), iStateListener.getGattCharacteristic(), iStateListener.getReadWriteListener());
                         }
 
                     }
@@ -384,7 +393,8 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     // do not process every disconnected events
                     if(e.device().is(BleDeviceState.CONNECTING) || e.device().is(BleDeviceState.CONNECTED) || e.didExit(BleDeviceState.CONNECTED)) {
                         mConnectedDevices.remove(e.device().getMacAddress());
-
+                        mCachedDevicesInfo.remove(e.device().getMacAddress());
+                        
                         if (allDevicesDisconnected()) {
                             mPaired = false;
                         }
@@ -429,8 +439,14 @@ public class BluetoothDevicePairingService extends DevicePairingService{
      * @param iDeviceInfo input updated device info
      */
     private void receiveBatteryLevel(DeviceInfo iDeviceInfo) {
+        mCachedDevicesInfo.put(iDeviceInfo.getId(), iDeviceInfo);
         EventBus.getDefault().post(new DevicePairingBatteryLevelNotification(iDeviceInfo));
     }
+
+    public ConcurrentHashMap<String, DeviceInfo> getMetaWearCacheDeviceInfo() {
+        return mCachedDevicesInfo;
+    }
+
     /**
      * @brief get connected devices though Bluetooth LE
      *

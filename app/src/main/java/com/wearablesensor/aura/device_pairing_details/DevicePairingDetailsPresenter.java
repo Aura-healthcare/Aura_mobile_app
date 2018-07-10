@@ -31,6 +31,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Created by lecoucl on 07/04/17.
@@ -64,6 +65,11 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
         if(mBluetoothDevicePairingService.isPaired()){
             LinkedList<DeviceInfo> lDeviceList = mBluetoothDevicePairingService.getDeviceList();
             mView.successPairing(lDeviceList);
+
+            // initialize battery state
+            for (Map.Entry<String, DeviceInfo> lDevice : mBluetoothDevicePairingService.getMetaWearCacheDeviceInfo().entrySet()) {
+                mView.refreshDeviceBatteryLevel(lDevice.getValue());
+            }
         }
         else{
             mView.failParing();
