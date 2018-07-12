@@ -45,6 +45,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class BluetoothDevicePairingService extends DevicePairingService{
@@ -53,6 +54,10 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
     private Handler handler = new Handler();
     private Runnable sendDataOnTic;
+
+    public ConcurrentHashMap<String, DeviceInfo> getCachedDevicesInfo() {
+        return new ConcurrentHashMap<String, DeviceInfo>();
+    }
 
     // a enum to describe action types that can be applied to a specific GATT characteristic
     public enum StateListenerAction{
