@@ -227,7 +227,8 @@ public class DataSyncService{
         File[] lFiles = lDirectory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                if(pathname.toString().contains(FileStorage.CACHE_FILENAME)){
+                String lDataFilePrefix = FileStorage.CACHE_FILENAME + FileStorage.PHYSIO_SIGNAL_SUFFIX;
+                if(pathname.toString().contains(lDataFilePrefix)){
                     return true;
                 }
 
