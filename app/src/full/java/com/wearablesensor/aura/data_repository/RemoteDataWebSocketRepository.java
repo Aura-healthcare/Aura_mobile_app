@@ -38,6 +38,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.wearablesensor.aura.data_sync.notifications.DataAckNotification;
+import com.wearablesensor.aura.data_sync.notifications.SocketOnCloseNotification;
 
 import org.greenrobot.eventbus.EventBus;
 import org.java_websocket.client.WebSocketClient;
@@ -103,6 +104,8 @@ public class RemoteDataWebSocketRepository implements RemoteDataRepository.TimeS
             @Override
             public void onClose(int code, String reason, boolean remote) {
                 Log.d(TAG, "onClose " + reason);
+                SocketOnCloseNotification lSocketOnCloseNotification = new SocketOnCloseNotification();
+                EventBus.getDefault().post(lSocketOnCloseNotification);
             }
 
             @Override
@@ -150,7 +153,7 @@ public class RemoteDataWebSocketRepository implements RemoteDataRepository.TimeS
 
             // force web-socket to stay open
             mWebSocketClient.getSocket().setSoTimeout(0);
-            mWebSocketClient.setConnectionLostTimeout(60);
+            mWebSocketClient.setConnectionLostTimeout(500);
 
         } catch (IOException e) {
             Log.d(TAG, "Socket IO exception");

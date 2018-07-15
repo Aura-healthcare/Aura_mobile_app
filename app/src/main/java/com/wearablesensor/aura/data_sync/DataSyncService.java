@@ -41,6 +41,7 @@ import com.wearablesensor.aura.data_sync.notifications.DataAckNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncEndNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncStartNotification;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
+import com.wearablesensor.aura.data_sync.notifications.SocketOnCloseNotification;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,6 +52,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -68,7 +70,7 @@ public class DataSyncService{
     private AtomicBoolean mIsDataSyncInProgress;
 
     private ScheduledExecutorService mScheduler;
-
+    private CountDownLatch mSocketWorkDoneBarrier;
 
     /**
      * @brief constructor
@@ -86,6 +88,7 @@ public class DataSyncService{
         mIsDataSyncEnabled = new AtomicBoolean(false);
         mIsDataSyncInProgress = new AtomicBoolean(false);
         setDataSyncIsInProgress(false);
+        mSocketWorkDoneBarrier = null;
     }
 
     /**
@@ -156,11 +159,15 @@ public class DataSyncService{
                     return;
                 }
 
+                Log.d(TAG, "Wifi ok");
+
                 if(isDataSyncInProgress()){
                     return;
                 }
 
                 setDataSyncIsInProgress(true);
+                Log.d(TAG, "Data transfer is in progress");
+
                 try {
                     mRemoteDataTimeSeriesRepository.connectToServer();
                 } catch (Exception e) {
@@ -168,6 +175,8 @@ public class DataSyncService{
                     Log.d(TAG, "Fail to connect to Server");
                     return;
                 }
+
+                Log.d(TAG, "Connection to server");
 
                 sendAll();
 
@@ -200,9 +209,14 @@ public class DataSyncService{
             return;
         }
 
+        // force ending data transfer
         mIsDataSyncEnabled.set(false);
 
-        mScheduler.shutdownNow();
+        if(mSocketWorkDoneBarrier != null){
+            mSocketWorkDoneBarrier.countDown();
+        }
+
+        mScheduler.shutdown();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -213,8 +227,20 @@ public class DataSyncService{
             mLocalDataRepository.removePhysioSignalSamples(lPacket);
             mPackets.remove(lPacket);
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
+
+            // trigger a signal to close the data transfer
+            if(mPackets.size() == 0){
+                mSocketWorkDoneBarrier.countDown();
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSocketOnCloseNotification(SocketOnCloseNotification iCloseNotification) {
+        if(mSocketWorkDoneBarrier != null) {
+            mSocketWorkDoneBarrier.countDown();
         }
     }
 
@@ -250,19 +276,24 @@ public class DataSyncService{
     }
 
     public void sendAll() {
+        Log.d(TAG, "Start data transfer");
+
         mPackets = getPackets();
-        boolean isFileExisting = true;
 
-        while (mPackets != null && mPackets.size() > 0 && mIsDataSyncEnabled.get()) {
+        mSocketWorkDoneBarrier = new CountDownLatch(1);
 
-            isFileExisting = true;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if(mPackets == null || mPackets.size() == 0){
+            return;
+        }
+
+        int i = 0;
+        int lInitialPacketSize = mPackets.size();
+        Log.d(TAG, "Data transfer - " + lInitialPacketSize);
+        while (i <= lInitialPacketSize && mIsDataSyncEnabled.get()) {
+            i++;
 
             String lPacket = mPackets.poll();
+
             if(lPacket == null){
                 return;
             }
@@ -272,23 +303,38 @@ public class DataSyncService{
                 mRemoteDataTimeSeriesRepository.save(lData);
             }
             catch (FileNotFoundException e){
-                Log.d("SendAll", "File does not exist anymore");
+                Log.d(TAG, "File does not exist anymore");
                 e.printStackTrace();
-                isFileExisting = false;
             }
             catch (WebsocketNotConnectedException e){
-                Log.d(TAG, "SendAll - Fail to save data packet");
+                Log.d(TAG, "Fail to save data packet - socket not connected");
                 e.printStackTrace();
                 return;
             }
             catch (Exception e) {
-                Log.d("SendAll", "Fail to save data packet");
+                Log.d(TAG, "Fail to save data packet");
                 e.printStackTrace();
             }
 
-            if(isFileExisting){
-                mPackets.add(lPacket);
-            }
+            mPackets.add(lPacket);
         }
+
+        Log.d(TAG, "Packets has been sent");
+
+        if(mPackets == null || mPackets.size() == 0 || !mIsDataSyncEnabled.get()){
+            return;
+        }
+
+        Log.d(TAG, "Start Acknowledgment receiving");
+
+        // wait for packet acknowledgment
+        try {
+            mSocketWorkDoneBarrier.await(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Log.d(TAG, "End of data transfer");
     }
 }
