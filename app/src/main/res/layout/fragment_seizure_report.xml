@@ -42,6 +42,14 @@
         app:selectedColor="@color/splashscreen_light"
         app:textSize="18sp" />
 
+    <Button
+        android:text="@string/give_more_details_about_seizure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seizure_report_additionnal_questions"
+        android:layout_gravity="center_horizontal"
+        />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"

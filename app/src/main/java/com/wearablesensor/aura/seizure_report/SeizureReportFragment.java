@@ -34,13 +34,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 import com.wearablesensor.aura.R;
+import com.wearablesensor.aura.SeizureMonitoringActivity;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -76,7 +79,12 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
 
     @BindView(R.id.single_time_date_picker) SingleDateAndTimePicker mSingleDateAndTimePicker;
     @BindView(R.id.switch_button_seizure_impact) SwitchMultiButton mSwitchMultiButton;
-
+    @BindView(R.id.seizure_report_additionnal_questions) Button mAdditionnalQuestions;
+    @OnClick(R.id.seizure_report_additionnal_questions)
+    public void goToAdditionnalQuestions(){
+        //TODO: replace by proper event driven Navigation component
+        ((SeizureMonitoringActivity) getActivity()).goToAdditionnalQuestions(0);
+    }
 
     public static SeizureReportFragment newInstance() {
         SeizureReportFragment fragment = new SeizureReportFragment();

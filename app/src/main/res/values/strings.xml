@@ -116,4 +116,30 @@
     <string name="device_scan_text">Devices scan</string>
     <string name="device_scan_scan_and_detect">Scan and detect your connected devices</string>
 
+    <string name="next_button">Next</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="additional_question_treatment_observance">Did you follow your treatment ?</string>
+    <string name="additional_question_treatment_observance_answer_yes">Yes</string>
+    <string name="additional_question_treatment_observance_answer_low">Yes, but with some misses</string>
+    <string name="additional_question_treatment_observance_answer_no">No, I never take it</string>
+
+    <string name="additional_question_sleep_night">Did you sleep well last night ?</string>
+    <string name="additional_question_sleep_night_answer_well">Yes, very well</string>
+    <string name="additional_question_sleep_night_answer_low">Yes, but with 1 or 2 wake ups</string>
+    <string name="additional_question_sleep_night_answer_no">No, I had insomnia</string>
+
+    <string name="additional_question_high_stress_episode">Did you experienced a very stressful episode today ?</string>
+    <string name="additional_question_fever">Do you have fever ?</string>
+    <string name="additional_question_new_treatment">Did you take new treatment recently ?</string>
+    <string name="additional_question_alcohol_consumption">Did you drink alcohol last night ?</string>
+    <string name="additional_question_alcohol_answer_none">No</string>
+    <string name="additional_question_alcohol_answer_low">Yes, few drinks</string>
+    <string name="additional_question_alcohol_answer_high">Yes, a lot</string>
+
+    <string name="additional_question_late_sleep"> Did you get out late last night ?</string>
+
+    <string name="additional_questions_completed"> Thanks for completing this questionnaire. It will provide very useful information to seizure anticipation and detection. </string>
+    <string name="give_more_details_about_seizure"> Give more details about your seizure </string>
 </resources>

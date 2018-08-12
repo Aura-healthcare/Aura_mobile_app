@@ -86,4 +86,32 @@
     <string name="device_scan_start_monitoring" >Démarrer le suivi</string>
     <string name="device_scan_text">Scanner les dispositifs</string>
     <string name="device_scan_scan_and_detect">Repérer vos appareils connectés</string>
+
+    <string name="next_button">Suivant</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <string name="additional_question_treatment_observance">Avez-vous pris tous vos traitements ?</string>
+    <string name="additional_question_treatment_observance_answer_yes">Oui</string>
+    <string name="additional_question_treatment_observance_answer_low">Oui, mais avec quelques oublis</string>
+    <string name="additional_question_treatment_observance_answer_no">Non, je ne les prends pas</string>
+
+    <string name="additional_question_sleep_night">Avez-vous ​bien dormi la nuit précédente ?</string>
+    <string name="additional_question_sleep_night_answer_well">Oui, tres bien</string>
+    <string name="additional_question_sleep_night_answer_low">Oui, mais avec 1 ou 2 reveils</string>
+    <string name="additional_question_sleep_night_answer_no">Non, j\'ai tres mal dormi</string>
+
+    <string name="additional_question_high_stress_episode">Avez-vous connu un épisode de ​grand stress dans la journée ?</string>
+    <string name="additional_question_fever">Avez-vous de la ​fièvre ?</string>
+    <string name="additional_question_new_treatment">Avez-vous ​pris de nouveaux médicaments ?</string>
+    <string name="additional_question_alcohol_consumption">Avez-vous ​bu de l\'alcool la veille ?</string>
+    <string name="additional_question_alcohol_answer_none">Non</string>
+    <string name="additional_question_alcohol_answer_low">Oui, faible consommation</string>
+    <string name="additional_question_alcohol_answer_high">Oui, forte consommation</string>
+
+    <string name="additional_question_late_sleep"> Êtes-vous​ sorti tard la veille​ ?</string>
+
+    <string name="additional_questions_completed"> Merci d\'avoir répondu à ce questionnaire. Vos réponses seront très utiles pour mieux comprendre les évenements favorisant le déclenchement d\'une crise. </string>
+    <string name="give_more_details_about_seizure"> Donner plus d\'information sur sa crise </string>
+
 </resources>

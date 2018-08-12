@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -50,12 +51,19 @@ import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
+import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureStatusFragment;
 import com.wearablesensor.aura.seizure_report.SeizureStatusPresenter;
+import com.wearablesensor.aura.seizure_report.SingleChoice;
+import com.wearablesensor.aura.seizure_report.SingleChoiceList;
+import com.wearablesensor.aura.seizure_report.SingleChoiceTaskFragment;
+import com.wearablesensor.aura.seizure_report.YesNoTaskFragment;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -89,6 +97,8 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     private SeizureReportFragment mSeizureReportFragment;
     private SeizureReportPresenter mSeizureReportPresenter;
+
+    private ArrayList<Fragment> mAdditionalInformationFragments;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -152,6 +162,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mSeizureStatusFragment = new SeizureStatusFragment();
         mSeizureStatusPresenter = new SeizureStatusPresenter(mSeizureStatusFragment, mSeizureReportFragment, this);
 
+        createAdditionalInformationFragments();
         displayFragments();
 
         ButterKnife.bind(this);
@@ -192,6 +203,38 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         });
         //wait the fragment to be fully displayed before starting automatic pairing
         startDataCollector();
+    }
+
+    /**
+     * @brief create a list of fragment that will map a succession of questions for the patient
+     */
+    private void createAdditionalInformationFragments() {
+        mAdditionalInformationFragments = new ArrayList<>();
+
+        SingleChoiceList lTreatmentObservanceOptions = new SingleChoiceList();
+        lTreatmentObservanceOptions.addChoice(new SingleChoice(getString(R.string.additional_question_treatment_observance_answer_yes), "", R.drawable.treatment_ok_selector, AdditionalInformationConstants.TreatmentObservanceOkOption));
+        lTreatmentObservanceOptions.addChoice(new SingleChoice(getString(R.string.additional_question_treatment_observance_answer_low),"", R.drawable.treatment_low_selector, AdditionalInformationConstants.TreatmentObservanceMissingSomeOption));
+        lTreatmentObservanceOptions.addChoice(new SingleChoice(getString(R.string.additional_question_treatment_observance_answer_no), "", R.drawable.treatment_none_selector, AdditionalInformationConstants.TreatmentObservanceNeverOption));
+
+        mAdditionalInformationFragments.add(SingleChoiceTaskFragment.newInstance(getString(R.string.additional_question_treatment_observance), AdditionalInformationConstants.TreatmentObservanceValue, lTreatmentObservanceOptions, 1));
+
+        SingleChoiceList lSleepQualityOptions = new SingleChoiceList();
+        lSleepQualityOptions.addChoice(new SingleChoice(getString(R.string.additional_question_sleep_night_answer_well), "", R.drawable.sleep_well_selector, AdditionalInformationConstants.QualityOfSleepWellOption));
+        lSleepQualityOptions.addChoice(new SingleChoice(getString(R.string.additional_question_sleep_night_answer_low),"", R.drawable.wake_up_selector, AdditionalInformationConstants.QualityOfSleepFewWakeUpsOption));
+        lSleepQualityOptions.addChoice(new SingleChoice(getString(R.string.additional_question_sleep_night_answer_no), "", R.drawable.insomnia_selector, AdditionalInformationConstants.QualityOfSleepInsomniaOption));
+        mAdditionalInformationFragments.add(SingleChoiceTaskFragment.newInstance(getString(R.string.additional_question_sleep_night), AdditionalInformationConstants.QualityOfSleepValue,lSleepQualityOptions, 2));
+
+        mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_high_stress_episode), AdditionalInformationConstants.HighStressEpisodeValue, 3));
+        mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_fever), AdditionalInformationConstants.HavingFeverValue, 4));
+
+        SingleChoiceList lAlcoholComsumptionOptions = new SingleChoiceList();
+        lAlcoholComsumptionOptions.addChoice(new SingleChoice(getString(R.string.additional_question_alcohol_answer_none), "", R.drawable.no_drink_selector, AdditionalInformationConstants.AlcoholConsumptionNoOption));
+        lAlcoholComsumptionOptions.addChoice(new SingleChoice(getString(R.string.additional_question_alcohol_answer_low),"", R.drawable.drink_selector, AdditionalInformationConstants.AlcoholConsumptionFewDrinksOption));
+        lAlcoholComsumptionOptions.addChoice(new SingleChoice(getString(R.string.additional_question_alcohol_answer_high), "", R.drawable.drink_high_selector, AdditionalInformationConstants.AlcoholConsumptionHighOption));
+
+        mAdditionalInformationFragments.add(SingleChoiceTaskFragment.newInstance(getString(R.string.additional_question_alcohol_consumption), AdditionalInformationConstants.AlcoholConsumptionValue,lAlcoholComsumptionOptions, 5));
+        mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_new_treatment), AdditionalInformationConstants.NewTreatmentValue, 6));
+        mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_late_sleep), AdditionalInformationConstants.LateSleepValue, 7));
     }
 
     private void quitApplication() {
@@ -347,6 +390,31 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     public void onDestroy(){
         doUnbindService();
         super.onDestroy();
+    }
+
+    //TODO: replace by an independent Navigation component
+    /**
+     * @brief method to handle navigation between additional question fragments
+     * @param iQuestionIndex
+     */
+    public void goToAdditionnalQuestions(int iQuestionIndex){
+        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+        Fragment lFragment;
+
+        if(iQuestionIndex >= mAdditionalInformationFragments.size()){
+           lFragment = mSeizureReportFragment;
+           Toast.makeText(this, getString(R.string.additional_questions_completed), Toast.LENGTH_SHORT).show();
+        }
+        else{
+            lFragment = mAdditionalInformationFragments.get(iQuestionIndex);
+        }
+
+        lTransaction.replace(R.id.content_frame, lFragment);
+
+        lTransaction.addToBackStack(null);
+
+        // Commit the transaction
+        lTransaction.commit();
     }
 
 }
