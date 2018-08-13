@@ -30,6 +30,7 @@
  */
 package com.wearablesensor.aura.seizure_report;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
@@ -135,6 +136,7 @@ public class SingleChoiceTaskFragment extends Fragment {
         lButton.setButtonDrawable(null);
         lButton.setText(iChoice.getHeadline());
         lButton.setGravity(Gravity.CENTER);
+        lButton.setTextColor(getResources().getColorStateList(R.color.single_choice_color_selector));
         lButton.setCompoundDrawablesWithIntrinsicBounds(0, iChoice.getButtonIconSelector(), 0, 0);
         lButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f));
         lButton.setOnClickListener(new RadioButton.OnClickListener(){

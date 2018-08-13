@@ -116,7 +116,7 @@
     <string name="device_scan_text">Devices scan</string>
     <string name="device_scan_scan_and_detect">Scan and detect your connected devices</string>
 
-    <string name="next_button">Next</string>
+    <string name="next_button">Next question</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
@@ -142,4 +142,7 @@
 
     <string name="additional_questions_completed"> Thanks for completing this questionnaire. It will provide very useful information to seizure anticipation and detection. </string>
     <string name="give_more_details_about_seizure"> Give more details about your seizure </string>
+
+    <string name="report_seizure_intensity">Report seizure intensity: </string>
+    <string name="report_seizure_date_and_time">Report seizure date and time: </string>
 </resources>

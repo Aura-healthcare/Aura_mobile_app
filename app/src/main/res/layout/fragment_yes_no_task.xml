@@ -43,6 +43,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/next_button"
         android:fontFamily="@font/helvetica_neue_nedium"
+        android:textColor="@color/splashscreen_dark"
         android:layout_marginBottom="20dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"/>
