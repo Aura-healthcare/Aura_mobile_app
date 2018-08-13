@@ -40,6 +40,8 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDisc
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStartDiscoveryNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -95,10 +97,7 @@ public class DeviceScanDetailsPresenter implements DeviceScanDetailsContract.Pre
 
     @Override
     public void goToSeizureMonitoring() {
-        Intent intent = new Intent(mActivity, SeizureMonitoringActivity.class);
-        mActivity.startActivity(intent);
-
-        mActivity.finish();
+        EventBus.getDefault().post(new NavigationNotification(NavigationConstants.NAVIGATION_SEIZURE_MONITORING));
     }
 
     @Override
@@ -107,7 +106,7 @@ public class DeviceScanDetailsPresenter implements DeviceScanDetailsContract.Pre
         if(mIsConnecting || mIsScanning){
             return;
         }
-        Log.d(TAG, "connect Device in presenter");
+
         mBluetoothDevicePairingService.configureAndConnectDevice(iBleDevice);
     }
 

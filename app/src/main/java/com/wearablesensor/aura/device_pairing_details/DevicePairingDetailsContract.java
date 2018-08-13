@@ -41,6 +41,6 @@ public class DevicePairingDetailsContract {
 
 
     interface Presenter extends BasePresenter {
-
+        void startScanning();
     }
 }

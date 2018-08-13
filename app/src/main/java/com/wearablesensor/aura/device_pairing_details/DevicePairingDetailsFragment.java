@@ -38,6 +38,10 @@ import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.LinkedList;
 
@@ -66,13 +70,8 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     @BindView(R.id.device_pairing_button) Button mDevicePairingButton;
     @OnClick(R.id.device_pairing_button)
     public void OnClickDevicePairingButton(View v){
-        if(mListener != null){
-            mListener.onDevicePairingAttempt();
-        }
-
+        mPresenter.startScanning();
     }
-
-    private OnFragmentInteractionListener mListener;
 
     public DevicePairingDetailsFragment() {
         // Required empty public constructor
@@ -110,28 +109,14 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onDevicePairingAttempt();
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     @Override

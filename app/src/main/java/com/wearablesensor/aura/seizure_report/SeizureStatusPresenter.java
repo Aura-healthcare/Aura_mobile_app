@@ -41,21 +41,21 @@ import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Date;
 
 public class SeizureStatusPresenter implements SeizureStatusContract.Presenter {
 
     private SeizureStatusContract.View mView;
-    private Fragment mReportFragment;
-    private FragmentActivity mActivity;
 
-    public SeizureStatusPresenter(SeizureStatusContract.View iView, Fragment iReportFragment, FragmentActivity iActivity){
-        mActivity = iActivity;
+    public SeizureStatusPresenter(SeizureStatusContract.View iView){
         mView = iView;
         mView.setPresenter(this);
-        mReportFragment = iReportFragment;
     }
 
     @Override
@@ -65,17 +65,7 @@ public class SeizureStatusPresenter implements SeizureStatusContract.Presenter {
 
     @Override
     public void startReportSeizureDetails() {
-        FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
-
-        lTransaction.add(R.id.content_frame, mReportFragment, SeizureReportFragment.class.getSimpleName());
-        lTransaction.addToBackStack(null);
-
-        // Commit the transaction
-        lTransaction.commit();
+        EventBus.getDefault().post(new NavigationNotification(NavigationConstants.NAVIGATION_SEIZURE_REPORTING));
     }
 
 }

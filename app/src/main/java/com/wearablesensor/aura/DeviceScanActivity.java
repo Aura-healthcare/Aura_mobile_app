@@ -41,8 +41,13 @@ import com.wearablesensor.aura.device_pairing.DevicePairingService;
 
 import com.wearablesensor.aura.device_scan_details.DeviceScanDetailsFragment;
 import com.wearablesensor.aura.device_scan_details.DeviceScanDetailsPresenter;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.ButterKnife;
 
@@ -162,6 +167,22 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     }
 
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNavigationEvent(NavigationNotification iNavigationEvent){
+        switch (iNavigationEvent.getNavigationFlag()) {
+            case NavigationConstants.NAVIGATION_SEIZURE_MONITORING:
+                goToSeizureMonitoring();
+                break;
+        }
+    }
+
+    private void goToSeizureMonitoring() {
+        Intent intent = new Intent(this, SeizureMonitoringActivity.class);
+        startActivity(intent);
+
+        this.finish();
+    }
 
     @Override
     protected void onDestroy(){

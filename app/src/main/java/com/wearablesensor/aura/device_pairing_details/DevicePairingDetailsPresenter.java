@@ -25,6 +25,8 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBattery
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.ThreadMode;
@@ -32,6 +34,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.LinkedList;
 import java.util.Map;
+
+import butterknife.OnCheckedChanged;
 
 /**
  * Created by lecoucl on 07/04/17.
@@ -104,6 +108,11 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
             DevicePairingBatteryLevelNotification lDevicePairingNotification = (DevicePairingBatteryLevelNotification) iDevicePairingNotification;
             mView.refreshDeviceBatteryLevel(lDevicePairingNotification.getDeviceInfo());
         }
+    }
+
+    @Override
+    public void startScanning(){
+        EventBus.getDefault().post(new NavigationNotification(NavigationConstants.NAVIGATION_DEVICE_SCANNING));
     }
 
     @Override

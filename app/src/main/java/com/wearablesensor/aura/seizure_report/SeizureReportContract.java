@@ -38,6 +38,8 @@ public class SeizureReportContract {
 
         void reportSeizure();
 
+        void giveAdditionalInformationsOnSeizure();
+
         void setCurrentDate(Date iDate);
 
         void setCurrentIntensity(String iIntensity);

@@ -40,22 +40,25 @@ import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
+import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Date;
 
 public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
     private SeizureReportContract.View mView;
-    private FragmentActivity mActivity;
     private LocalDataRepository mLocalDataRepository;
     private UserSessionService mUserSessionService;
 
     private Date mCurrentDate;
     private String mCurrentIntensity;
 
-    public SeizureReportPresenter(SeizureReportContract.View iView, FragmentActivity iActivity, LocalDataRepository iLocalDataRepository, UserSessionService iUserSessionService){
-        mActivity = iActivity;
+    public SeizureReportPresenter(SeizureReportContract.View iView, LocalDataRepository iLocalDataRepository, UserSessionService iUserSessionService){
         mView = iView;
         mView.setPresenter(this);
         mLocalDataRepository = iLocalDataRepository;
@@ -81,21 +84,7 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     }
 
     public void endReportSeizureDetails(){
-
-
-        FragmentTransaction lTransaction = mActivity.getSupportFragmentManager().beginTransaction();
-
-        lTransaction.remove(mActivity.getSupportFragmentManager().findFragmentByTag(SeizureReportFragment.class.getSimpleName()));
-
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(DataSyncFragment.class.getSimpleName()));
-        lTransaction.add(R.id.content_frame, mActivity.getSupportFragmentManager().findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
-
-        lTransaction.addToBackStack(null);
-
-        // Commit the transaction
-        lTransaction.commit();
+        EventBus.getDefault().post(new NavigationNotification(NavigationConstants.NAVIGATION_SEIZURE_MONITORING));
     }
 
     @Override
@@ -116,4 +105,8 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
         endReportSeizureDetails();
     }
 
+    @Override
+    public void giveAdditionalInformationsOnSeizure() {
+        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, 0));
+    }
 }

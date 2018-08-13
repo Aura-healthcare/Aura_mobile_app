@@ -41,6 +41,11 @@ import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.SeizureMonitoringActivity;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
+import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,7 +66,7 @@ public class YesNoTaskFragment extends Fragment {
     @BindView(R.id.next_button) Button mNextButton;
     @OnClick(R.id.next_button)
     public void goToNext(View v){
-        ((SeizureMonitoringActivity) getActivity()).goToAdditionnalQuestions(mTaskIndex);
+        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, mTaskIndex));
     }
     @BindView(R.id.switch_button_yes_no) SwitchMultiButton mYesNoSwitchButton;
 

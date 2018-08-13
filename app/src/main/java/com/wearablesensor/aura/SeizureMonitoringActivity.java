@@ -18,7 +18,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.FragmentManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -38,19 +40,19 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.idevicesinc.sweetblue.utils.BluetoothEnabler;
 import com.wearablesensor.aura.data_sync.DataSyncFragment;
 import com.wearablesensor.aura.data_sync.DataSyncPresenter;
 import com.wearablesensor.aura.data_visualisation.DataVisualisationPresenter;
 import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsPresenter;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
+import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
 import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
@@ -62,6 +64,10 @@ import com.wearablesensor.aura.seizure_report.SingleChoiceTaskFragment;
 import com.wearablesensor.aura.seizure_report.YesNoTaskFragment;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -157,14 +163,15 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);
 
         mSeizureReportFragment = new SeizureReportFragment();
-        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, this, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
+        mSeizureReportPresenter = new SeizureReportPresenter(mSeizureReportFragment, ((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService());
 
         mSeizureStatusFragment = new SeizureStatusFragment();
-        mSeizureStatusPresenter = new SeizureStatusPresenter(mSeizureStatusFragment, mSeizureReportFragment, this);
+        mSeizureStatusPresenter = new SeizureStatusPresenter(mSeizureStatusFragment);
 
         createAdditionalInformationFragments();
         displayFragments();
 
+        EventBus.getDefault().register(this);
         ButterKnife.bind(this);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, 0, 0) {
@@ -364,10 +371,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @Override
     public void onDevicePairingAttempt() {
-        Intent intent = new Intent(this, DeviceScanActivity.class);
-        startActivity(intent);
 
-        this.finish();
     }
 
     @Override
@@ -389,6 +393,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @Override
     public void onDestroy(){
         doUnbindService();
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
@@ -417,4 +422,68 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         lTransaction.commit();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNavigationEvent(NavigationNotification iNavigationEvent){
+
+        switch (iNavigationEvent.getNavigationFlag()){
+            case NavigationConstants.NAVIGATION_SEIZURE_MONITORING:
+                goToSeizureMonitoring();
+                break;
+            case NavigationConstants.NAVIGATION_SEIZURE_REPORTING:
+                goToSeizureReporting();
+                break;
+            case NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION:
+                NavigationWithIndexNotification iNavigationEventWithIndex = (NavigationWithIndexNotification) iNavigationEvent;
+                goToAdditionnalQuestions(iNavigationEventWithIndex.getIndex());
+                break;
+            case NavigationConstants.NAVIGATION_DEVICE_SCANNING:
+                goToDeviceScanning();
+                break;
+            default:
+        }
+    }
+
+    private void goToDeviceScanning() {
+        Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
+        this.finish();
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void goToSeizureMonitoring() {
+        android.support.v4.app.FragmentManager lFragmentManager = getSupportFragmentManager();
+        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+
+        for(Fragment lFragment: lFragmentManager.getFragments()){
+            if (lFragment != null) {
+                lTransaction.remove(lFragment);
+            }
+        }
+
+        lTransaction.add(R.id.content_frame, lFragmentManager.findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, lFragmentManager.findFragmentByTag(PhysioSignalVisualisationFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, lFragmentManager.findFragmentByTag(DataSyncFragment.class.getSimpleName()));
+        lTransaction.add(R.id.content_frame, lFragmentManager.findFragmentByTag(SeizureStatusFragment.class.getSimpleName()));
+        lTransaction.addToBackStack(null);
+
+        lTransaction.commit();
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void goToSeizureReporting() {
+        android.support.v4.app.FragmentManager lFragmentManager = getSupportFragmentManager();
+        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+
+        for(Fragment lFragment: lFragmentManager.getFragments()){
+            if (lFragment != null) {
+                lTransaction.remove(lFragment);
+            }
+        }
+
+        lTransaction.add(R.id.content_frame, mSeizureReportFragment, SeizureReportFragment.class.getSimpleName());
+        lTransaction.addToBackStack(null);
+
+        lTransaction.commit();
+    }
 }

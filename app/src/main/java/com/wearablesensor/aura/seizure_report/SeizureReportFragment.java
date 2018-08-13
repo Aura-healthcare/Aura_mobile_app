@@ -82,8 +82,7 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
     @BindView(R.id.seizure_report_additionnal_questions) Button mAdditionnalQuestions;
     @OnClick(R.id.seizure_report_additionnal_questions)
     public void goToAdditionnalQuestions(){
-        //TODO: replace by proper event driven Navigation component
-        ((SeizureMonitoringActivity) getActivity()).goToAdditionnalQuestions(0);
+        mPresenter.giveAdditionalInformationsOnSeizure();
     }
 
     public static SeizureReportFragment newInstance() {

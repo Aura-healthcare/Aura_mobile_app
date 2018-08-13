@@ -45,6 +45,11 @@ import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.SeizureMonitoringActivity;
+import com.wearablesensor.aura.navigation.NavigationConstants;
+import com.wearablesensor.aura.navigation.NavigationNotification;
+import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,8 +71,7 @@ public class SingleChoiceTaskFragment extends Fragment {
     @BindView(R.id.next_button) Button mNextButton;
     @OnClick(R.id.next_button)
     public void goToNext(View v){
-        //TODO: replace by proper event driven Navigation component
-        ((SeizureMonitoringActivity) getActivity()).goToAdditionnalQuestions(mTaskIndex);
+        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, mTaskIndex));
     }
 
     @BindView(R.id.choices_list) RadioGroup mRadioGroup;
