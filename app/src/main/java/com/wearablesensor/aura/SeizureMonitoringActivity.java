@@ -54,6 +54,7 @@ import com.wearablesensor.aura.navigation.NavigationConstants;
 import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
 import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
+import com.wearablesensor.aura.seizure_report.SeizureReportContract;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
 import com.wearablesensor.aura.seizure_report.SeizureStatusFragment;
@@ -79,7 +80,7 @@ import butterknife.OnClick;
 public class SeizureMonitoringActivity extends AppCompatActivity implements DevicePairingDetailsFragment.OnFragmentInteractionListener, DataSyncFragment.OnFragmentInteractionListener, PhysioSignalVisualisationFragment.OnFragmentInteractionListener, SeizureStatusFragment.OnFragmentInteractionListener, SeizureReportFragment.OnFragmentInteractionListener{
 
     private final static String TAG = SeizureMonitoringActivity.class.getSimpleName();
-    private String[] mDrawerTitles;
+
     private ActionBarDrawerToggle mDrawerToggle;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_view) NavigationView mNavigationView;
@@ -105,7 +106,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     private SeizureReportPresenter mSeizureReportPresenter;
 
     private ArrayList<Fragment> mAdditionalInformationFragments;
-
+    private ArrayList<SeizureReportContract.Presenter> mAdditionalInformationPresenter;
     private static final int REQUEST_ENABLE_BT = 1;
 
     private DataCollectorService mDataCollectorService;
@@ -242,6 +243,11 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mAdditionalInformationFragments.add(SingleChoiceTaskFragment.newInstance(getString(R.string.additional_question_alcohol_consumption), AdditionalInformationConstants.AlcoholConsumptionValue,lAlcoholComsumptionOptions, 5));
         mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_new_treatment), AdditionalInformationConstants.NewTreatmentValue, 6));
         mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_late_sleep), AdditionalInformationConstants.LateSleepValue, 7));
+
+        mAdditionalInformationPresenter = new ArrayList<>();
+        for(Fragment lFragment: mAdditionalInformationFragments){
+            mAdditionalInformationPresenter.add( new SeizureReportPresenter( (SeizureReportContract.View)lFragment ,((AuraApplication) getApplication()).getLocalDataRepository(), ((AuraApplication) getApplication()).getUserSessionService() ));
+        }
     }
 
     private void quitApplication() {
@@ -403,23 +409,28 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
      * @param iQuestionIndex
      */
     public void goToAdditionnalQuestions(int iQuestionIndex){
-        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
-        Fragment lFragment;
+
 
         if(iQuestionIndex >= mAdditionalInformationFragments.size()){
-           lFragment = mSeizureReportFragment;
-           Toast.makeText(this, getString(R.string.additional_questions_completed), Toast.LENGTH_SHORT).show();
+            try {
+                ((AuraApplication) getApplication()).getLocalDataRepository().saveSeizure();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            ((AuraApplication) getApplication()).getLocalDataRepository().clearSeizure();
+            Toast.makeText(this, getString(R.string.additional_questions_completed), Toast.LENGTH_SHORT).show();
+            goToSeizureMonitoring();
         }
         else{
-            lFragment = mAdditionalInformationFragments.get(iQuestionIndex);
+            FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+            Fragment lFragment = mAdditionalInformationFragments.get(iQuestionIndex);
+            lTransaction.replace(R.id.content_frame, lFragment);
+
+            lTransaction.addToBackStack(null);
+
+            // Commit the transaction
+            lTransaction.commit();
         }
-
-        lTransaction.replace(R.id.content_frame, lFragment);
-
-        lTransaction.addToBackStack(null);
-
-        // Commit the transaction
-        lTransaction.commit();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

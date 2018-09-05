@@ -55,23 +55,27 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SingleChoiceTaskFragment extends Fragment {
+public class SingleChoiceTaskFragment extends Fragment implements SeizureReportContract.View{
 
     private static final String QUESTION_KEY = "question";
     private static final String TASK_NAME = "task-name";
     private static final String TASK_INDEX = "task-index";
     private static final String CHOICE_LIST = "choice_list";
 
+    private static final String UNKNOWN_OPTION = "unknown";
+
     private int mTaskIndex;
     private String mTaskName;
     private String mQuestion;
     private SingleChoiceList mChoiceList;
 
+    private SeizureReportContract.Presenter mPresenter;
+
     @BindView(R.id.yes_no_question)TextView mQuestionText;
     @BindView(R.id.next_button) Button mNextButton;
     @OnClick(R.id.next_button)
     public void goToNext(View v){
-        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, mTaskIndex));
+        mPresenter.nextAdditionalInformationSeizureOnSeizure(mTaskIndex);
     }
 
     @BindView(R.id.choices_list) RadioGroup mRadioGroup;
@@ -115,6 +119,8 @@ public class SingleChoiceTaskFragment extends Fragment {
 
         mQuestionText.setText(mQuestion);
         buildRadioButtonOptions(mChoiceList);
+        mPresenter.setQuestionResult(mTaskName, UNKNOWN_OPTION);
+        mRadioGroup.setSelected(false);
 
         return view;
     }
@@ -147,8 +153,14 @@ public class SingleChoiceTaskFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mOptionDescription.setText(iChoice.getDescription());
+                mPresenter.setQuestionResult(mTaskName, iChoice.getValue());
             }
         });
         return lButton;
+    }
+
+    @Override
+    public void setPresenter(SeizureReportContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
     }
 }

@@ -28,6 +28,8 @@
  */
 package com.wearablesensor.aura.data_repository.models;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -42,6 +44,8 @@ public class SeizureEventModel {
 
     private String mType; // sample data type
 
+    private HashMap<String, String> mAdditionalInformation;
+
     public SeizureEventModel(String iUuid, String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity){
         mUuid = iUuid;
         mUser = iUser;
@@ -50,6 +54,8 @@ public class SeizureEventModel {
         mIntensity = iIntensity;
 
         mType = SENSITIVE_EVENT_TYPE;
+
+        mAdditionalInformation = new HashMap<>();
     }
 
     public SeizureEventModel(String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity){
@@ -60,6 +66,8 @@ public class SeizureEventModel {
         mIntensity = iIntensity;
 
         mType = SENSITIVE_EVENT_TYPE;
+
+        mAdditionalInformation = new HashMap<>();
     }
 
     public SeizureEventModel(){
@@ -70,6 +78,8 @@ public class SeizureEventModel {
         mIntensity = "";
 
         mType = SENSITIVE_EVENT_TYPE;
+
+        mAdditionalInformation = new HashMap<>();
     }
 
     public String getUuid() {
@@ -114,7 +124,16 @@ public class SeizureEventModel {
         mType = iType;
     }
 
+    public void addAdditionalInformation(String iQuestionTag, String iResultTag){
+        mAdditionalInformation.put(iQuestionTag, iResultTag);
+    }
+
     public String toString(){
-        return mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mIntensity;
+        String lDesc = mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mIntensity +"\n";
+        for(Map.Entry<String, String> lEntry: mAdditionalInformation.entrySet()){
+            lDesc+= lEntry.getKey() + ":" + lEntry.getValue() + " ";
+        }
+
+        return lDesc;
     }
 }

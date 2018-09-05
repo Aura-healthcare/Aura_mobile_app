@@ -42,6 +42,7 @@ import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -52,6 +53,8 @@ public class LocalDataFileRepository implements LocalDataRepository {
     private Context mApplicationContext;
 
     private CacheStorage mCache; /* temporary storage in a cache to avoid call overhead to local data repository */
+
+    private SeizureEventModel mSeizureCache; /* temporary storage of a seizure */
     private FileStorage mFileStorage; /* file storage for permanent storage on mobile device */
 
     /**
@@ -66,6 +69,8 @@ public class LocalDataFileRepository implements LocalDataRepository {
         mApplicationContext = iApplicationContext;
         mCache = new CacheStorage();
         mFileStorage = new FileStorage(iApplicationContext);
+
+        mSeizureCache = null;
     }
 
     /**
@@ -103,13 +108,22 @@ public class LocalDataFileRepository implements LocalDataRepository {
     /**
      * @brief save a seizure event
      *
-     * @param iSeizureEventModel seizure event
-     *
      * @throws Exception
      */
     @Override
-    public void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception {
-        mFileStorage.saveSeizure(iSeizureEventModel);
+    public void saveSeizure() throws Exception {
+        if(mSeizureCache != null){
+            //mFileStorage.saveSeizure(mSeizureCache);
+            Log.d("Debug", mSeizureCache.toString());
+        }
+    }
+
+    /**
+     * @brief clear seizure cache
+     */
+    @Override
+    public void clearSeizure(){
+        mSeizureCache = null;
     }
 
     /**
@@ -139,6 +153,32 @@ public class LocalDataFileRepository implements LocalDataRepository {
     public void removePhysioSignalSamples(String iFilename) throws Exception{
         File lToBeDeletedFile = new File(mApplicationContext.getFilesDir().getPath()+ "/" + iFilename);
         lToBeDeletedFile.delete();
+    }
+
+    /**
+     * @brief cache seizure basic information
+     *
+     * @param iUser user uuid
+     * @param iTimestamp user triggered timestamp
+     * @param iSensitiveEventTimestamp sensitive event timestamp
+     * @param iIntensity event intensity
+     */
+    @Override
+    public void cacheSeizureBasicInformation(String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity) {
+        mSeizureCache = new SeizureEventModel(iUser, iTimestamp, iSensitiveEventTimestamp, iIntensity);
+    }
+
+    /**
+     * @brief cache seizure additional info
+     *
+     * @param iQuestionTag question tag
+     * @param iResultTag result tag
+     */
+    @Override
+    public void cacheSeizureAdditionalInformation(String iQuestionTag, String iResultTag) {
+        if(mSeizureCache != null) {
+            mSeizureCache.addAdditionalInformation(iQuestionTag, iResultTag);
+        }
     }
 
     /**

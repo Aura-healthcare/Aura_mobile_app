@@ -35,6 +35,7 @@ import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public interface LocalDataRepository {
@@ -58,7 +59,7 @@ public interface LocalDataRepository {
      *
      * @throws Exception
      */
-    public String queryPhysioSignalSamples(String iFilename) throws Exception;
+     String queryPhysioSignalSamples(String iFilename) throws Exception;
 
     /**
      * @brief remove a batch of physiological signal samples from the local storage
@@ -67,20 +68,42 @@ public interface LocalDataRepository {
      *
      * @throws Exception
      */
-    public void removePhysioSignalSamples(String iFilename) throws Exception;
+     void removePhysioSignalSamples(String iFilename) throws Exception;
 
     /**
-     * @brief save a seizure event
+     * @brief cache seizure basic information
      *
-     * @param iSeizureEventModel seizure event
-     *
-     * @throws Exception
+     * @param iUser user uuid
+     * @param iTimestamp user triggered timestamp
+     * @param iSensitiveEventTimestamp sensitive event timestamp
+     * @param iIntensity event intensity
      */
-    void saveSeizure(final SeizureEventModel iSeizureEventModel) throws Exception;
+
+    void cacheSeizureBasicInformation(String iUser, String iTimestamp, String iSensitiveEventTimestamp, String iIntensity);
+
+    /**
+     * @brief cache seizure additional information
+     *
+     * @param iQuestionTag question tag
+     * @param iResultTag result tag
+     */
+    void cacheSeizureAdditionalInformation(String iQuestionTag, String iResultTag);
+
+    /**
+     * @brief save seizure in a file
+     *
+     */
+    void saveSeizure() throws Exception;
+
+    /**
+     * @brief clear seizure
+     */
+    void clearSeizure();
 
     /**
      * @brief clear cache and store data from heap to local data storage
      *
      */
     void forceSavingPhysioSignalSamples() throws Exception;
+
 }

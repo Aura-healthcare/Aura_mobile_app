@@ -67,14 +67,13 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
     AppCompatButton mConfirmButton; /** confirm button */
     @OnClick(R.id.seizure_report_confirm_button)
     public void confirmCallback(View v) {
-
         mPresenter.reportSeizure();
     }
 
     @BindView(R.id.seizure_report_cancel_button) AppCompatButton mCancelButton;   /** cancel button  */
     @OnClick(R.id.seizure_report_cancel_button)
     public void cancelCallback(View v) {
-        mPresenter.cancelReportSeizureDetails();
+        mPresenter.cancelReportSeizure();
     }
 
     @BindView(R.id.single_time_date_picker) SingleDateAndTimePicker mSingleDateAndTimePicker;
@@ -82,7 +81,7 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
     @BindView(R.id.seizure_report_additionnal_questions) Button mAdditionnalQuestions;
     @OnClick(R.id.seizure_report_additionnal_questions)
     public void goToAdditionnalQuestions(){
-        mPresenter.giveAdditionalInformationsOnSeizure();
+        mPresenter.giveAdditionalInformationOnSeizure();
     }
 
     public static SeizureReportFragment newInstance() {
@@ -125,9 +124,11 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
         mSingleDateAndTimePicker.setListener(new SingleDateAndTimePicker.Listener() {
             @Override
             public void onDateChanged(String displayed, Date date) {
-                mPresenter.setCurrentDate(date);
+                mPresenter.setCurrentDate(truncateDateToMinutes(date));
             }
         });
+        mPresenter.setCurrentDate(truncateDateToMinutes(mSingleDateAndTimePicker.getDate()) );
+
         return view;
     }
 
@@ -178,6 +179,14 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
      */
     public interface OnFragmentInteractionListener {
         void onSeizureReportFragmentInteraction(Uri uri);
+    }
+
+    private Date truncateDateToMinutes(Date iDate){
+        Calendar cal = Calendar.getInstance(); // locale-specific
+        cal.setTime(iDate);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 }
 

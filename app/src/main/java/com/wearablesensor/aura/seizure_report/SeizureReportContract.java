@@ -34,15 +34,19 @@ public class SeizureReportContract {
 
 
     public interface Presenter extends BasePresenter {
-        void cancelReportSeizureDetails();
+        void giveAdditionalInformationOnSeizure();
+
+        void nextAdditionalInformationSeizureOnSeizure(int iIndex);
+
+        void cancelReportSeizure();
 
         void reportSeizure();
-
-        void giveAdditionalInformationsOnSeizure();
 
         void setCurrentDate(Date iDate);
 
         void setCurrentIntensity(String iIntensity);
+
+        void setQuestionResult(String iQuestionTag, String iResultTag);
     }
 }
 

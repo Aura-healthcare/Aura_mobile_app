@@ -30,16 +30,8 @@
  */
 package com.wearablesensor.aura.seizure_report;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-
-import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
-import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
-import com.wearablesensor.aura.data_sync.DataSyncFragment;
-import com.wearablesensor.aura.data_visualisation.PhysioSignalVisualisationFragment;
-import com.wearablesensor.aura.device_pairing_details.DevicePairingDetailsFragment;
 import com.wearablesensor.aura.navigation.NavigationConstants;
 import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
@@ -58,6 +50,9 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
     private Date mCurrentDate;
     private String mCurrentIntensity;
 
+    private String mQuestionTag;
+    private String mResultTag;
+
     public SeizureReportPresenter(SeizureReportContract.View iView, LocalDataRepository iLocalDataRepository, UserSessionService iUserSessionService){
         mView = iView;
         mView.setPresenter(this);
@@ -66,6 +61,9 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
         mCurrentDate = new Date();
         mCurrentIntensity = "";
+
+        mQuestionTag = "";
+        mResultTag = "";
     }
 
     @Override
@@ -83,30 +81,44 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
         mCurrentIntensity = iIntensity;
     }
 
-    public void endReportSeizureDetails(){
+    public void setQuestionResult(String iQuestionTag, String iResultTag){
+        mQuestionTag = iQuestionTag;
+        mResultTag = iResultTag;
+    }
+
+    public void endReportSeizure(){
         EventBus.getDefault().post(new NavigationNotification(NavigationConstants.NAVIGATION_SEIZURE_MONITORING));
     }
 
     @Override
-    public void cancelReportSeizureDetails(){
-        endReportSeizureDetails();
+    public void cancelReportSeizure(){
+        mLocalDataRepository.clearSeizure();
+        endReportSeizure();
     }
 
     @Override
     public void reportSeizure() {
-        SeizureEventModel lNewSeizureEvent = new SeizureEventModel(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(mCurrentDate), mCurrentIntensity);
+        mLocalDataRepository.cacheSeizureBasicInformation(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(mCurrentDate), mCurrentIntensity);
         try {
-            mLocalDataRepository.saveSeizure(lNewSeizureEvent);
+            mLocalDataRepository.saveSeizure();
         }
         catch (Exception e){
             e.printStackTrace();
         }
 
-        endReportSeizureDetails();
+        mLocalDataRepository.clearSeizure();
+        endReportSeizure();
     }
 
     @Override
-    public void giveAdditionalInformationsOnSeizure() {
+    public void giveAdditionalInformationOnSeizure() {
+        mLocalDataRepository.cacheSeizureBasicInformation(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(mCurrentDate), mCurrentIntensity);
         EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, 0));
+    }
+
+    @Override
+    public void nextAdditionalInformationSeizureOnSeizure(int iIndex) {
+        mLocalDataRepository.cacheSeizureAdditionalInformation(mQuestionTag, mResultTag);
+        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, iIndex));
     }
 }

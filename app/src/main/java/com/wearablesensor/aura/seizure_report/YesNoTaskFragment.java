@@ -50,23 +50,28 @@ import org.greenrobot.eventbus.EventBus;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnItemSelected;
 import lib.kingja.switchbutton.SwitchMultiButton;
 
-public class YesNoTaskFragment extends Fragment {
+public class YesNoTaskFragment extends Fragment implements SeizureReportContract.View{
 
     private static final String QUESTION_KEY = "question";
     private static final String TASK_NAME = "task-name";
     private static final String TASK_INDEX = "task-index";
+    private static final String YES_OPTION = "yes";
+    private static final String NO_OPTION = "no";
 
     private int mTaskIndex;
     private String mTaskName;
     private String mQuestion;
 
+    private SeizureReportContract.Presenter mPresenter;
+
     @BindView(R.id.yes_no_question)TextView mQuestionText;
     @BindView(R.id.next_button) Button mNextButton;
     @OnClick(R.id.next_button)
     public void goToNext(View v){
-        EventBus.getDefault().post(new NavigationWithIndexNotification(NavigationConstants.NAVIGATION_SEIZURE_NEXT_QUESTION, mTaskIndex));
+        mPresenter.nextAdditionalInformationSeizureOnSeizure(mTaskIndex);
     }
     @BindView(R.id.switch_button_yes_no) SwitchMultiButton mYesNoSwitchButton;
 
@@ -105,7 +110,25 @@ public class YesNoTaskFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         mYesNoSwitchButton.setText(getString(R.string.yes), getString(R.string.no));
+        mPresenter.setQuestionResult(mTaskName, YES_OPTION);
+
+        mYesNoSwitchButton.setOnSwitchListener(new SwitchMultiButton.OnSwitchListener() {
+            @Override
+            public void onSwitch(int position, String tabText) {
+                if(position == 0){
+                    mPresenter.setQuestionResult(mTaskName, YES_OPTION);
+                }
+                else if(position == 1){
+                    mPresenter.setQuestionResult(mTaskName, NO_OPTION);
+                }
+            }
+        });
         mQuestionText.setText(mQuestion);
         return view;
+    }
+
+    @Override
+    public void setPresenter(SeizureReportContract.Presenter iPresenter) {
+        mPresenter = iPresenter;
     }
 }
