@@ -59,7 +59,7 @@ public interface LocalDataRepository {
      *
      * @throws Exception
      */
-     String queryPhysioSignalSamples(String iFilename) throws Exception;
+     String queryRawFileContent(String iFilename) throws Exception;
 
     /**
      * @brief remove a batch of physiological signal samples from the local storage

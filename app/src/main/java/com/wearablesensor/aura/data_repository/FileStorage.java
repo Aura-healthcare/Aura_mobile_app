@@ -47,6 +47,7 @@ import com.facebook.crypto.exception.KeyChainException;
 import com.facebook.crypto.keychain.KeyChain;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
@@ -62,7 +63,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
@@ -171,8 +174,6 @@ public class FileStorage {
         try{
             // if file the available for reading
             if (lInputStream != null) {
-
-
                 // prepare the file for reading
                 InputStreamReader lInputReader = new InputStreamReader(lDecryptedInputStream);
                 BufferedReader lBuffreader = new BufferedReader(lInputReader);
@@ -211,24 +212,22 @@ public class FileStorage {
         String lFilename = getCacheSensitiveEventFilename();
         FileOutputStream lOutputStream = null;
 
-        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
-        try {
-            lSeizureList = querySeizures(lFilename);
-        }
-        catch(FileNotFoundException e){
-            Log.d(TAG, "Create Seizure file");
-        }
-        catch (Exception e){
-            throw new Exception();
-        }
-
         if(iSeizureEventModel == null){
             return;
         }
 
-        lSeizureList.add(iSeizureEventModel);
+        ArrayList<SeizureEventModel> lSeizureList = new ArrayList<>();
 
-        Log.d(TAG, "Start Recording");
+        // fetch previously recorded seizures
+        try {
+            lSeizureList = querySeizures(lFilename);
+        }
+        catch(Exception e){
+            Log.d(TAG, "Create Seizure file");
+        }
+
+        // insert new seizure into encrypted JSON
+        lSeizureList.add(iSeizureEventModel);
         try {
             lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
             // Creates an output stream which encrypts the data as
@@ -237,11 +236,9 @@ public class FileStorage {
                     lOutputStream,
                     Entity.create("entity_id"));
 
+            Type lType = new TypeToken<ArrayList<SeizureEventModel>>() {}.getType();
             String lData = "";
-            for(SeizureEventModel lSeizure : lSeizureList){
-                lData += lSeizureList.toString() + "\n";
-            }
-
+            lData = mGson.toJson(lSeizureList, lType);
             lCryptedStream.write(lData.getBytes());
             lCryptedStream.close();
 
@@ -269,44 +266,13 @@ public class FileStorage {
     public ArrayList<SeizureEventModel> querySeizures(String iFilename) throws IOException, CryptoInitializationException, KeyChainException {
         Log.d(TAG, "File Open: " + iFilename);
 
-        FileInputStream lInputStream = mApplicationContext.openFileInput(iFilename);
-        InputStream lDecryptedInputStream = mCrypto.getCipherInputStream(
-                lInputStream, Entity.create("entity_id"));
-        ArrayList<SeizureEventModel> lSeizureEventSamples = new ArrayList<SeizureEventModel>();
+        String lSeizureData = queryRawContent(iFilename);
 
-        try{
-            // if file the available for reading
-            if (lDecryptedInputStream != null) {
-                // prepare the file for reading
-                InputStreamReader lInputReader = new InputStreamReader(lDecryptedInputStream);
-                BufferedReader lBuffreader = new BufferedReader(lInputReader);
+        Type lType = new TypeToken<ArrayList<SeizureEventModel>>() {}.getType();
+        ArrayList<SeizureEventModel> lSeizureList = mGson.fromJson(lSeizureData, lType);
 
-                String lLine = lBuffreader.readLine();
-
-                // read every line of the file into the line-variable, on line at the time
-                // TODO: implement a builder
-
-                while(lLine != null) {
-                    String[] lArgs = lLine.split(" ");
-                    if(lArgs[1].equals(SeizureEventModel.SENSITIVE_EVENT_TYPE)){
-                        SeizureEventModel lSeizureEvent = new SeizureEventModel(lArgs[0], lArgs[2], lArgs[3], lArgs[4], lArgs[5]);
-                        lSeizureEventSamples.add( lSeizureEvent );
-                    }
-
-                    lLine = lBuffreader.readLine();
-                }
-
-                lBuffreader.close();
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lInputStream.close();
-        }
-
-        Log.d(TAG, "Samples count - " + lSeizureEventSamples.size());
-        return lSeizureEventSamples;
+        Log.d(TAG, "Samples count - " + lSeizureList.size());
+        return lSeizureList;
     }
 
     public static String getCachePhysioFilename(String iDatatype, String iTimestamp){

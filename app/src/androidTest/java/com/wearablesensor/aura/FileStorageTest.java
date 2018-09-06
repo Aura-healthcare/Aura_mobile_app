@@ -3,7 +3,6 @@ package com.wearablesensor.aura;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import com.amazonaws.util.IOUtils;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
@@ -14,6 +13,7 @@ import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
+import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -101,6 +101,16 @@ public class FileStorageTest {
         mFileStorage.saveSeizure(lSeizureEventModel);
         assertThat("Single seizure event recording failed", mDataFileHelper.isFileExistAt(FileStorage.getCacheSensitiveEventFilename()));
         mDataFileHelper.cleanPrivateFiles();
+
+        SeizureEventModel lSeizureEventModel2 = new SeizureEventModel(lUserUuid, lTimestamp1, lTimestamp2, "Big");
+        lSeizureEventModel2.addAdditionalInformation(AdditionalInformationConstants.AlcoholConsumptionValue, AdditionalInformationConstants.AlcoholConsumptionFewDrinksOption);
+        lSeizureEventModel2.addAdditionalInformation(AdditionalInformationConstants.LateSleepValue, "yes");
+        lSeizureEventModel2.addAdditionalInformation(AdditionalInformationConstants.TreatmentObservanceValue, AdditionalInformationConstants.TreatmentObservanceNeverOption);
+        lSeizureEventModel2.addAdditionalInformation(AdditionalInformationConstants.NewTreatmentValue, "no");
+
+        mFileStorage.saveSeizure(lSeizureEventModel2);
+        assertThat("Single seizure event recording failed", mDataFileHelper.isFileExistAt(FileStorage.getCacheSensitiveEventFilename()));
+        mDataFileHelper.cleanPrivateFiles();
     }
 
     @Test
@@ -119,8 +129,17 @@ public class FileStorageTest {
         final String lTimestamp8 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 4, 1,1,40));
 
         mFileStorage.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp1, lTimestamp2, "Big"));
-        mFileStorage.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp3, lTimestamp4, "Small"));
-        mFileStorage.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp5, lTimestamp6, "Medium"));
+        SeizureEventModel lSeizure = new SeizureEventModel(lUserUuid, lTimestamp3, lTimestamp4, "Small");
+        lSeizure.addAdditionalInformation(AdditionalInformationConstants.AlcoholConsumptionValue, AdditionalInformationConstants.AlcoholConsumptionFewDrinksOption);
+        lSeizure.addAdditionalInformation(AdditionalInformationConstants.LateSleepValue, "yes");
+        mFileStorage.saveSeizure(lSeizure);
+
+        SeizureEventModel lSeizure2 = new SeizureEventModel(lUserUuid, lTimestamp5, lTimestamp6, "Medium");
+        lSeizure2.addAdditionalInformation(AdditionalInformationConstants.AlcoholConsumptionValue, AdditionalInformationConstants.AlcoholConsumptionFewDrinksOption);
+        lSeizure2.addAdditionalInformation(AdditionalInformationConstants.LateSleepValue, "yes");
+        lSeizure2.addAdditionalInformation(AdditionalInformationConstants.TreatmentObservanceValue, AdditionalInformationConstants.TreatmentObservanceNeverOption);
+        lSeizure2.addAdditionalInformation(AdditionalInformationConstants.NewTreatmentValue, "no");
+        mFileStorage.saveSeizure(lSeizure2);
         mFileStorage.saveSeizure(new SeizureEventModel(lUserUuid, lTimestamp7, lTimestamp8, "Medium"));
 
         lSeizureList = mFileStorage.querySeizures(FileStorage.getCacheSensitiveEventFilename());
@@ -200,6 +219,4 @@ public class FileStorageTest {
         assertThat("file content does not match with references json file", lStatus);
         mDataFileHelper.cleanPrivateFiles();
     }
-
-
 }

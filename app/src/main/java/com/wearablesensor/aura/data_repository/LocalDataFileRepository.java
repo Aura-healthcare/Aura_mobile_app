@@ -84,7 +84,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
      */
 
     @Override
-    public String queryPhysioSignalSamples(String iFilename) throws Exception {
+    public String queryRawFileContent(String iFilename) throws Exception {
         return mFileStorage.queryRawContent(iFilename);
     }
 
@@ -113,8 +113,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
     @Override
     public void saveSeizure() throws Exception {
         if(mSeizureCache != null){
-            //mFileStorage.saveSeizure(mSeizureCache);
-            Log.d("Debug", mSeizureCache.toString());
+            mFileStorage.saveSeizure(mSeizureCache);
         }
     }
 
@@ -190,4 +189,7 @@ public class LocalDataFileRepository implements LocalDataRepository {
         return mCache;
     }
 
+    public SeizureEventModel getSeizureCache() {
+        return mSeizureCache;
+    }
 }

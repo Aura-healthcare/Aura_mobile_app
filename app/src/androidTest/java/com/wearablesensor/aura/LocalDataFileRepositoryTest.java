@@ -16,6 +16,7 @@ import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.RRIntervalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
 import com.wearablesensor.aura.data_repository.models.SkinTemperatureModel;
+import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -164,5 +165,53 @@ public class LocalDataFileRepositoryTest{
         mLocalDataFileRepository.removePhysioSignalSamples(FileStorage.getCachePhysioFilename(RRIntervalModel.RR_INTERVAL_TYPE, lTimestamp2));
         assertThat("RemovePhysioSignals failed - files not deleted", mDataFileHelper.getDataFiles().length == 0);
         mDataFileHelper.cleanPrivateFiles();
+    }
+
+    @Test
+    public void cacheSeizureBasicInformation(){
+        final String lUserUuid = "c561e550-0000-483f-ac38-76fd09c72afd";
+
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,20));
+        final String lIntensity = "Big";
+
+        mLocalDataFileRepository.cacheSeizureBasicInformation(lUserUuid, lTimestamp1, lTimestamp2, lIntensity);
+        assertThat("Basic seizure info not cached properly", mLocalDataFileRepository.getSeizureCache() != null);
+        mLocalDataFileRepository.clearSeizure();
+    }
+
+    @Test
+    public void cacheSeizureAdditionalInformation_MultipleEntries(){
+        final String lUserUuid = "c561e550-0000-483f-ac38-76fd09c72afd";
+
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,20));
+        final String lIntensity = "Big";
+
+        mLocalDataFileRepository.cacheSeizureBasicInformation(lUserUuid, lTimestamp1, lTimestamp2, lIntensity);
+        mLocalDataFileRepository.cacheSeizureAdditionalInformation(AdditionalInformationConstants.NewTreatmentValue, "yes");
+        mLocalDataFileRepository.cacheSeizureAdditionalInformation(AdditionalInformationConstants.AlcoholConsumptionValue, AdditionalInformationConstants.AlcoholConsumptionFewDrinksOption);
+        assertThat("Additional seizure info not cached properly", mLocalDataFileRepository.getSeizureCache().getNbAdditionalInformation() == 2);
+        mLocalDataFileRepository.clearSeizure();
+    }
+
+    @Test
+    public void cacheSeizureAdditionalInformation_IncorrectEntry(){
+        mLocalDataFileRepository.cacheSeizureAdditionalInformation(AdditionalInformationConstants.QualityOfSleepValue, AdditionalInformationConstants.QualityOfSleepInsomniaOption);
+        assertThat("Additional seizure info not cached properly", mLocalDataFileRepository.getSeizureCache() == null);
+
+    }
+
+    @Test
+    public void clearSeizure(){
+        final String lUserUuid = "c561e550-0000-483f-ac38-76fd09c72afd";
+
+        final String lTimestamp1 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,10));
+        final String lTimestamp2 = DateIso8601Mapper.getString(new Date(/*1900 + */118, 2, 1,1,20));
+        final String lIntensity = "Big";
+
+        mLocalDataFileRepository.cacheSeizureBasicInformation(lUserUuid, lTimestamp1, lTimestamp2, lIntensity);
+        mLocalDataFileRepository.clearSeizure();
+        assertThat("Seizure cache not cleared properly", mLocalDataFileRepository.getSeizureCache() == null);
     }
 }

@@ -253,7 +253,7 @@ public class DataSyncService{
         File[] lFiles = lDirectory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                String lDataFilePrefix = FileStorage.CACHE_FILENAME + FileStorage.PHYSIO_SIGNAL_SUFFIX;
+                String lDataFilePrefix = FileStorage.CACHE_FILENAME;
                 if(pathname.toString().contains(lDataFilePrefix)){
                     return true;
                 }
@@ -299,7 +299,7 @@ public class DataSyncService{
             }
 
             try {
-                String lData = mLocalDataRepository.queryPhysioSignalSamples(lPacket);
+                String lData = mLocalDataRepository.queryRawFileContent(lPacket);
                 mRemoteDataTimeSeriesRepository.save(lData);
             }
             catch (FileNotFoundException e){

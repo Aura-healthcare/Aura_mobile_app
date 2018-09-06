@@ -128,6 +128,10 @@ public class SeizureEventModel {
         mAdditionalInformation.put(iQuestionTag, iResultTag);
     }
 
+    public Integer getNbAdditionalInformation(){
+        return mAdditionalInformation.size();
+    }
+
     public String toString(){
         String lDesc = mUuid + " " + mType + " " + mUser + " " + mTimestamp + " " + mSensitiveEventTimestamp + " " +mIntensity +"\n";
         for(Map.Entry<String, String> lEntry: mAdditionalInformation.entrySet()){
