@@ -141,9 +141,16 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                     Calendar c = Calendar.getInstance();
                     String lCurrentTimestamp = DateIso8601Mapper.getString(c.getTime());
 
-                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(e.device().getMacAddress(), lCurrentTimestamp, lGattCharacteristicReader.getRrInterval());
-                    Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
-                    receiveData(lRrIntervalModel);
+                    Integer[] lRrIntervals = lGattCharacteristicReader.getRrInterval();
+                    if(lRrIntervals == null){
+                        return;
+                    }
+
+                    for(Integer lRrInterval : lRrIntervals) {
+                        RRIntervalModel lRrIntervalModel = new RRIntervalModel(e.device().getMacAddress(), lCurrentTimestamp, lRrInterval);
+                        Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrInterval + " " + lRrIntervalModel.getUser());
+                        receiveData(lRrIntervalModel);
+                    }
                 }
             }
         };
@@ -467,6 +474,19 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     public void close(){
         BleManager.get(mContext).turnOff();
         super.close();
+    }
+
+    @Override
+    public boolean disconnectDevices(){
+        if(mConnectedDevices.size() == 0){
+            return false;
+        }
+
+        for(BleDevice lBleDevice: mConnectedDevices.values()){
+            lBleDevice.disconnect();
+        }
+
+        return super.disconnectDevices();
     }
 
 }

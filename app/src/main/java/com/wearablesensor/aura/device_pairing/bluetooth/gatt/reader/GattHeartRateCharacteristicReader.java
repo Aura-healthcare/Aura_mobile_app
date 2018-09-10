@@ -116,12 +116,12 @@ public class GattHeartRateCharacteristicReader  implements GattCharacteristicRea
      *
      * @return first R-R interval in ms
      */
-    public Integer getRrInterval(){
+    public Integer[] getRrInterval(){
         if(mRrIntervalCount > 0) {
-            return mRrInterval[0];
+            return mRrInterval;
         }
         else{
-            return 0;
+            return null;
         }
     }
 }
