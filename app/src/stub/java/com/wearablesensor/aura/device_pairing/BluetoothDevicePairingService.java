@@ -115,7 +115,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
                 GattHeartRateCharacteristicReader heartRateCharacteristicReader = new GattHeartRateCharacteristicReader();
                 if(heartRateCharacteristicReader.read(event)){
-                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(event.getMacAddress(), lCurrentTimestamp, heartRateCharacteristicReader.getRrInterval());
+                    RRIntervalModel lRrIntervalModel = new RRIntervalModel(event.getMacAddress(), lCurrentTimestamp, heartRateCharacteristicReader.getRrInterval()[0]);
                     Log.d(TAG, lRrIntervalModel.getTimestamp() + " " + lRrIntervalModel.getUuid() + " " + lRrIntervalModel.getRrInterval() + " " + lRrIntervalModel.getUser());
                     receiveData(lRrIntervalModel);
                 }
