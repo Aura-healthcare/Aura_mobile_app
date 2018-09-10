@@ -30,6 +30,8 @@ public class SeizureReportContract {
 
 
         void setPresenter(Presenter iPresenter);
+
+        void displaySaveSeizureValidation();
     }
 
 

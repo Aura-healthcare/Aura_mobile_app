@@ -131,4 +131,9 @@ public class YesNoTaskFragment extends Fragment implements SeizureReportContract
     public void setPresenter(SeizureReportContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }
+
+    @Override
+    public void displaySaveSeizureValidation() {
+
+    }
 }

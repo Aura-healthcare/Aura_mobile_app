@@ -79,6 +79,7 @@
     <string name="menu_contact">Contact</string>
     <string name="menu_cgu">CGU</string>
     <string name="menu_general_information">Informations générales</string>
+    <string name="menu_disconnect_devices">Déconnecter les dispositifs</string>
     <string name="menu_leave_app">Quitter l\'application</string>
 
     <string name="title_activity_device_paring" >Device Pairing Activity</string>
@@ -111,9 +112,12 @@
 
     <string name="additional_question_late_sleep"> Êtes-vous​ sorti tard la veille​ ?</string>
 
+    <string name="seizure_completed"> Merci d\'avoir reporté cette crise avec soin. Vos réponses seront très utiles pour mieux comprendre les évenements favorisant le déclenchement d\'une crise.</string>
     <string name="additional_questions_completed"> Merci d\'avoir répondu à ce questionnaire. Vos réponses seront très utiles pour mieux comprendre les évenements favorisant le déclenchement d\'une crise. </string>
     <string name="give_more_details_about_seizure"> Donner plus d\'informations sur sa crise </string>
 
     <string name="report_seizure_intensity">Reporter l\'intensité de la crise: </string>
     <string name="report_seizure_date_and_time">Reporter la date et l\'heure de la crise: </string>
+    <string name="devices_disconnected_info" >Les dispositifs ont été deconnectés avec succès</string>
+    <string name="configure_application" > Configurer l\'application </string>
 </resources>

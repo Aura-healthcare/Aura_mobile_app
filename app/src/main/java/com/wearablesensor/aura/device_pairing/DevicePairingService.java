@@ -115,4 +115,9 @@ public class DevicePairingService{
     public void configureAndConnectDevice(BleDevice iBleDevice) {
         Log.d(TAG, "configureAndConnectDevice");
     }
+
+    public boolean disconnectDevices(){
+        Log.d(TAG, "disconnect devices");
+        return true;
+    }
 }

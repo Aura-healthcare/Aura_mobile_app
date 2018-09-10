@@ -30,6 +30,8 @@
  */
 package com.wearablesensor.aura.seizure_report;
 
+import android.widget.Toast;
+
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.navigation.NavigationConstants;
@@ -101,6 +103,7 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
         mLocalDataRepository.cacheSeizureBasicInformation(mUserSessionService.getUser().getUuid(), DateIso8601Mapper.getString(new Date()), DateIso8601Mapper.getString(mCurrentDate), mCurrentIntensity);
         try {
             mLocalDataRepository.saveSeizure();
+            mView.displaySaveSeizureValidation();
         }
         catch (Exception e){
             e.printStackTrace();

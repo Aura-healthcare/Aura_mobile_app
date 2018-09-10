@@ -4,7 +4,7 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_SuiviContinu"
+            android:id="@+id/nav_ContinuousMonitoring"
             android:icon="@drawable/ic_signal"
             android:title="@string/menu_monitoring" />
     </group>
@@ -28,10 +28,16 @@
         </menu>
     </item>
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_LeaveApp"
-            android:icon="@drawable/ic_leave_app"
-            android:title="@string/menu_leave_app" />
-    </group>
+    <item android:title="@string/configure_application">
+        <menu android:checkableBehavior="none">
+            <item
+                android:id="@+id/nav_DisconnectDevices"
+                android:icon="@drawable/ic_sync_disabled_black_24dp"
+                android:title="@string/menu_disconnect_devices" />
+            <item
+                android:id="@+id/nav_LeaveApp"
+                android:icon="@drawable/ic_leave_app"
+                android:title="@string/menu_leave_app" />
+        </menu>
+    </item>
 </menu>

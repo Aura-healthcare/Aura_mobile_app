@@ -193,13 +193,16 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
-        mNavigationView.setCheckedItem(R.id.nav_SuiviContinu);
+        mNavigationView.setCheckedItem(R.id.nav_ContinuousMonitoring);
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
 
                 switch (item.getItemId()) {
-                    case R.id.nav_SuiviContinu:
+                    case R.id.nav_ContinuousMonitoring:
+                        break;
+                    case R.id.nav_DisconnectDevices:
+                        disconnectDevices();
                         break;
                     case R.id.nav_LeaveApp:
                         quitApplication();
@@ -211,6 +214,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         });
         //wait the fragment to be fully displayed before starting automatic pairing
         startDataCollector();
+    }
+
+    private void disconnectDevices() {
+        if(mDataCollectorService == null
+        || mDataCollectorService.getDevicePairingService() == null){
+            return;
+        }
+
+        if(mDataCollectorService.getDevicePairingService().disconnectDevices()) {
+            Toast.makeText(getBaseContext(), R.string.devices_disconnected_info, Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -418,7 +432,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
                 e.printStackTrace();
             }
             ((AuraApplication) getApplication()).getLocalDataRepository().clearSeizure();
-            Toast.makeText(this, getString(R.string.additional_questions_completed), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.additional_questions_completed), Toast.LENGTH_LONG).show();
             goToSeizureMonitoring();
         }
         else{

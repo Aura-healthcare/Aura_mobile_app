@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 import com.wearablesensor.aura.R;
@@ -165,6 +166,11 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
     @Override
     public void setPresenter(SeizureReportContract.Presenter iPresenter) {
         mPresenter = iPresenter;
+    }
+
+    @Override
+    public void displaySaveSeizureValidation() {
+        Toast.makeText(this.getActivity(), R.string.seizure_completed, Toast.LENGTH_LONG).show();
     }
 
     /**

@@ -108,6 +108,7 @@
     <string name="menu_contact">Contact</string>
     <string name="menu_cgu">Terms and conditions</string>
     <string name="menu_general_information">General information</string>
+    <string name="menu_disconnect_devices">Disconnect devices</string>
     <string name="menu_leave_app">Leave application</string>
 
     <string name="title_activity_device_paring" >Device Pairing Activity</string>
@@ -140,9 +141,12 @@
 
     <string name="additional_question_late_sleep"> Did you get out late last night ?</string>
 
+    <string name="seizure_completed"> Thanks for reporting this seizure. It will provide very useful information to understand early seizure signs.</string>
     <string name="additional_questions_completed"> Thanks for completing this questionnaire. It will provide very useful information to seizure anticipation and detection. </string>
     <string name="give_more_details_about_seizure"> Give more details about your seizure </string>
 
     <string name="report_seizure_intensity">Report seizure intensity: </string>
     <string name="report_seizure_date_and_time">Report seizure date and time: </string>
+    <string name="devices_disconnected_info" > Devices has been successfully disconnected </string>
+    <string name="configure_application" > Configure mobile application </string>
 </resources>

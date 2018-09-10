@@ -163,4 +163,9 @@ public class SingleChoiceTaskFragment extends Fragment implements SeizureReportC
     public void setPresenter(SeizureReportContract.Presenter iPresenter) {
         mPresenter = iPresenter;
     }
+
+    @Override
+    public void displaySaveSeizureValidation() {
+
+    }
 }
