@@ -46,6 +46,7 @@ import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.user_session.UserModel;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -88,6 +89,8 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mDeviceScanDetailsFragment = DeviceScanDetailsFragment.newInstance();
         mDeviceScanDetailsPresenter = new DeviceScanDetailsPresenter(mDevicePairingService, this,  mDeviceScanDetailsFragment);
+        EventBus.getDefault().register(this);
+
         ButterKnife.bind(this);
 
         FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
@@ -187,6 +190,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         doUnbindService();
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 }
