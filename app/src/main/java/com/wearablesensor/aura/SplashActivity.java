@@ -37,7 +37,7 @@ public class SplashActivity extends AppCompatActivity {
         String lUserUUID = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_UUID, null);
 
         if(lUserUUID != null){
-            Intent intent = new Intent(this, DeviceScanActivity.class);
+            Intent intent = new Intent(this, MainMenuActivity.class);
             startActivity(intent);
         }
         else {

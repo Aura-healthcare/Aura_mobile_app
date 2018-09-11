@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+        android:id="@+id/image-header"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="70dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/aura_logo" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="70dp"
+        android:layout_below="@+id/image-header"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <Button
+            android:id="@+id/device_scan_button"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:backgroundTint="@color/app_primary"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/white"
+            android:textAllCaps="true"
+            android:text="@string/connect_to_devices" />
+
+        <Button
+            android:id="@+id/seizure_monitoring_button"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/app_primary_dark"
+            android:textColor="@color/white"
+            android:textAllCaps="true"
+            android:text="@string/start_immediately_session" />
+
+    </LinearLayout>
+
+</RelativeLayout>
+

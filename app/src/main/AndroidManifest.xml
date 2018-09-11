@@ -42,6 +42,11 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:label="@string/title_activity_sign_in" />
         <activity
+            android:name="com.wearablesensor.aura.MainMenuActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:label="@string/title_activity_main_menu" />
+        <activity
             android:name="com.wearablesensor.aura.DeviceScanActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"

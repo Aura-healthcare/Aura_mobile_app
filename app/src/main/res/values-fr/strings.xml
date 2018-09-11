@@ -120,4 +120,7 @@
     <string name="report_seizure_date_and_time">Reporter la date et l\'heure de la crise: </string>
     <string name="devices_disconnected_info" >Les dispositifs ont été deconnectés avec succès</string>
     <string name="configure_application" > Configurer l\'application </string>
+
+    <string name="connect_to_devices">Se connecter aux dispositifs</string>
+    <string name="start_immediately_session">Démarrer directement la session</string>
 </resources>
