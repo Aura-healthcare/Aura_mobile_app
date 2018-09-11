@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
         android:textSize="18dp"
         android:textColor="@color/black"
         android:fontFamily="@font/helvetica_neue_nedium"
@@ -18,8 +20,9 @@
     <com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker
         android:id="@+id/single_time_date_picker"
         android:layout_width="wrap_content"
-        android:layout_height="230dp"
+        android:layout_height="0dp"
         app:picker_curved="true"
+        android:layout_weight="5"
         app:picker_visibleItemCount="7"
         android:fontFamily="@font/helvetica_neue_nedium"
         app:picker_selectorColor="@color/splashscreen_light"
@@ -27,9 +30,11 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:textSize="18dp"
+        android:layout_weight="1"
         android:textColor="@color/black"
         android:fontFamily="@font/helvetica_neue_nedium"
         android:text="@string/report_seizure_intensity"/>
@@ -37,8 +42,9 @@
     <lib.kingja.switchbutton.SwitchMultiButton
         android:id="@+id/switch_button_seizure_impact"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="center"
+        android:layout_weight="1"
         android:padding="8dp"
         app:strokeRadius="5dp"
         app:strokeWidth="1dp"
@@ -54,8 +60,10 @@
     <Button
         android:text="@string/give_more_details_about_seizure"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
         android:id="@+id/seizure_report_additionnal_questions"
         android:textColor="@color/splashscreen_dark"
         android:fontFamily="@font/helvetica_neue_nedium"
@@ -65,9 +73,10 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
+        android:layout_weight="1"
         android:elevation="0dp"
         android:gravity="bottom">
 
