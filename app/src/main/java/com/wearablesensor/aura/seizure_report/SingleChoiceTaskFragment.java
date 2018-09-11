@@ -33,6 +33,7 @@ package com.wearablesensor.aura.seizure_report;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,10 +120,15 @@ public class SingleChoiceTaskFragment extends Fragment implements SeizureReportC
 
         mQuestionText.setText(mQuestion);
         buildRadioButtonOptions(mChoiceList);
-        mPresenter.setQuestionResult(mTaskName, UNKNOWN_OPTION);
-        mRadioGroup.setSelected(false);
 
         return view;
+    }
+
+    @Override
+    public void onResume(){
+        mPresenter.setQuestionResult(mTaskName, UNKNOWN_OPTION);
+        mRadioGroup.clearCheck();
+        super.onResume();
     }
 
     /**

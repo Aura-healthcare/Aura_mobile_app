@@ -110,8 +110,6 @@ public class YesNoTaskFragment extends Fragment implements SeizureReportContract
         ButterKnife.bind(this, view);
 
         mYesNoSwitchButton.setText(getString(R.string.yes), getString(R.string.no));
-        mPresenter.setQuestionResult(mTaskName, YES_OPTION);
-
         mYesNoSwitchButton.setOnSwitchListener(new SwitchMultiButton.OnSwitchListener() {
             @Override
             public void onSwitch(int position, String tabText) {
@@ -125,6 +123,14 @@ public class YesNoTaskFragment extends Fragment implements SeizureReportContract
         });
         mQuestionText.setText(mQuestion);
         return view;
+    }
+
+    @Override
+    public void onResume(){
+        mYesNoSwitchButton.setSelectedTab(0);
+        mPresenter.setQuestionResult(mTaskName, YES_OPTION);
+
+        super.onResume();
     }
 
     @Override
