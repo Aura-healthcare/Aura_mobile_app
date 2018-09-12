@@ -70,7 +70,7 @@ public class SeizureReportPresenter implements SeizureReportContract.Presenter {
 
     @Override
     public void start() {
-
+        mLocalDataRepository.clearSeizure();
     }
 
     @Override

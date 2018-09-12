@@ -54,6 +54,7 @@ import com.wearablesensor.aura.navigation.NavigationConstants;
 import com.wearablesensor.aura.navigation.NavigationNotification;
 import com.wearablesensor.aura.navigation.NavigationWithIndexNotification;
 import com.wearablesensor.aura.seizure_report.AdditionalInformationConstants;
+import com.wearablesensor.aura.seizure_report.FreeTextTaskFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportContract;
 import com.wearablesensor.aura.seizure_report.SeizureReportFragment;
 import com.wearablesensor.aura.seizure_report.SeizureReportPresenter;
@@ -257,6 +258,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mAdditionalInformationFragments.add(SingleChoiceTaskFragment.newInstance(getString(R.string.additional_question_alcohol_consumption), AdditionalInformationConstants.AlcoholConsumptionValue,lAlcoholComsumptionOptions, 5));
         mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_new_treatment), AdditionalInformationConstants.NewTreatmentValue, 6));
         mAdditionalInformationFragments.add(YesNoTaskFragment.newInstance(getString(R.string.additional_question_late_sleep), AdditionalInformationConstants.LateSleepValue, 7));
+        mAdditionalInformationFragments.add(FreeTextTaskFragment.newInstance(getString(R.string.additional_question_comments), AdditionalInformationConstants.Comments, 8));
 
         mAdditionalInformationPresenter = new ArrayList<>();
         for(Fragment lFragment: mAdditionalInformationFragments){
@@ -326,7 +328,17 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
 
     @Override
     public void onBackPressed() {
-        //disable leaving activity on back button pressed
+        Fragment lSeizureReportFragment = getSupportFragmentManager().findFragmentByTag(SeizureReportFragment.class.getSimpleName());
+        Fragment lSeizureMonitoringFragment = getSupportFragmentManager().findFragmentByTag(DevicePairingDetailsFragment.class.getSimpleName());
+        if(lSeizureReportFragment != null && lSeizureReportFragment.isVisible()){
+            goToSeizureMonitoring();
+        }
+        else if(lSeizureMonitoringFragment != null && lSeizureMonitoringFragment.isVisible()){
+            moveTaskToBack(true);
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 
 
@@ -348,7 +360,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         lTransaction.add(R.id.content_frame, mPhysioSignalVisualisationFragment, PhysioSignalVisualisationFragment.class.getSimpleName() );
         lTransaction.add(R.id.content_frame, mDataSyncFragment , DataSyncFragment.class.getSimpleName());
         lTransaction.add(R.id.content_frame, mSeizureStatusFragment, SeizureStatusFragment.class.getSimpleName());
-        lTransaction.addToBackStack(null);
 
         // Commit the transaction
         lTransaction.commit();
@@ -478,7 +489,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @SuppressLint("RestrictedApi")
     private void goToSeizureMonitoring() {
         android.support.v4.app.FragmentManager lFragmentManager = getSupportFragmentManager();
-        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction lTransaction = lFragmentManager.beginTransaction();
 
         for(Fragment lFragment: lFragmentManager.getFragments()){
             if (lFragment != null) {
@@ -498,7 +509,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     @SuppressLint("RestrictedApi")
     private void goToSeizureReporting() {
         android.support.v4.app.FragmentManager lFragmentManager = getSupportFragmentManager();
-        FragmentTransaction lTransaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction lTransaction = lFragmentManager.beginTransaction();
 
         for(Fragment lFragment: lFragmentManager.getFragments()){
             if (lFragment != null) {

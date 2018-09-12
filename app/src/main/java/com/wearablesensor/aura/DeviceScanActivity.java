@@ -187,6 +187,20 @@ public class DeviceScanActivity extends AppCompatActivity {
         this.finish();
     }
 
+    private void goToMainMenu() {
+        Intent intent = new Intent(this, MainMenuActivity.class);
+        startActivity(intent);
+
+        this.finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        goToMainMenu();
+        super.onBackPressed();
+    }
+
+
     @Override
     protected void onDestroy(){
         doUnbindService();

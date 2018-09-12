@@ -120,7 +120,6 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
                 }
             }
         });
-        mSwitchMultiButton.setSelectedTab(0);
 
         mSingleDateAndTimePicker.setListener(new SingleDateAndTimePicker.Listener() {
             @Override
@@ -159,8 +158,11 @@ public class SeizureReportFragment extends Fragment implements SeizureReportCont
 
     @Override
     public void onResume() {
-        super.onResume();
         mPresenter.start();
+        mSwitchMultiButton.setSelectedTab(0);
+        mPresenter.setCurrentDate(truncateDateToMinutes(mSingleDateAndTimePicker.getDate()) );
+
+        super.onResume();
     }
 
     @Override
