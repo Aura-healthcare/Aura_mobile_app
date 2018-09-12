@@ -36,7 +36,6 @@
         android:fontFamily="@font/helvetica_neue_nedium"
         app:textSize="18sp" />
 
-
     <Button
         android:text="@string/next_button"
         android:layout_width="200dp"

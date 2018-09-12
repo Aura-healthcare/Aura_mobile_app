@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -25,11 +26,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="24dp"
-            android:layout_marginRight="24dp">
+            android:layout_marginRight="24dp"
+            app:hintTextAppearance="@style/EditTextAppearance">
+
             <EditText android:id="@+id/first_signin_new_password_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:textColorHint="@color/app_primary"
+                android:theme="@style/EditTextTheme"
                 android:hint="@string/first_sign_in_new_password" />
 
         </android.support.design.widget.TextInputLayout>
@@ -41,11 +46,14 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="24dp"
-            android:layout_marginRight="24dp">
+            android:layout_marginRight="24dp"
+            app:hintTextAppearance="@style/EditTextAppearance">
             <EditText android:id="@+id/first_signin_confirm_password_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:textColorHint="@color/app_primary"
+                android:theme="@style/EditTextTheme"
                 android:hint="@string/first_sign_in_confirm_new_password" />
 
         </android.support.design.widget.TextInputLayout>

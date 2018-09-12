@@ -39,4 +39,10 @@
         <item name="android:shadowRadius">2</item>
     </style>
 
+    <style name="EditTextTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorControlNormal">@color/app_primary_dark</item>
+        <item name="colorControlActivated">@color/app_primary</item>
+        <item name="colorControlHighlight">@color/app_primary</item>
+    </style>
+
 </resources>

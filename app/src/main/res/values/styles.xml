@@ -9,4 +9,7 @@
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="EditTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/app_primary</item>
+    </style>
 </resources>

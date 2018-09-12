@@ -153,4 +153,5 @@
 
     <string name="connect_to_devices">Connect to devices</string>
     <string name="start_immediately_session">Start immediately session</string>
+    <string name="additional_question_comments">Comments</string>
 </resources>

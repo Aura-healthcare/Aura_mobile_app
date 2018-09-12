@@ -53,4 +53,5 @@ public class AdditionalInformationConstants {
 
     public static final String NewTreatmentValue = "new_treatment";
     public static final String LateSleepValue = "late_sleep";
+    public static String Comments = "comments";
 }

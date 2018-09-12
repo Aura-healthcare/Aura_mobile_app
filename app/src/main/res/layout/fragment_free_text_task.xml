@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    <TextView
+        android:id="@+id/free_text_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:textSize="35dp"
+        android:fontFamily="@font/helvetica_neue_nedium"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/splashscreen_light"
+        android:text=""
+        />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/free_text_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="@color/black"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        app:counterEnabled="true"
+        app:counterMaxLength="100"
+        android:layout_below="@+id/free_text_question">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/free_text_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:theme="@style/EditTextTheme"
+            android:maxLength="100"
+            android:minLines="1"
+            android:maxLines="1"
+            android:imeOptions="actionSend"
+            />
+
+    </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+</ScrollView>
