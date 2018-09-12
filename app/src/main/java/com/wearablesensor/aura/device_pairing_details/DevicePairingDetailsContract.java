@@ -37,6 +37,8 @@ public class DevicePairingDetailsContract {
         void refreshDeviceBatteryLevel(DeviceInfo iDeviceInfo);
 
         void setPresenter(Presenter iPresenter);
+
+        void refreshSessionDuration(long lSessionDuration);
     }
 
 

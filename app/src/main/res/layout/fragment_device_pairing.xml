@@ -15,6 +15,20 @@
 
     </GridView>
 
+    <TextView
+        android:id="@+id/session_duration"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="7dp"
+        android:layout_marginRight="10dp"
+        android:layout_height="25dp"
+        android:drawablePadding="4dp"
+        android:textSize="15dp"
+        android:textColor="@color/splashscreen_light"
+        android:layout_alignParentEnd="true"
+        android:drawableLeft="@drawable/ic_session_duration"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:text="00:00"/>
 
     <TextView
         android:id="@+id/device_scan_button"

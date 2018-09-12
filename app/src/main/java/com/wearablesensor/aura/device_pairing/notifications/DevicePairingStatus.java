@@ -12,4 +12,5 @@ public enum DevicePairingStatus{
     DEVICE_DISCONNECTED,
     RECEIVED_DATA,
     RECEIVED_BATTERY_LEVEL,
+    SESSION_DURATION
 }

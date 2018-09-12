@@ -19,31 +19,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura.device_pairing_details;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wearablesensor.aura.R;
 import com.wearablesensor.aura.device_pairing.DeviceInfo;
-import com.wearablesensor.aura.navigation.NavigationConstants;
-import com.wearablesensor.aura.navigation.NavigationNotification;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,6 +62,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     public void OnClickDevicePairingButton(View v){
         mPresenter.startScanning();
     }
+    @BindView(R.id.session_duration) TextView mSessionDuration;
 
     public DevicePairingDetailsFragment() {
         // Required empty public constructor
@@ -134,6 +125,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
         mDeviceGridView.setVisibility(View.VISIBLE);
         mDevicePairingButton.setVisibility(View.GONE);
+        mSessionDuration.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -144,6 +136,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
 
         mDeviceGridView.setVisibility(View.GONE);
         mDevicePairingButton.setVisibility(View.VISIBLE);
+        mSessionDuration.setVisibility(View.GONE);
     }
 
     @Override
@@ -166,6 +159,14 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     @Override
     public void setPresenter(DevicePairingDetailsContract.Presenter iPresenter) {
         mPresenter = iPresenter;
+    }
+
+    @Override
+    public void refreshSessionDuration(long lSessionDuration) {
+        String lDuration = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(lSessionDuration),
+                TimeUnit.MILLISECONDS.toMinutes(lSessionDuration));
+        mSessionDuration.setText(lDuration);
     }
 
     /**

@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura.device_pairing;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
@@ -45,6 +46,7 @@ import com.wearablesensor.aura.device_pairing.notifications.DevicePairingDeviceD
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDiscoveryNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingSessionDurationNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 
@@ -69,6 +71,9 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private BleManager.DiscoveryListener mDiscoveryListener;
 
     private ConcurrentHashMap<String, DeviceInfo> mCachedDevicesInfo;
+
+    private CountDownTimer mSessionTimer;
+    private long mCachedSessionDuration; // in milliseconds
     // a enum to describe action types that can be applied to a specific GATT characteristic
     public enum StateListenerAction{
         READ,
@@ -265,6 +270,21 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
         mConnectedDevices = new ConcurrentHashMap<String, BleDevice>();
         mCachedDevicesInfo = new ConcurrentHashMap<String, DeviceInfo>();
+
+        mSessionTimer = new CountDownTimer(1000 * 60 * 60 * 20, 1000 * 60) {
+            @Override
+            public void onTick(long l) {
+                long lElapsedTime = 20 * 60 * 60 * 1000 - l;
+                mCachedSessionDuration = lElapsedTime;
+                EventBus.getDefault().post(new DevicePairingSessionDurationNotification(DevicePairingStatus.SESSION_DURATION, lElapsedTime));
+            }
+
+            @Override
+            public void onFinish() {
+                mCachedSessionDuration = 0l;
+            }
+        };
+        mCachedSessionDuration = 0l;
     }
 
     @Override
@@ -377,7 +397,11 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 if(e.didEnter(BleDeviceState.INITIALIZED)){
                     Log.d(TAG, "deviceConnected");
                     mConnectedDevices.put(e.device().getMacAddress(), e.device());
+                    if(!mPaired) {
+                        mSessionTimer.start();
+                    }
                     deviceConnected();
+
 
                     for(StateListenerConfig iStateListener : iStateListeners) {
                         if (iStateListener.getAction() == StateListenerAction.ENABLE_NOTIFICATION) {
@@ -401,6 +425,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
 
                         if (allDevicesDisconnected()) {
                             mPaired = false;
+                            mSessionTimer.cancel();
                         }
 
                         deviceDisconnected();
@@ -451,6 +476,15 @@ public class BluetoothDevicePairingService extends DevicePairingService{
         return mCachedDevicesInfo;
     }
 
+    /**
+     * @brief get cache session duration
+     *
+     * @return session duration if session started otherwise 0
+     */
+
+    public long getCachedSessionDuration(){
+        return mCachedSessionDuration;
+    }
     /**
      * @brief get connected devices though Bluetooth LE
      *

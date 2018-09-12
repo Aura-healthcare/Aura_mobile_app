@@ -24,6 +24,7 @@ import com.wearablesensor.aura.device_pairing.DeviceInfo;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingSessionDurationNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 import com.wearablesensor.aura.navigation.NavigationConstants;
 import com.wearablesensor.aura.navigation.NavigationNotification;
@@ -34,8 +35,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.LinkedList;
 import java.util.Map;
-
-import butterknife.OnCheckedChanged;
 
 /**
  * Created by lecoucl on 07/04/17.
@@ -74,6 +73,8 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
             for (Map.Entry<String, DeviceInfo> lDevice : mBluetoothDevicePairingService.getCachedDevicesInfo().entrySet()) {
                 mView.refreshDeviceBatteryLevel(lDevice.getValue());
             }
+
+            mView.refreshSessionDuration(mBluetoothDevicePairingService.getCachedSessionDuration());
         }
         else{
             mView.failParing();
@@ -107,6 +108,10 @@ public class DevicePairingDetailsPresenter implements DevicePairingDetailsContra
         else if(lStatus == DevicePairingStatus.RECEIVED_BATTERY_LEVEL){
             DevicePairingBatteryLevelNotification lDevicePairingNotification = (DevicePairingBatteryLevelNotification) iDevicePairingNotification;
             mView.refreshDeviceBatteryLevel(lDevicePairingNotification.getDeviceInfo());
+        }
+        else if(lStatus == DevicePairingStatus.SESSION_DURATION){
+            DevicePairingSessionDurationNotification lDevicePairingNotification = (DevicePairingSessionDurationNotification) iDevicePairingNotification;
+            mView.refreshSessionDuration(lDevicePairingNotification.getSessionDuration());
         }
     }
 
