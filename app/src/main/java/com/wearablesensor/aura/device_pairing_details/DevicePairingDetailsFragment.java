@@ -165,7 +165,7 @@ public class DevicePairingDetailsFragment extends Fragment implements DevicePair
     public void refreshSessionDuration(long lSessionDuration) {
         String lDuration = String.format("%02d:%02d",
                 TimeUnit.MILLISECONDS.toHours(lSessionDuration),
-                TimeUnit.MILLISECONDS.toMinutes(lSessionDuration));
+                TimeUnit.MILLISECONDS.toMinutes(lSessionDuration) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(lSessionDuration)));
         mSessionDuration.setText(lDuration);
     }
 

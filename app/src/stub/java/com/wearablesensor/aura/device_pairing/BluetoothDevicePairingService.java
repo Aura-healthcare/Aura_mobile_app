@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 package com.wearablesensor.aura.device_pairing;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.UiThread;
 import android.util.Log;
@@ -39,6 +40,8 @@ import com.wearablesensor.aura.device_pairing.data_model.PhysioEvent;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingBatteryLevelNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingEndDiscoveryNotification;
 import com.wearablesensor.aura.device_pairing.notifications.DevicePairingReceivedDataNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingSessionDurationNotification;
+import com.wearablesensor.aura.device_pairing.notifications.DevicePairingStatus;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -55,8 +58,15 @@ public class BluetoothDevicePairingService extends DevicePairingService{
     private Handler handler = new Handler();
     private Runnable sendDataOnTic;
 
+    private CountDownTimer mSessionTimer;
+    private long mCachedSessionDuration; // in milliseconds
+
     public ConcurrentHashMap<String, DeviceInfo> getCachedDevicesInfo() {
         return new ConcurrentHashMap<String, DeviceInfo>();
+    }
+
+    public long getCachedSessionDuration() {
+        return mCachedSessionDuration;
     }
 
     // a enum to describe action types that can be applied to a specific GATT characteristic
@@ -139,7 +149,23 @@ public class BluetoothDevicePairingService extends DevicePairingService{
                 }
             }
         };
+        mSessionTimer = new CountDownTimer(1000 * 60 * 60 * 20, 1000 * 60) {
+            @Override
+            public void onTick(long l) {
+                long lElapsedTime = 20 * 60 * 60 * 1000 - l;
+                mCachedSessionDuration = lElapsedTime;
+                EventBus.getDefault().post(new DevicePairingSessionDurationNotification(DevicePairingStatus.SESSION_DURATION, lElapsedTime));
+            }
+
+            @Override
+            public void onFinish() {
+                mCachedSessionDuration = 0l;
+            }
+        };
+        mCachedSessionDuration = 0l;
+
         stubDeviceDataFlow(eventManager);
+
         mPaired = true;
     }
 
@@ -156,6 +182,7 @@ public class BluetoothDevicePairingService extends DevicePairingService{
             }
         };
         handler.postDelayed(sendDataOnTic, manager.getFrequency());
+        mSessionTimer.start();
     }
 
     @Override
