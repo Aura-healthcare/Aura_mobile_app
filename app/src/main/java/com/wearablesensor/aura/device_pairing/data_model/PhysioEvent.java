@@ -34,6 +34,8 @@ import android.util.Log;
 import com.idevicesinc.sweetblue.BleDevice;
 import java.util.UUID;
 
+import static com.idevicesinc.sweetblue.utils.Uuids.HEART_RATE_MEASUREMENT;
+
 
 public class PhysioEvent {
     private final String TAG = this.getClass().getSimpleName();
@@ -50,10 +52,11 @@ public class PhysioEvent {
     public PhysioEvent(BleDevice.ReadWriteListener.ReadWriteEvent e){
         isDataReceivedNotification = e.wasSuccess() && e.type() == BleDevice.ReadWriteListener.Type.NOTIFICATION;
 
-        e.characteristic();
         data = e.characteristic().getValue();
         uuid = e.characteristic().getUuid();
-        fillHeartBeatSpecificData(e.characteristic());
+        if(uuid.equals(HEART_RATE_MEASUREMENT)) {
+            fillHeartBeatSpecificData(e.characteristic());
+        }
 
         macAddress = e.device().getMacAddress();
     }
@@ -88,16 +91,19 @@ public class PhysioEvent {
             mEnergy = 0;
         }
 
-        if ((lFlag & 0x10) != 0) {
+        if ((lFlag & 0x16) != 0) {
             // RR stuff.
             mRrIntervalCount = ((characteristic.getValue()).length - lOffset) / 2;
-            mRrInterval = new Integer[mRrIntervalCount];
-            for (int i = 0; i < mRrIntervalCount; i++) {
-                mRrInterval[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, lOffset);
-                lOffset += 2;
-                Log.d(TAG, "Received RR: " + mRrInterval[i]);
-            }
 
+            if(mRrIntervalCount > 0) {
+                mRrInterval = new Integer[mRrIntervalCount];
+                for (int i = 0; i < mRrIntervalCount; i++) {
+                    Integer lRrInterval = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, lOffset);
+                    mRrInterval[i] = (int)(lRrInterval * 1000.0 / 1024.0);
+                    lOffset += 2;
+                    Log.d(TAG, "Received RR: " + mRrInterval[i]);
+                }
+            }
         }
         else{
             mRrIntervalCount = 0;
