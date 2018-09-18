@@ -185,7 +185,7 @@ public class FileStorageTest {
 
     @Test
     public void queryRawContent_InvalidFileName() throws Exception{
-        final String INVALID_DATA_FILE_NAME = "InvalidDataFileName.dat";
+        final String INVALID_DATA_FILE_NAME = "InvalidDataFileName.json";
 
         // test invalid name file
         sExceptionGrabber.expect(Exception.class);

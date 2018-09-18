@@ -276,11 +276,11 @@ public class FileStorage {
     }
 
     public static String getCachePhysioFilename(String iDatatype, String iTimestamp){
-        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX + iDatatype + "_" + iTimestamp + ".dat";
+        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX + iDatatype + "_" + iTimestamp + ".json";
     }
 
     public static String getCacheSensitiveEventFilename(){
-        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".dat";
+        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".json";
     }
 
 }

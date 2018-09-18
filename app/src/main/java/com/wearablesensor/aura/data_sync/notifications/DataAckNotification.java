@@ -30,6 +30,8 @@ package com.wearablesensor.aura.data_sync.notifications;
 
 import com.wearablesensor.aura.data_repository.FileStorage;
 
+import static com.wearablesensor.aura.data_repository.models.SeizureEventModel.SENSITIVE_EVENT_TYPE;
+
 public class DataAckNotification {
 
     private String mAckMessage;
@@ -49,16 +51,21 @@ public class DataAckNotification {
 
         mAckStatus = lParsedMessage[1];
 
-        String[] lParsedFileName = lParsedMessage[0].split("_");
+        String[] lParsedFileName = lParsedMessage[0].split("_|\\.");
         if(lParsedFileName.length < 3){
+            return;
+        }
+
+        // sensitive event specific file
+        if(lParsedFileName[1].equals(SENSITIVE_EVENT_TYPE)){
+            mFileName = FileStorage.getCacheSensitiveEventFilename();
             return;
         }
 
         StringBuilder lBuilder = new StringBuilder(lParsedFileName[2]);
         lBuilder.insert(13, ":");
         lBuilder.insert(16, ":");
-
-
+        lBuilder.insert(19, ".");
         mFileName = FileStorage.getCachePhysioFilename(lParsedFileName[1], lBuilder.toString());
     }
 
