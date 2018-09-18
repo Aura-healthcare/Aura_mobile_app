@@ -35,7 +35,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.regex.Pattern;
+
+import static com.wearablesensor.aura.data_repository.FileStorage.CACHE_FILENAME_EXTENSION;
 
 public class DataFileHelper {
 
@@ -70,7 +71,7 @@ public class DataFileHelper {
         File[] lDataFiles = lrootFolder.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                return Pattern.matches(".+dat$", pathname.getName());
+                return pathname.getName().endsWith(CACHE_FILENAME_EXTENSION);
             }
         });
 

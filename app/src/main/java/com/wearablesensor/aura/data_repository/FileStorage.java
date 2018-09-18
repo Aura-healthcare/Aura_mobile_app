@@ -84,7 +84,7 @@ public class FileStorage {
     public final static String CACHE_FILENAME = "DataFile_";
     public final static String SENSITIVE_EVENT_SUFFIX = "SensitiveEvent_";
     public final static String PHYSIO_SIGNAL_SUFFIX = "PhysioSignal_";
-
+    public final static String CACHE_FILENAME_EXTENSION = "json";
     /**
      * @brief constructor
      *
@@ -276,11 +276,11 @@ public class FileStorage {
     }
 
     public static String getCachePhysioFilename(String iDatatype, String iTimestamp){
-        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX + iDatatype + "_" + iTimestamp + ".json";
+        return CACHE_FILENAME + PHYSIO_SIGNAL_SUFFIX + iDatatype + "_" + iTimestamp + "." + CACHE_FILENAME_EXTENSION;
     }
 
     public static String getCacheSensitiveEventFilename(){
-        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + ".json";
+        return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + "." + CACHE_FILENAME_EXTENSION;
     }
 
 }
