@@ -62,18 +62,18 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
     implementation 'com.jjoe64:graphview:4.2.1'
     implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
-        transitive = true;
+        transitive = true
     }
     implementation 'com.github.florent37:singledateandtimepicker:1.2.2'
     implementation 'lib.kingja.switchbutton:switchbutton:1.1.3'
     implementation 'com.eyalbira.loadingdots:loading-dots:1.0.2'
-    compile "org.java-websocket:Java-WebSocket:1.3.8"
+    compile 'org.java-websocket:Java-WebSocket:1.3.8'
     compileOnly 'org.projectlombok:lombok:1.16.20'
     annotationProcessor 'org.projectlombok:lombok:1.16.20'
     testImplementation 'junit:junit:4.12'
-    testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
-    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.8.4'
-    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+    testImplementation 'org.mockito:mockito-all:1.8.4'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
@@ -124,6 +124,12 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled true
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt', 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 
