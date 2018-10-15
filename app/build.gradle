@@ -124,6 +124,9 @@ android {
         debug {
             testCoverageEnabled true
         }
+        release {
+            signingConfig signingConfigs.config
+        }
     }
 
     def isRunningOnTravis = System.getenv("CI") == "true"
