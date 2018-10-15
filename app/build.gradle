@@ -6,13 +6,14 @@ buildscript {
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://maven.google.com' }
+        google()
     }
 
     dependencies {
         /* add asm 6.0 as a workaround to support jacoco and fabric simultaneously
          see issue https://github.com/jacoco/jacoco/issues/639*/
         classpath 'org.ow2.asm:asm:6.0'
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.2.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'org.jacoco:org.jacoco.core:0.8.1'
         classpath 'io.fabric.tools:gradle:1.+'
@@ -82,15 +83,13 @@ dependencies {
 
 android {
     signingConfigs {
-        config {
-            storeFile file('/home/lecoucl/Android/keystores/android.jks')
-        }
+        config
     }
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.2'
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 28
         multiDexEnabled true
         versionCode 11
         versionName '2.9'
@@ -125,6 +124,16 @@ android {
         debug {
             testCoverageEnabled true
         }
+    }
+
+    def isRunningOnTravis = System.getenv("CI") == "true"
+
+    if (isRunningOnTravis) {
+        // configure keystore
+        signingConfigs.config.storeFile = file("AssociationAurav3.jks.enc")
+        signingConfigs.config.storePassword = System.getenv("keystore_password")
+        signingConfigs.config.keyAlias = System.getenv("keystore_alias")
+        signingConfigs.config.keyPassword = System.getenv("keystore_alias_password")
     }
 
     flavorDimensions "mode"
