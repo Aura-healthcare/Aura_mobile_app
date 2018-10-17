@@ -31,11 +31,7 @@ import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
-import com.wearablesensor.aura.data_sync.DataSyncService;
 import com.wearablesensor.aura.user_session.UserSessionService;
-
-import java.net.URISyntaxException;
 
 import io.fabric.sdk.android.Fabric;
 
