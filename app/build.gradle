@@ -82,9 +82,7 @@ dependencies {
 
 android {
     signingConfigs {
-        config {
-            storeFile file('/home/lecoucl/Android/keystores/android.jks')
-        }
+        config
     }
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -131,6 +129,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt', 'proguard-rules.pro'
             signingConfig signingConfigs.config
         }
+    }
+
+    def isRunningOnTravis = System.getenv("CI") == "true"
+
+    if (isRunningOnTravis) {
+        // configure keystore
+        signingConfigs.config.storeFile = file("../AssociationAurav3.jks")
+        signingConfigs.config.storePassword = System.getenv("keystore_password")
+        signingConfigs.config.keyAlias = System.getenv("keystore_alias")
+        signingConfigs.config.keyPassword = System.getenv("keystore_alias_password")
     }
 
     flavorDimensions "mode"
