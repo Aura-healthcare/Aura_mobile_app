@@ -42,10 +42,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 
-import com.wearablesensor.aura.DeviceScanActivity;
 import com.wearablesensor.aura.MainMenuActivity;
 import com.wearablesensor.aura.R;
-import com.wearablesensor.aura.SignInActivity;
 import com.wearablesensor.aura.data_repository.DateIso8601Mapper;
 import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 
@@ -82,97 +80,13 @@ public class UserSessionService {
 
         mRemoteDataRepository = iRemoteDataRepository;
 
-        mUserModel = null;
+        mUserModel = new UserModel("0000-0000-0000-0000-0000", "", "");
         mUserPrefs = null;
 
         mAuthToken = "";
         mIsFirstSignIn = false;
     }
 
-    /**
-     * @brief attempt to start a user session
-     *
-     * @param iAmazonId Amazon unique user name
-     * @param iActivity user session launcher activity
-     */
-    public void initSession(String iAmazonId, Activity iActivity){
-        try {
-            mRemoteDataRepository.connect(mAuthToken);
-        }catch (Exception e){
-            closeSession(iActivity, mApplicationContext.getResources().getString(R.string.fail_extra_message_no_internet));
-            return;
-        }
-
-        setCurrentActivity(iActivity);
-
-        if(mIsFirstSignIn){
-            registerUser(iAmazonId);
-        }
-        else {
-            new LoadUserAsync().execute(iAmazonId);
-        }
-    }
-
-    /**
-     * @brief setter
-     *
-     * @param iActivity user session launcher activity
-     */
-    private void setCurrentActivity(Activity iActivity) {
-        mActivity = iActivity;
-    }
-
-    /**
-     * @brief getter used to allow asynchronous tasks to get acces to current activity
-     *
-     * @return user session launcher activity
-     */
-    private Activity getCurrentActivity(){
-        return mActivity;
-    }
-
-    public void startSession(Activity iActivity){
-
-        SharedPreferences lSharedPref = mActivity.getSharedPreferences(UserSessionService.SHARED_PREFS_FILE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor lEditor = lSharedPref.edit();
-        lEditor.putString(UserSessionService.SHARED_PREFS_USER_UUID, getUser().getUuid());
-        lEditor.putString(UserSessionService.SHARED_PREFS_USER_AMAZON_ID, getUser().getAmazonId());
-        lEditor.putString(UserSessionService.SHARED_PREFS_USER_ALIAS, getUser().getAlias());
-        lEditor.commit();
-
-        Log.d(TAG, "USER RECORD" + getUser().getUuid() + " " + getUser().getAmazonId());
-        Intent intent = new Intent(mApplicationContext, MainMenuActivity.class);
-        iActivity.startActivity(intent);
-        iActivity.finish();
-    }
-
-    public void closeSession(Activity iActivity, String iSessionSignInFailExtraMessage){
-        mUserModel = null;
-        mUserPrefs = null;
-
-        Intent intent = new Intent(mApplicationContext, SignInActivity.class);
-        intent.putExtra("sessionFailSignInExtraMessage", iSessionSignInFailExtraMessage);
-        iActivity.startActivity(intent);
-        iActivity.finish();
-    }
-
-    /**
-     * @brief setter
-     *
-     * @param iAuthToken authentification token
-     */
-    public void setAuthToken(String iAuthToken) {
-        this.mAuthToken = iAuthToken;
-    }
-
-    /**
-     * @brief setter
-     *
-     * @param lIsFirstSignIn first time sign-in flag
-     */
-    public void setIsFirstSignIn(Boolean lIsFirstSignIn) {
-        this.mIsFirstSignIn = lIsFirstSignIn;
-    }
 
     /**
      * @brief setter
@@ -208,90 +122,5 @@ public class UserSessionService {
      */
     public UserModel getUser(){
         return mUserModel;
-    }
-
-    /**
-     * @brief load user and user preferences from remote database asynchronous task
-     *
-     */
-    class LoadUserAsync extends AsyncTask<String, Integer, Boolean>
-    {
-        @Override
-        protected Boolean doInBackground(String... iAmazonId) {
-            try {
-                mUserModel = mRemoteDataRepository.queryUser(iAmazonId[0]);
-                mUserPrefs = mRemoteDataRepository.queryUserPreferences(mUserModel.getUuid());
-                Log.d(TAG, "Success LoadUser" + mUserModel.getUuid() + " " + mUserModel.getAmazonId());
-
-                return true;
-            }catch(Exception e){
-                e.printStackTrace();
-                Log.d(TAG, "Fail LoadUser");
-                return false;
-            }
-        }
-
-        protected void onPostExecute(Boolean iLoadingSucceed) {
-            if(iLoadingSucceed){
-              startSession(getCurrentActivity());
-            }
-            else{
-               closeSession(getCurrentActivity(), mApplicationContext.getResources().getString(R.string.fail_extra_message_no_internet));
-            }
-        }
-    }
-
-    /**
-     * @brief create and register a new user in remote database
-     *
-     * @param iAmazonId Amazon unique username
-     */
-    public void registerUser(String iAmazonId){
-        UserModel lUser = new UserModel(iAmazonId);
-        try {
-            new RegisterUserAsync().execute(lUser);
-        }catch (Exception e){
-            Log.d(TAG, "");
-        }
-    }
-
-
-    /**
-     * @brief new user registering in remote database asynchronous task
-     *
-     */
-    class RegisterUserAsync extends AsyncTask<UserModel, Integer, Boolean>
-    {
-        private String mRegisteredAmazonId;
-
-        @Override
-        protected Boolean doInBackground(UserModel... lUser) {
-            try {
-                mRemoteDataRepository.saveUser(lUser[0]);
-
-
-                UserPreferencesModel lDefaultUserPreferencesModel = new UserPreferencesModel(lUser[0].getUuid(), DateIso8601Mapper.getString(new Date()));
-                mRemoteDataRepository.saveUserPreferences(lDefaultUserPreferencesModel);
-
-                mRegisteredAmazonId = lUser[0].getAmazonId();
-                Log.d(TAG, "Success RegisterUser" + lUser[0].getAmazonId() +" " +lUser[0].getUuid());
-                return true;
-
-            }catch(Exception e){
-                e.printStackTrace();
-                Log.d(TAG, "Fail RegisterUser");
-                return false;
-            }
-        }
-
-        protected void onPostExecute(Boolean iLoadingSucceed) {
-            if(iLoadingSucceed){
-                new LoadUserAsync().execute(mRegisteredAmazonId);
-            }
-            else{
-                closeSession(getCurrentActivity(), mApplicationContext.getResources().getString(R.string.fail_extra_message_no_internet));
-            }
-        }
-
     }
 }

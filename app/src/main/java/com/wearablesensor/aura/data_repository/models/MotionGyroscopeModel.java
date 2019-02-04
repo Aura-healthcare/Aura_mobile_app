@@ -58,4 +58,13 @@ public class MotionGyroscopeModel extends PhysioSignalModel{
     public String toString(){
         return super.toString() + " " +String.valueOf(mGyroscope[0]) + " " + String.valueOf(mGyroscope[1]) + " " + String.valueOf(mGyroscope[2]);
     }
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR +String.valueOf(mGyroscope[0]) + COMMA_SEPARATOR + String.valueOf(mGyroscope[1]) + COMMA_SEPARATOR + String.valueOf(mGyroscope[2]) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "gyroscope_x" + COMMA_SEPARATOR + "gyroscope_y" + COMMA_SEPARATOR + "gyroscope_z" + "\n";
+    }
+
 }

@@ -44,9 +44,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataWebSocketRepository;
-import com.wearablesensor.aura.data_sync.DataSyncService;
 import com.wearablesensor.aura.device_pairing.BluetoothDevicePairingService;
 import com.wearablesensor.aura.real_time_data_processor.MetricType;
 import com.wearablesensor.aura.real_time_data_processor.RealTimeDataProcessorService;
@@ -60,8 +57,6 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
     private BluetoothDevicePairingService mDevicePairingService;
     private RealTimeDataProcessorService mRealTimeDataProcessorService;
 
-    private RemoteDataRepository.TimeSeries mRemoteDataRepository;
-    private DataSyncService mDataSyncService;
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new LocalBinder();
 
@@ -80,11 +75,6 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
         mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
         mDevicePairingService = new BluetoothDevicePairingService(lApplicationContext);
 
-        mRemoteDataRepository = new RemoteDataWebSocketRepository(RemoteDataWebSocketRepository.PREPROD_SERVER_URL);
-        mDataSyncService = new DataSyncService(mLocalDataRepository,
-                        mRemoteDataRepository,
-                        lApplicationContext);
-
     }
 
         @Override
@@ -100,10 +90,9 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-            mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, intent.getExtras().getString("UserUUID"));
+            mRealTimeDataProcessorService = new RealTimeDataProcessorService(mDevicePairingService, mLocalDataRepository, "0000-0000-0000-0000-0000");
             mRealTimeDataProcessorService.addMetricAnalyserObserver(this);
 
-            mDataSyncService.initialize();
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     notificationIntent, 0);
 
@@ -136,8 +125,6 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
         return mDevicePairingService;
     }
 
-    public DataSyncService getDataSyncService(){ return mDataSyncService; }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -151,7 +138,6 @@ public class DataCollectorService extends Service implements TimeSerieAnalyserOb
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mDataSyncService.close();
         mDevicePairingService.close();
     }
 

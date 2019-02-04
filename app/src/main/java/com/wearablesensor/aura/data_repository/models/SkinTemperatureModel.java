@@ -56,4 +56,12 @@ public class SkinTemperatureModel extends PhysioSignalModel {
     public String toString(){
         return super.toString() + " " +String.valueOf(mTemperature);
     }
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR + String.valueOf(mTemperature) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "temperature" + "\n";
+    }
 }

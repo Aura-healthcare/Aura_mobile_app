@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/
 
 package com.wearablesensor.aura;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.FragmentManager;
@@ -26,13 +27,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -119,7 +123,6 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
             mDevicePairingDetailsPresenter.setDevicePairingService(mDataCollectorService.getDevicePairingService());
             mDevicePairingDetailsPresenter.start();
 
-            mDataSyncPresenter.setDataSyncService(mDataCollectorService.getDataSyncService());
             mDataSyncPresenter.start();
         }
 
@@ -129,6 +132,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     };
     private Boolean mIsDataCollectorBound = false;
 
+    private final static int STATUS_WRITE_EXTERNAL_STORAGE = 50;
     void doBindService() {
 
         bindService(new Intent(getApplicationContext(), DataCollectorService.class),
@@ -146,6 +150,25 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case STATUS_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Storage on phone accepted", Toast.LENGTH_LONG);
+                } else {
+                    Toast.makeText(this, "Storage on phone denied", Toast.LENGTH_LONG);
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -159,7 +182,7 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         mDevicePairingDetailsPresenter = new DevicePairingDetailsPresenter(( (mDataCollectorService != null) ? mDataCollectorService.getDevicePairingService():null), mDevicePairingFragment);
 
         mDataSyncFragment = new DataSyncFragment();
-        mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(),( (mDataCollectorService != null) ?  mDataCollectorService.getDataSyncService():null), mDataSyncFragment);
+        mDataSyncPresenter = new DataSyncPresenter(getApplicationContext(), mDataSyncFragment);
 
         mPhysioSignalVisualisationFragment = new PhysioSignalVisualisationFragment();
         mDataVisualisationPresenter = new DataVisualisationPresenter(mPhysioSignalVisualisationFragment);
@@ -215,6 +238,25 @@ public class SeizureMonitoringActivity extends AppCompatActivity implements Devi
         });
         //wait the fragment to be fully displayed before starting automatic pairing
         startDataCollector();
+        requestDataStorage();
+    }
+
+    private void requestDataStorage(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STATUS_WRITE_EXTERNAL_STORAGE);
+
+            }
+        } else {
+            // Permission has already been granted
+        }
     }
 
     private void disconnectDevices() {

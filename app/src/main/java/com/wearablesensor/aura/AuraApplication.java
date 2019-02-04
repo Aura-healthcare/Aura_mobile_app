@@ -26,11 +26,8 @@ import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.facebook.soloader.SoLoader;
-import com.wearablesensor.aura.authentification.AmazonCognitoAuthentificationHelper;
 import com.wearablesensor.aura.data_repository.LocalDataFileRepository;
 import com.wearablesensor.aura.data_repository.LocalDataRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataDynamoDBRepository;
-import com.wearablesensor.aura.data_repository.RemoteDataRepository;
 import com.wearablesensor.aura.user_session.UserSessionService;
 
 import io.fabric.sdk.android.Fabric;
@@ -39,11 +36,7 @@ import io.fabric.sdk.android.Fabric;
 public class AuraApplication extends MultiDexApplication {
 
     private LocalDataRepository mLocalDataRepository;
-    private RemoteDataRepository.Session mRemoteDataSessionRepository;
-
     private UserSessionService mUserSessionService;
-
-    private AmazonCognitoAuthentificationHelper mAuthentificationHelper;
 
     @Override
     public void onCreate() {
@@ -54,13 +47,10 @@ public class AuraApplication extends MultiDexApplication {
         SoLoader.init(this, false);
 
         Context lApplicationContext = getApplicationContext();
-        mAuthentificationHelper = new AmazonCognitoAuthentificationHelper();
-        mAuthentificationHelper.init(lApplicationContext);
 
         mLocalDataRepository = new LocalDataFileRepository(lApplicationContext);
-        mRemoteDataSessionRepository = new RemoteDataDynamoDBRepository(lApplicationContext);
 
-        mUserSessionService = new UserSessionService(mRemoteDataSessionRepository, lApplicationContext);
+        mUserSessionService = new UserSessionService(null, lApplicationContext);
     }
 
     @Override
@@ -80,12 +70,6 @@ public class AuraApplication extends MultiDexApplication {
     public LocalDataRepository getLocalDataRepository() {
         return mLocalDataRepository;
     }
-
-    public RemoteDataRepository.Session getRemoteDataSessionRepository() {
-        return mRemoteDataSessionRepository;
-    }
-
-    public AmazonCognitoAuthentificationHelper getAuthentificationHelper() {return mAuthentificationHelper;}
 
     public UserSessionService getUserSessionService(){return mUserSessionService;}
 }

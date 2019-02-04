@@ -33,17 +33,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences lSharedPref = getSharedPreferences(UserSessionService.SHARED_PREFS_FILE, Context.MODE_PRIVATE);
-        String lUserUUID = lSharedPref.getString(UserSessionService.SHARED_PREFS_USER_UUID, null);
+        Intent intent = new Intent(this, MainMenuActivity.class);
+        startActivity(intent);
 
-        if(lUserUUID != null){
-            Intent intent = new Intent(this, MainMenuActivity.class);
-            startActivity(intent);
-        }
-        else {
-            Intent intent = new Intent(this, SignInActivity.class);
-            startActivity(intent);
-        }
 
         this.finish();
     }

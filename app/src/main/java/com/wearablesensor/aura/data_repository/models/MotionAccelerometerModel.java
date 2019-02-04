@@ -69,4 +69,13 @@ public class MotionAccelerometerModel extends PhysioSignalModel{
     public String toString(){
         return super.toString() + " " +String.valueOf(mAccelerometer[0]) + " " + String.valueOf(mAccelerometer[1]) + " " + String.valueOf(mAccelerometer[2])+ " " + mAccelerationScale;
     }
+
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR +String.valueOf(mAccelerometer[0]) + COMMA_SEPARATOR + String.valueOf(mAccelerometer[1]) + COMMA_SEPARATOR + String.valueOf(mAccelerometer[2]) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "accelerometer_x" + COMMA_SEPARATOR + "accelerometer_y" + COMMA_SEPARATOR + "accelerometer_z" + "\n";
+    }
 }

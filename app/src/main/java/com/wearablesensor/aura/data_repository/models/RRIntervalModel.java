@@ -54,4 +54,12 @@ public class RRIntervalModel extends PhysioSignalModel {
     public String toString(){
         return super.toString() + " " + String.valueOf(mRrInterval);
     }
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR + String.valueOf(mRrInterval) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "rr_interval" + "\n";
+    }
 }

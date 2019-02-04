@@ -58,4 +58,13 @@ public class MotionMagnetometerModel extends PhysioSignalModel{
     public String toString(){
         return super.toString() + " " +String.valueOf(mMagnetometer[0]) + " " + String.valueOf(mMagnetometer[1]) + " " + String.valueOf(mMagnetometer[2]);
     }
+
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR +String.valueOf(mMagnetometer[0]) + COMMA_SEPARATOR + String.valueOf(mMagnetometer[1]) + COMMA_SEPARATOR + String.valueOf(mMagnetometer[2]) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "magnetometer_x" + COMMA_SEPARATOR + "magnetometer_y" + COMMA_SEPARATOR + "magnetometer_z" + "\n";
+    }
 }

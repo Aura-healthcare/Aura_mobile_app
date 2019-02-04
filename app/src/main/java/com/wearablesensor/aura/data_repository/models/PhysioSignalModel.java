@@ -41,6 +41,7 @@ public class PhysioSignalModel {
 
     protected String mType;          // data type
 
+    public static final String COMMA_SEPARATOR = ",";
     protected PhysioSignalModel() {
 
     }
@@ -100,6 +101,14 @@ public class PhysioSignalModel {
     @Override
     public String toString(){
         return mTimestamp;
+    }
+
+    public String toCsvString(){
+        return mUuid + COMMA_SEPARATOR + mDeviceAdress + COMMA_SEPARATOR + mUser + COMMA_SEPARATOR + mTimestamp + COMMA_SEPARATOR + mType;
+    }
+
+    public String toCsvHeader(){
+        return "uuid" + COMMA_SEPARATOR + "device_adress" + COMMA_SEPARATOR + "user" + COMMA_SEPARATOR + "timestamp" + COMMA_SEPARATOR + "type";
     }
 
     @Override

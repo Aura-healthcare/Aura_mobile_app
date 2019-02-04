@@ -44,16 +44,15 @@ public class AuraDevicePairingCompatibility {
      * @return true if device is compatible, false otherwise
      */
     public static boolean isHeartRateCompatibleDevice(String iDeviceName) {
-
         if(iDeviceName != null) {
             String lDeviceUpperName = iDeviceName.toUpperCase();
 
-            if ((lDeviceUpperName.contains("RHYTHM") || lDeviceUpperName.contains("POLAR") || lDeviceUpperName.contains("MIO"))) {
+            if(!lDeviceUpperName.contains("NO_NAME")) {
                 return true;
             }
-
             return false;
         }
+
         return false;
     }
 

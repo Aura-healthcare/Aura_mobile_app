@@ -69,4 +69,12 @@ public class ElectroDermalActivityModel extends PhysioSignalModel{
     public String toString(){
         return super.toString() + " " +String.valueOf(mElectroDermalActivity) + " " + String.valueOf(mSensorOutputFrequency);
     }
+
+    public String toCsvString(){
+        return super.toCsvString() + COMMA_SEPARATOR +String.valueOf(mElectroDermalActivity) + COMMA_SEPARATOR + String.valueOf(mSensorOutputFrequency) + "\n";
+    }
+
+    public String toCsvHeader(){
+        return super.toCsvHeader() + COMMA_SEPARATOR + "electro_dermal_activity" + COMMA_SEPARATOR + "sensor_output_frequency" + "\n";
+    }
 }

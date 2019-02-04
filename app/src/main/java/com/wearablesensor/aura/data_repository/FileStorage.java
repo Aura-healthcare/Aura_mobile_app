@@ -35,6 +35,8 @@
 package com.wearablesensor.aura.data_repository;
 
 import android.content.Context;
+import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.facebook.android.crypto.keychain.AndroidConceal;
@@ -50,12 +52,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.wearablesensor.aura.data_repository.models.PhysioSignalModel;
 import com.wearablesensor.aura.data_repository.models.SeizureEventModel;
-import com.wearablesensor.aura.data_sync.notifications.DataSyncUpdateStateNotification;
+import com.wearablesensor.aura.data_sync.DataSyncUpdateStateNotification;
+
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -84,8 +88,11 @@ public class FileStorage {
     public final static String CACHE_FILENAME = "DataFile_";
     public final static String SENSITIVE_EVENT_SUFFIX = "SensitiveEvent_";
     public final static String PHYSIO_SIGNAL_SUFFIX = "PhysioSignal_";
-    public final static String CACHE_FILENAME_EXTENSION = "json";
+    public final static String CACHE_FILENAME_EXTENSION = "csv";
+
+    public final static String EXPORT_AURA_DATA_DIR = "/auraExport";
     /**
+     *
      * @brief constructor
      *
      * @param iApplicationContext application context
@@ -117,36 +124,30 @@ public class FileStorage {
 
         PhysioSignalModel lPhysioSignal = iPhysioSignalSamples.peek();
         String lFilename = getCachePhysioFilename(lPhysioSignal.getType(), lPhysioSignal.getTimestamp());
+
         FileOutputStream lFileOutputStream = null;
         OutputStream lOutputStream = null;
 
-        Log.d(TAG, "Start Recording " + lFilename);
         try {
-            lFileOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
-            lOutputStream = new BufferedOutputStream(lFileOutputStream);
+            File lDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + EXPORT_AURA_DATA_DIR);
+            if(!lDir.isDirectory()){
+                lDir.mkdirs();
+            }
 
-            // Creates an output stream which encrypts the data as
-            // it is written to it and writes it out to the file.
-            OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
-                    lOutputStream,
-                    Entity.create("entity_id"));
+            File lFile = new File(lDir, lFilename);
+            lFileOutputStream = new FileOutputStream(lFile);
 
-            String lData = mGson.toJson(iPhysioSignalSamples);
-
-            lCryptedStream.write(lData.getBytes());
-            lCryptedStream.close();
+            String lData = convertDataToSimpleCsv(iPhysioSignalSamples);
+            lFileOutputStream.write(lData.getBytes());
 
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         finally {
             if(lFileOutputStream != null){
                 lFileOutputStream.close();
-            }
-
-            if(lOutputStream != null){
-                lOutputStream.close();
             }
         }
     }
@@ -168,14 +169,12 @@ public class FileStorage {
 
         String oLine = "";
         FileInputStream lInputStream = mApplicationContext.openFileInput(iFilename);
-        InputStream lDecryptedInputStream = mCrypto.getCipherInputStream(
-                lInputStream, Entity.create("entity_id"));
 
         try{
             // if file the available for reading
             if (lInputStream != null) {
                 // prepare the file for reading
-                InputStreamReader lInputReader = new InputStreamReader(lDecryptedInputStream);
+                InputStreamReader lInputReader = new InputStreamReader(lInputStream);
                 BufferedReader lBuffreader = new BufferedReader(lInputReader);
 
                 String lLine = lBuffreader.readLine();
@@ -229,18 +228,18 @@ public class FileStorage {
         // insert new seizure into encrypted JSON
         lSeizureList.add(iSeizureEventModel);
         try {
-            lOutputStream = mApplicationContext.openFileOutput(lFilename, Context.MODE_PRIVATE);
-            // Creates an output stream which encrypts the data as
-            // it is written to it and writes it out to the file.
-            OutputStream lCryptedStream = mCrypto.getCipherOutputStream(
-                    lOutputStream,
-                    Entity.create("entity_id"));
+
+            File lDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + EXPORT_AURA_DATA_DIR);
+            if(!lDir.isDirectory()){
+                lDir.mkdirs();
+            }
+            File lFile = new File(lDir, lFilename);
+            lOutputStream = new FileOutputStream(lFile);
 
             Type lType = new TypeToken<ArrayList<SeizureEventModel>>() {}.getType();
             String lData = "";
             lData = mGson.toJson(lSeizureList, lType);
-            lCryptedStream.write(lData.getBytes());
-            lCryptedStream.close();
+            lOutputStream.write(lData.getBytes());
 
             EventBus.getDefault().post(new DataSyncUpdateStateNotification());
         } catch (Exception e) {
@@ -281,6 +280,20 @@ public class FileStorage {
 
     public static String getCacheSensitiveEventFilename(){
         return CACHE_FILENAME + SENSITIVE_EVENT_SUFFIX + "." + CACHE_FILENAME_EXTENSION;
+    }
+
+    public static String convertDataToSimpleCsv(ConcurrentLinkedQueue<PhysioSignalModel> iData)
+    {
+        if(iData == null || iData.isEmpty()){
+            return "";
+        }
+
+        String oCsv = iData.peek().toCsvHeader();
+        for (PhysioSignalModel iDataSample : iData){
+            oCsv += iDataSample.toCsvString();
+        }
+
+        return oCsv;
     }
 
 }
