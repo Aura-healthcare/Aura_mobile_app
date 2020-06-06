@@ -1,7 +1,4 @@
 buildscript {
-    ext {
-        androidVersion = "25.3.1"
-    }
     repositories {
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
@@ -12,7 +9,7 @@ buildscript {
         /* add asm 6.0 as a workaround to support jacoco and fabric simultaneously
          see issue https://github.com/jacoco/jacoco/issues/639*/
         classpath 'org.ow2.asm:asm:6.0'
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.6.3'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'org.jacoco:org.jacoco.core:0.8.1'
         classpath 'io.fabric.tools:gradle:1.+'
@@ -49,9 +46,9 @@ repositories {
 dependencies {
     implementation 'com.facebook.conceal:conceal:2.0.1@aar'
     implementation 'org.greenrobot:eventbus:3.0.0'
-    implementation 'com.android.support:multidex:1.0.2'
-    implementation "com.android.support:support-v4:${androidVersion}"
-    implementation "com.android.support:design:${androidVersion}"
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.android.support:support-v4:26.1.0"
+    implementation "com.android.support:design:26.1.0"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     implementation 'com.amazonaws:aws-android-sdk-core:2.2.+'
     implementation 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
@@ -61,22 +58,23 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
     implementation 'com.jjoe64:graphview:4.2.1'
-    implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true
     }
     implementation 'com.github.florent37:singledateandtimepicker:1.2.2'
     implementation 'lib.kingja.switchbutton:switchbutton:1.1.3'
     implementation 'com.eyalbira.loadingdots:loading-dots:1.0.2'
-    compile 'org.java-websocket:Java-WebSocket:1.3.8'
+    implementation 'org.java-websocket:Java-WebSocket:1.3.8'
     compileOnly 'org.projectlombok:lombok:1.16.20'
     annotationProcessor 'org.projectlombok:lombok:1.16.20'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.hamcrest:hamcrest-library:1.3'
     testImplementation 'org.mockito:mockito-all:1.8.4'
-    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    androidTestImplementation 'com.android.support.test:runner:0.5'
+    androidTestImplementation 'com.android.support.test:rules:0.5'
+    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
 }
 
 
@@ -84,11 +82,11 @@ android {
     signingConfigs {
         config
     }
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 29
+    buildToolsVersion '26.0.3'
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 29
         multiDexEnabled true
         versionCode 11
         versionName '2.9'
@@ -113,7 +111,7 @@ android {
         }
     }
     // workaround for "duplicate files during packaging of APK" issue
-// see https://groups.google.com/d/msg/adt-dev/bl5Rc4Szpzg/wC8cylTWuIEJ
+    // see https://groups.google.com/d/msg/adt-dev/bl5Rc4Szpzg/wC8cylTWuIEJ
     packagingOptions {
         exclude 'META-INF/ASL2.0'
         exclude 'META-INF/LICENSE'
